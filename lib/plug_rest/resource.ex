@@ -140,7 +140,7 @@ defmodule PlugRest.Resource do
 
   def upgrade(conn, handler, _opts \\ []) do
     method = conn.method
-    state = %{method: method, handler: handler, handler_state: %{}}
+    state = %PlugRest.State{method: method, handler: handler}
     service_available(conn, state)
   end
 
