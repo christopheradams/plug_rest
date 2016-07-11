@@ -7,6 +7,8 @@ defmodule PlugRest.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: description(),
+     package: package(),
      deps: deps()]
   end
 
@@ -29,4 +31,21 @@ defmodule PlugRest.Mixfile do
   defp deps do
     []
   end
+
+  defp description do
+    """
+    plug_rest
+    """
+  end
+
+  defp package do
+    [
+     name: :plug_rest,
+     maintainers: ["Christopher Adams"],
+     licenses: ["MIT"],
+     links: %{github: "https://github.com/christopheradams/plug_rest"}
+    ]
+  end
+
+
 end
