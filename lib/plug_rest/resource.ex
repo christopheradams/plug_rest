@@ -57,7 +57,7 @@ defmodule PlugRest.Resource do
   defp unsafe_call(req, %{state | :handler_state => handler_state}, callback) do
     case function_exported?(handler, callback, 2) do
       true ->
-        apply(handler, callback, [req, handlerState])
+        apply(handler, callback, [req, handler_state])
       false ->
         :no_call
     end
