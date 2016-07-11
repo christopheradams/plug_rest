@@ -1,0 +1,2 @@
+defmodule PlugRest do
+end
