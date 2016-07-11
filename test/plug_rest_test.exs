@@ -5,6 +5,7 @@ defmodule PlugRestTest do
   doctest PlugRest
 
   defmodule IndexResource do
+    @behaviour PlugRest.Resource
   end
 
   defmodule Router do
