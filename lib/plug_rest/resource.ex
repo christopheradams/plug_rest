@@ -8,7 +8,8 @@ defmodule PlugRest.Resource do
   @optional_callbacks [service_available: 2]
 
   def upgrade(conn, handler, _opts \\ []) do
-    state = %{handler: handler, handler_state: %{}}
+    method = conn.method
+    state = %{method: method, handler: handler, handler_state: %{}}
     service_available(conn, state)
   end
 
