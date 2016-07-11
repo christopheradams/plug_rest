@@ -1,6 +1,12 @@
 defmodule PlugRest.Resource do
   import Plug.Conn
 
+  ## REST handler callbacks.
+
+  @callback service_available(conn, state) :: {[binary()], conn, state}
+            when conn: %Plug.Conn{}, state: any()
+  @optional_callbacks [service_available: 2]
+
   def upgrade(conn, handler, _opts \\ []) do
     state = %{handler: handler, handler_state: %{}}
     service_available(conn, state)
