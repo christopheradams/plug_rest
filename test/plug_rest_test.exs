@@ -6,6 +6,10 @@ defmodule PlugRestTest do
 
   defmodule IndexResource do
     @behaviour PlugRest.Resource
+
+    def to_html(conn, state) do
+      {"Plug REST", conn, state}
+    end
   end
 
   defmodule ServiceUnavailableResource do
@@ -100,8 +104,7 @@ defmodule PlugRestTest do
 
     conn = Router.call(conn, [])
 
-    assert conn.state == :sent
-    assert conn.status == 200
+    test_status(conn, 200)
     assert conn.resp_body == "Plug REST"
   end
 

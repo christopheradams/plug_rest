@@ -1,4 +1,5 @@
 defmodule PlugRest.Resource do
+  import PlugRest.Utils
   import Plug.Conn
 
   ## REST handler callbacks.
@@ -261,9 +262,9 @@ defmodule PlugRest.Resource do
         state2 = %{state | content_types_p: [{{"text", "html", %{}}, :to_html}]}
         try do
           case get_req_header(conn, "accept") do
-            :undefined ->
+            [] ->
               conn
-              |> put_resp_content_type(join_content_types({{"text", "html", %{}}}))
+              |> put_resp_content_type(print_media_type({"text", "html", %{}}))
               |> languages_provided(%{state2 | content_type_a: {{"text", "html", %{}}, :to_html}})
             accept ->
               choose_media_type(conn, state2, prioritize_accept(accept))
@@ -281,10 +282,10 @@ defmodule PlugRest.Resource do
         state2 = %{state | handler_state: handler_state, content_types_p: cTP2}
         try do
           case get_req_header(conn2, "accept") do
-            :undefined ->
+            [] ->
               {pMT, _fun} = headCTP = hd(cTP2)
               conn2
-              |> put_resp_content_type(join_content_types(pMT))
+              |> put_resp_content_type(print_media_type(pMT))
               |> languages_provided(%{state2 | content_type_a: headCTP})
             accept ->
               choose_media_type(conn2, state2, prioritize_accept(accept))
@@ -303,10 +304,6 @@ defmodule PlugRest.Resource do
 
   defp normalize_content_types(normalized) do
     normalized
-  end
-
-  defp join_content_types({type, subtype, _params}) do
-    "#{type}/#{subtype}"
   end
 
 
@@ -368,7 +365,7 @@ defmodule PlugRest.Resource do
   defp match_media_type_params(conn, state, _accept, [provided = {{tP, sTP, :*}, _fun} | _tail], {{_tA, _sTA, params_A}, _qA, _aPA}) do
     pMT = {tP, sTP, params_A}
     conn
-    |> put_resp_content_type(join_content_types(pMT))
+    |> put_resp_content_type(print_media_type(pMT))
     |> languages_provided(%{state | content_type_a: provided})
   end
 
@@ -376,7 +373,7 @@ defmodule PlugRest.Resource do
     case :lists.sort(params_P) === :lists.sort(params_A) do
       true ->
         conn
-        |> put_resp_content_type(join_content_types(pMT))
+        |> put_resp_content_type(print_media_type(pMT))
         |> languages_provided(%{state | content_type_a: provided})
       false ->
         match_media_type(conn, state, accept, tail, mediaType)
@@ -395,7 +392,7 @@ defmodule PlugRest.Resource do
       {lP, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, languages_p: lP}
         case get_req_header(conn2, "accept-language") do
-          :undefined ->
+          [] ->
             set_language(conn2, %{state2 | language_a: hd(lP)})
           acceptLanguage ->
             acceptLanguage2 = prioritize_languages(acceptLanguage)
@@ -460,7 +457,7 @@ defmodule PlugRest.Resource do
       {cP, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, charsets_p: cP}
         case get_req_header(conn2, "accept-charset") do
-          :undefined ->
+          [] ->
             set_content_type(conn2, %{state2 | charset_a: hd(cP)})
           acceptCharset ->
             acceptCharset2 = prioritize_charsets(acceptCharset)
@@ -518,12 +515,12 @@ defmodule PlugRest.Resource do
         [content_type, "; charset=", charset]
     end
     conn
-    |> put_resp_content_type(join_content_types(content_type2), charset)
+    |> put_resp_content_type(print_media_type(content_type2))
     |> encodings_provided(state)
   end
 
 
-  defp set_content_type_build_params(:*, []) do
+  defp set_content_type_build_params(%{}, []) do
     <<>>
   end
 
@@ -611,7 +608,7 @@ defmodule PlugRest.Resource do
   defp if_match_exists(conn, state) do
     state2 = %{state | exists: true}
     case get_req_header(conn, "if-match") do
-      :undefined ->
+      [] ->
         if_unmodified_since_exists(conn, state2)
       :* ->
         if_unmodified_since_exists(conn, state2)
@@ -643,7 +640,7 @@ defmodule PlugRest.Resource do
 
   defp if_match_must_not_exist(conn, state) do
     case get_req_header(conn, "if-match") do
-      :undefined ->
+      [] ->
         is_put_to_missing_resource(conn, state)
       _ ->
         precondition_failed(conn, state)
@@ -653,15 +650,15 @@ defmodule PlugRest.Resource do
 
   defp if_unmodified_since_exists(conn, state) do
     try() do
-      get_req_header(conn, "if-unmodified-since")
+      case get_req_header(conn, "if-unmodified-since") do
+        [] ->
+          if_none_match_exists(conn, state)
+        ifUnmodifiedSince ->
+          if_unmodified_since(conn, state, ifUnmodifiedSince)
+      end
     catch
       _, _ ->
         if_none_match_exists(conn, state)
-    else
-      :undefined ->
-        if_none_match_exists(conn, state)
-      ifUnmodifiedSince ->
-        if_unmodified_since(conn, state, ifUnmodifiedSince)
     end
   end
 
@@ -686,7 +683,7 @@ defmodule PlugRest.Resource do
 
   defp if_none_match_exists(conn, state) do
     case get_req_header(conn, "if-none-match") do
-      :undefined ->
+      [] ->
         if_modified_since_exists(conn, state)
       :* ->
         precondition_is_head_get(conn, state)
@@ -744,7 +741,7 @@ defmodule PlugRest.Resource do
   defp if_modified_since_exists(conn, state) do
     try() do
       case get_req_header(conn, "if-modified-since") do
-        :undefined ->
+        [] ->
           method(conn, state)
         ifModifiedSince ->
           if_modified_since_now(conn, state, ifModifiedSince)
@@ -917,13 +914,13 @@ defmodule PlugRest.Resource do
         cTA2 = for(p <- cTA, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state}
         try() do
-          get_req_header(conn2, "content-type")
+          case get_req_header(conn2, "content-type") do
+            content_type ->
+              choose_content_type(conn2, state2, content_type, cTA2)
+          end
         catch
           _, _ ->
             respond(conn2, state2, 415)
-        else
-          content_type ->
-            choose_content_type(conn2, state2, content_type, cTA2)
         end
     end
   end
@@ -1053,14 +1050,8 @@ defmodule PlugRest.Resource do
         {:stop, conn2, handler_state2} ->
           terminate(conn2, %{state | handler_state: handler_state2})
         {body, conn2, handler_state2} ->
-          state2 = %{state | handler_state: handler_state2}
-          conn3 = case body do
-                    {:chunked, streamFun} ->
-                      send_chunked(conn2, streamFun)
-                    _ ->
-                      send_resp(conn, conn.status, body)
-                  end
-          multiple_choices(conn3, state2)
+          state2 = %{state | handler_state: handler_state2, body: body}
+          multiple_choices(conn2, state2)
       end
     catch
       class, reason = {:case_clause, :no_call} ->
@@ -1225,8 +1216,8 @@ defmodule PlugRest.Resource do
     conn |> put_status(status_code) |> terminate(state)
   end
 
-  defp terminate(conn, _state) do
-    conn |> send_resp(conn.status, "Plug REST")
+  defp terminate(conn, state) do
+    conn |> send_resp(conn.status, state.body)
   end
 
   defp error_terminate(conn, _state, _class, reason, _callback) do
