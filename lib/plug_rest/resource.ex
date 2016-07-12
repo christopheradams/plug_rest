@@ -148,7 +148,118 @@ defmodule PlugRest.Resource do
     expect(conn, state, :service_available, true, &known_methods/2, 503)
   end
 
-  defp known_methods(conn, state) do
+  defp known_methods(conn, %{method: var_method} = state) do
+    case call(conn, state, :known_methods) do
+      :no_call when var_method === "HEAD" or var_method === "GET"
+      or var_method === "POST" or var_method === "PUT"
+      or var_method === "PATCH" or var_method === "DELETE"
+      or var_method === "OPTIONS" ->
+        next(conn, state, &uri_too_long/2)
+      :no_call ->
+        next(conn, state, 501)
+      {:halt, conn2, handler_state} ->
+        terminate(conn2, %{state | :handler_state => handler_state})
+      {list, conn2, handler_state} ->
+        state2 = %{state | :handler_state => handler_state}
+        case Enum.member?(list, var_method) do
+          true ->
+            next(conn2, state2, &uri_too_long/2)
+          false ->
+            next(conn2, state2, 501)
+        end
+    end
+  end
+
+  defp uri_too_long(conn, state) do
+    expect(conn, state, :uri_too_long, false, &allowed_methods/2, 414)
+  end
+
+  defp allowed_methods(conn, %{method: var_method} = state) do
+    case call(conn, state, :allowed_methods) do
+      :no_call when var_method === "HEAD" or var_method === "GET" ->
+        next(conn, state, &malformed_request/2)
+      :no_call when var_method === "OPTIONS" ->
+        next(conn, %{state | allowed_methods: ["HEAD", "GET", "OPTIONS"]}, &malformed_request/2)
+      :no_call ->
+        method_not_allowed(conn, state, ["HEAD", "GET", "OPTIONS"])
+      {:halt, conn2, handler_state} ->
+        terminate(conn2, %{state | :handler_state => handler_state})
+      {list, conn2, handler_state} ->
+        state2 = %{state | :handler_state => handler_state}
+        case Enum.member?(list, var_method) do
+          true when var_method === "OPTIONS" ->
+            next(conn2, %{state2 | allowed_methods: list}, &malformed_request/2)
+          true ->
+            next(conn2, state2, &malformed_request/2)
+          false ->
+            method_not_allowed(conn2, state2, list)
+        end
+    end
+  end
+
+  defp method_not_allowed(conn, state, []) do
+    conn |> put_resp_header("allow", "") |> respond(state, 405)
+  end
+
+  defp method_not_allowed(conn, state, methods) do
+    <<", ", allow::binary>> = for(m <- methods, into: <<>>, do: <<", ", m::binary>>)
+    conn |> put_resp_header("allow", allow) |> respond(state, 405)
+  end
+
+  defp malformed_request(conn, state) do
+    expect(conn, state, :malformed_request, false, &is_authorized/2, 400)
+  end
+
+  defp is_authorized(conn, state) do
+    case call(conn, state, :is_authorized) do
+      :no_call ->
+        forbidden(conn, state)
+      {:halt, conn2, handler_state} ->
+        terminate(conn2, %{state | :handler_state => handler_state})
+      {true, conn2, handler_state} ->
+        forbidden(conn2, %{state | :handler_state => handler_state})
+      {{false, auth_head}, conn2, handler_state} ->
+        conn2
+        |> put_resp_header("www-authenticate", auth_head)
+        |> respond(%{state | :handler_state => handler_state}, 401)
+    end
+  end
+
+  defp forbidden(conn, state) do
+    expect(conn, state, :forbidden, false, &valid_content_headers/2, 403)
+  end
+
+  defp valid_content_headers(conn, state) do
+    expect(conn, state, :valid_content_headers, true, &known_content_type/2, 501)
+  end
+
+  defp known_content_type(conn, state) do
+    expect(conn, state, :known_content_type, true, &valid_entity_length/2, 415)
+  end
+
+  defp valid_entity_length(conn, state) do
+    expect(conn, state, :valid_entity_length, true, &options/2, 413)
+  end
+
+  defp options(conn, %{allowed_methods: methods, method: "OPTIONS"} = state) do
+    case call(conn, state, :options) do
+      :no_call when methods === [] ->
+        conn |> put_resp_header("allow", "") |> respond(state, 200)
+      :no_call ->
+        <<", ", allow::binary>> = for(m <- methods, into: <<>>, do: <<", ", m::binary>>)
+        conn |> put_resp_header("allow", allow) |> respond(state, 200)
+      {:halt, conn2, handler_state} ->
+        terminate(conn2, %{state | :handler_state => handler_state})
+      {:ok, conn2, handler_state} ->
+        respond(conn2, %{state | :handler_state => handler_state}, 200)
+    end
+  end
+
+  defp options(conn, state) do
+    content_types_provided(conn, state)
+  end
+
+  defp content_types_provided(conn, state) do
     respond(conn, state, 200)
   end
 
