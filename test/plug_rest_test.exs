@@ -72,14 +72,6 @@ defmodule PlugRestTest do
     end
   end
 
-  defmodule UnknownContentTypeResource do
-    @behaviour PlugRest.Resource
-
-    def known_content_type(conn, state) do
-      {false, conn, state}
-    end
-  end
-
   defmodule InvalidEntityLengthResource do
     @behaviour PlugRest.Resource
 
@@ -100,7 +92,6 @@ defmodule PlugRestTest do
     resource "/unauthorized", UnauthorizedResource
     resource "/forbidden", ForbiddenResource
     resource "/invalid_content_headers", InvalidContentHeadersResource
-    resource "/unknown_content_type", UnknownContentTypeResource
     resource "/invalid_entity_length", InvalidEntityLengthResource
   end
 
@@ -144,10 +135,6 @@ defmodule PlugRestTest do
 
   test "invalid content headers returns 501" do
     build_conn(:get, "/invalid_content_headers") |> test_status(501)
-  end
-
-  test "unknown content type returns 415" do
-    build_conn(:get, "/unknown_content_type") |> test_status(415)
   end
 
   test "invalid entity length returns 413" do
