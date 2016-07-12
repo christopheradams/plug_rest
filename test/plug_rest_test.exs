@@ -20,7 +20,7 @@ defmodule PlugRestTest do
     end
   end
 
-  defmodule UnknownMethodsResource do
+  defmodule KnownMethodsResource do
     @behaviour PlugRest.Resource
 
     def known_methods(conn, state) do
@@ -36,11 +36,11 @@ defmodule PlugRestTest do
     end
   end
 
-  defmodule UnallowedMethodsResource do
+  defmodule AllowedMethodsResource do
     @behaviour PlugRest.Resource
 
     def allowed_methods(conn, state) do
-      {["GET", "POST"], conn, state}
+      {["HEAD", "GET", "POST", "OPTIONS"], conn, state}
     end
   end
 
@@ -84,19 +84,32 @@ defmodule PlugRestTest do
     end
   end
 
+  defmodule JsonResource do
+    @behaviour PlugRest.Resource
+
+    def content_types_provided(conn, state) do
+      {[{{"application", "json", %{}}, :to_json}], conn, state}
+    end
+
+    def to_json(conn, state) do
+      {"{}", conn, state}
+    end
+  end
+
   defmodule Router do
     use PlugRest
 
     resource "/", IndexResource
     resource "/service_unavailable", ServiceUnavailableResource
-    resource "/unknown_methods", UnknownMethodsResource
+    resource "/known_methods", KnownMethodsResource
     resource "/uri_too_long", UriTooLongResource
-    resource "/unallowed_methods", UnallowedMethodsResource
+    resource "/allowed_methods", AllowedMethodsResource
     resource "/malformed_request", MalformedRequestResource
     resource "/unauthorized", UnauthorizedResource
     resource "/forbidden", ForbiddenResource
     resource "/invalid_content_headers", InvalidContentHeadersResource
     resource "/invalid_entity_length", InvalidEntityLengthResource
+    resource "/json_resource", JsonResource
   end
 
   test "basic DSL is available" do
@@ -113,7 +126,7 @@ defmodule PlugRestTest do
   end
 
   test "unknown method returns 501" do
-    build_conn(:delete, "/unknown_methods") |> test_status(501)
+    build_conn(:delete, "/known_methods") |> test_status(501)
   end
 
   test "uri too long returns 414" do
@@ -121,7 +134,7 @@ defmodule PlugRestTest do
   end
 
   test "unallowed method returns 405" do
-    build_conn(:delete, "/unallowed_methods") |> test_status(405)
+    build_conn(:delete, "/allowed_methods") |> test_status(405)
   end
 
   test "malformed request returns 400" do
@@ -144,9 +157,25 @@ defmodule PlugRestTest do
     build_conn(:get, "/invalid_entity_length") |> test_status(413)
   end
 
-  test "options" do
+  test "options sends allowed methods" do
     conn = build_conn(:options, "/")
     test_status(conn, 200)
+    test_header(conn, "allow", "HEAD, GET, OPTIONS")
+
+    conn2 = build_conn(:options, "/allowed_methods")
+    test_status(conn2, 200)
+    test_header(conn2, "allow", "HEAD, GET, POST, OPTIONS")
+  end
+
+  test "default content type is text/html and utf-8" do
+    build_conn(:get, "/")
+    |> test_header("content-type", "text/html; charset=utf-8")
+  end
+
+  test "custom content types can be provided" do
+    build_conn(:get, "/json_resource")
+    |> test_status(200)
+    |> test_header("content-type", "application/json; charset=utf-8")
   end
 
   defp build_conn(method, path) do
@@ -156,5 +185,11 @@ defmodule PlugRestTest do
   defp test_status(conn, status) do
     assert conn.state == :sent
     assert conn.status == status
+    conn
+  end
+
+  defp test_header(conn, key, value) do
+    assert get_resp_header(conn, key) == [value]
+    conn
   end
 end
