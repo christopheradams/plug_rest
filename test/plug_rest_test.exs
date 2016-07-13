@@ -154,6 +154,14 @@ defmodule PlugRestTest do
     end
   end
 
+  defmodule ResourceNotExists do
+    @bheaviour PlugRest.Resource
+
+    def resource_exists(conn, state) do
+      {false, conn, state}
+    end
+  end
+
   defmodule Router do
     use PlugRest
 
@@ -173,6 +181,7 @@ defmodule PlugRestTest do
     resource "/binary_ctp_resource", BinaryCtpResource
     resource "/languages_resource", LanguagesResource
     resource "/charset_resource", CharsetResource
+    resource "/resource_not_exists", ResourceNotExists
   end
 
   test "basic DSL is available" do
@@ -290,6 +299,9 @@ defmodule PlugRestTest do
     |> test_header("vary", "accept-charset")
   end
 
+  test "resource not exists returns 404" do
+    build_conn(:get, "/resource_not_exists") |> test_status(404)
+  end
   defp build_conn(method, path) do
     conn(method, path) |> Router.call([])
   end
