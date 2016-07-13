@@ -460,7 +460,7 @@ defmodule PlugRest.Resource do
         not_acceptable(conn2, %{state | handler_state: handler_state})
       {cP, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, charsets_p: cP}
-        case get_req_header(conn2, "accept-charset") do
+        case parse_req_header(conn2, "accept-charset") do
           [] ->
             set_content_type(conn2, %{state2 | charset_a: hd(cP)})
           acceptCharset ->
@@ -511,15 +511,14 @@ defmodule PlugRest.Resource do
 
   defp set_content_type(conn, %{content_type_a: {{type, subType, params}, _fun}, charset_a: charset} = state) do
     paramsBin = set_content_type_build_params(params, [])
-    content_type = [type, "/", subType, paramsBin]
-    content_type2 = case charset do
+    content_type = print_media_type({type, subType, paramsBin})
+    conn2 = case charset do
       :undefined ->
-        content_type
+        put_resp_content_type(conn, content_type)
       ^charset ->
-        [content_type, "; charset=", charset]
+        put_resp_content_type(conn, content_type, charset)
     end
-    conn
-    |> put_resp_content_type(print_media_type(content_type2))
+    conn2
     |> encodings_provided(state)
   end
 

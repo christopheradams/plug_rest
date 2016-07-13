@@ -138,6 +138,18 @@ defmodule PlugRestTest do
     end
   end
 
+  defmodule CharsetResource do
+    @behaviour PlugRest.Resource
+
+    def charsets_provided(conn, state) do
+      {["utf-8", "unicode-1-1"], conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"Charsets", conn, state}
+    end
+  end
+
   defmodule Router do
     use PlugRest
 
@@ -156,6 +168,7 @@ defmodule PlugRestTest do
     resource "/content_negotiation", HypermediaResource
     resource "/binary_ctp_resource", BinaryCtpResource
     resource "/languages_resource", LanguagesResource
+    resource "/charset_resource", CharsetResource
   end
 
   test "basic DSL is available" do
@@ -260,6 +273,14 @@ defmodule PlugRestTest do
     |> Router.call([])
     |> test_status(200)
     |> test_header("content-language", "en")
+  end
+
+  test "charset negotiation" do
+    conn(:get, "/charset_resource")
+    |> put_req_header("accept-charset", "iso-8859-5, unicode-1-1;q=0.8")
+    |> Router.call([])
+    |> test_status(200)
+    |> test_header("content-type", "text/html; charset=unicode-1-1")
   end
 
   defp build_conn(method, path) do

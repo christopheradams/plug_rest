@@ -37,5 +37,17 @@ defmodule PlugRest.ConnTest do
 
     assert actual_headers == expected_headers
   end
+
+  test "parse charset accept header" do
+    accept = "iso-8859-5, unicode-1-1;q=0.8"
+
+    actual_headers = conn(:get, "/")
+    |> put_req_header("accept-charset", accept)
+    |> parse_req_header("accept-charset")
+
+    expected_headers = [{"iso-8859-5", 1.0}, {"unicode-1-1", 0.8}]
+
+    assert actual_headers == expected_headers
+  end
 end
 
