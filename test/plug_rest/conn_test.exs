@@ -1,0 +1,41 @@
+defmodule PlugRest.ConnTest do
+  use ExUnit.Case
+  use Plug.Test
+
+  import PlugRest.Conn
+
+  test "parse non-existent header" do
+    headers = conn(:get, "/")
+    |> parse_req_header("accept-language")
+
+    assert headers == []
+  end
+
+  test "parse content type accept header" do
+    accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8;err"
+
+    actual_media_types = conn(:get, "/")
+    |> put_req_header("accept", accept)
+    |> parse_req_header("accept")
+
+    expected_media_types = [{{"text", "html", %{}}, 1.0, %{}},
+      {{"application", "xhtml+xml", %{}}, 1.0, %{}},
+      {{"application", "xml", %{"q" => "0.9"}}, 0.9, %{}},
+      {{"*", "*", %{"q" => "0.8"}}, 0.8, %{}}]
+
+    assert actual_media_types == expected_media_types
+  end
+
+  test "parse language accept header" do
+    accept = "da, en-gb;q=0.8, en;q=0.7"
+
+    actual_headers = conn(:get, "/")
+    |> put_req_header("accept-language", accept)
+    |> parse_req_header("accept-language")
+
+    expected_headers = [{"da", 1.0}, {"en-gb", 0.8}, {"en", 0.7}]
+
+    assert actual_headers == expected_headers
+  end
+end
+

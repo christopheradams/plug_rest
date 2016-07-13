@@ -1,5 +1,6 @@
 defmodule PlugRest.Resource do
   import PlugRest.Utils
+  import PlugRest.Conn
   import Plug.Conn
 
   ## REST handler callbacks.
@@ -261,7 +262,7 @@ defmodule PlugRest.Resource do
       :no_call ->
         state2 = %{state | content_types_p: [{{"text", "html", %{}}, :to_html}]}
         try do
-          case get_req_header(conn, "accept") do
+          case parse_req_header(conn, "accept") do
             [] ->
               conn
               |> put_resp_content_type(print_media_type({"text", "html", %{}}))
@@ -281,7 +282,7 @@ defmodule PlugRest.Resource do
         cTP2 = for(p <- cTP, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state, content_types_p: cTP2}
         try do
-          case get_req_header(conn2, "accept") do
+          case parse_req_header(conn2, "accept") do
             [] ->
               {pMT, _fun} = headCTP = hd(cTP2)
               conn2
@@ -310,8 +311,6 @@ defmodule PlugRest.Resource do
 
   defp prioritize_accept(accept) do
     accept
-    |> parse_accept_header
-    |> reformat_media_types_for_cowboy_rest
     |> Enum.sort(fn
       {mediaTypeA, quality, _acceptParamsA}, {mediaTypeB, quality, _acceptParamsB} ->
         prioritize_mediatype(mediaTypeA, mediaTypeB)
@@ -395,7 +394,7 @@ defmodule PlugRest.Resource do
         not_acceptable(conn2, %{state | handler_state: handler_state})
       {lP, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, languages_p: lP}
-        case get_req_header(conn2, "accept-language") do
+        case parse_req_header(conn2, "accept-language") do
           [] ->
             set_language(conn2, %{state2 | language_a: hd(lP)})
           acceptLanguage ->
@@ -408,8 +407,6 @@ defmodule PlugRest.Resource do
 
   defp prioritize_languages(accept_languages) do
     accept_languages
-    |> parse_language_header
-    |> reformat_languages_for_cowboy_rest
     |> Enum.sort(fn {_tagA, qualityA}, {_tagB, qualityB} -> qualityA > qualityB end)
   end
 
