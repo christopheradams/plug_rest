@@ -96,6 +96,37 @@ defmodule PlugRestTest do
     end
   end
 
+  defmodule BinaryCtpResource do
+    @behaviour PlugRest.Resource
+
+    def content_types_provided(conn, state) do
+      {[{"application/json", :to_json}], conn, state}
+    end
+
+    def to_json(conn, state) do
+      {"{}", conn, state}
+    end
+  end
+
+
+  defmodule HypermediaResource do
+    @behaviour PlugRest.Resource
+
+    def content_types_provided(conn, state) do
+      {[{{"text", "html", %{}}, :to_html},
+        {{"application", "json", %{}}, :to_json}
+      ], conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"Media", conn, state}
+    end
+
+    def to_json(conn, state) do
+      {"{\"title\": \"Media\"}", conn, state}
+    end
+  end
+
   defmodule Router do
     use PlugRest
 
@@ -110,6 +141,9 @@ defmodule PlugRestTest do
     resource "/invalid_content_headers", InvalidContentHeadersResource
     resource "/invalid_entity_length", InvalidEntityLengthResource
     resource "/json_resource", JsonResource
+    resource "/hypermedia_resource", HypermediaResource
+    resource "/content_negotiation", HypermediaResource
+    resource "/binary_ctp_resource", BinaryCtpResource
   end
 
   test "basic DSL is available" do
@@ -174,6 +208,24 @@ defmodule PlugRestTest do
 
   test "custom content types can be provided" do
     build_conn(:get, "/json_resource")
+    |> test_status(200)
+    |> test_header("content-type", "application/json; charset=utf-8")
+  end
+
+  test "media types can be represented as a binary" do
+    build_conn(:get, "/binary_ctp_resource")
+    |> test_status(200)
+    |> test_header("content-type", "application/json; charset=utf-8")
+  end
+
+  test "content negotiation" do
+    build_conn(:get, "/content_negotiation")
+    |> test_status(200)
+    |> test_header("content-type", "text/html; charset=utf-8")
+
+    conn(:get, "/content_negotiation")
+    |> put_req_header("accept", "application/json")
+    |> Router.call([])
     |> test_status(200)
     |> test_header("content-type", "application/json; charset=utf-8")
   end

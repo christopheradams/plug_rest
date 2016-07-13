@@ -309,7 +309,10 @@ defmodule PlugRest.Resource do
 
 
   defp prioritize_accept(accept) do
-    Enum.sort(accept, fn
+    accept
+    |> parse_accept_header
+    |> reformat_media_types_for_cowboy_rest
+    |> Enum.sort(fn
       {mediaTypeA, quality, _acceptParamsA}, {mediaTypeB, quality, _acceptParamsB} ->
         prioritize_mediatype(mediaTypeA, mediaTypeB)
       {_mediaTypeA, qualityA, _acceptParamsA}, {_mediaTypeB, qualityB, _acceptParamsB} ->
@@ -363,7 +366,7 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp match_media_type_params(conn, state, _accept, [provided = {{tP, sTP, :*}, _fun} | _tail], {{_tA, _sTA, params_A}, _qA, _aPA}) do
+  defp match_media_type_params(conn, state, _accept, [provided = {{tP, sTP, %{}}, _fun} | _tail], {{_tA, _sTA, params_A}, _qA, _aPA}) do
     pMT = {tP, sTP, params_A}
     conn
     |> put_resp_content_type(print_media_type(pMT))
