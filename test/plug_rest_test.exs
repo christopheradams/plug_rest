@@ -108,7 +108,6 @@ defmodule PlugRestTest do
     end
   end
 
-
   defmodule HypermediaResource do
     @behaviour PlugRest.Resource
 
@@ -124,6 +123,18 @@ defmodule PlugRestTest do
 
     def to_json(conn, state) do
       {"{\"title\": \"Media\"}", conn, state}
+    end
+  end
+
+  defmodule LanguagesResource do
+    @behaviour PlugRest.Resource
+
+    def languages_provided(conn, state) do
+      {["de", "en"], conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"Languages", conn, state}
     end
   end
 
@@ -144,6 +155,7 @@ defmodule PlugRestTest do
     resource "/hypermedia_resource", HypermediaResource
     resource "/content_negotiation", HypermediaResource
     resource "/binary_ctp_resource", BinaryCtpResource
+    resource "/languages_resource", LanguagesResource
   end
 
   test "basic DSL is available" do
@@ -219,15 +231,35 @@ defmodule PlugRestTest do
   end
 
   test "content negotiation" do
+    conn(:get, "/")
+    |> put_req_header("accept", ",text/html,application/json")
+    |> Router.call([])
+    |> test_status(200)
+    |> test_header("content-type", "text/html; charset=utf-8")
+
     build_conn(:get, "/content_negotiation")
     |> test_status(200)
     |> test_header("content-type", "text/html; charset=utf-8")
 
     conn(:get, "/content_negotiation")
-    |> put_req_header("accept", "application/json")
+    |> put_req_header("accept", "text/html,application/json")
     |> Router.call([])
     |> test_status(200)
     |> test_header("content-type", "application/json; charset=utf-8")
+
+    conn(:get, "/content_negotiation")
+    |> put_req_header("accept", "application/json,text/html;q=0.9")
+    |> Router.call([])
+    |> test_status(200)
+    |> test_header("content-type", "application/json; charset=utf-8")
+  end
+
+  test "content language" do
+    conn(:get, "/languages_resource")
+    |> put_req_header("accept-language", "da, en-gb;q=0.8, en;q=0.7")
+    |> Router.call([])
+    |> test_status(200)
+    |> test_header("content-language", "en")
   end
 
   defp build_conn(method, path) do

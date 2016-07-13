@@ -406,8 +406,11 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp prioritize_languages(acceptLanguages) do
-    :lists.sort(fn {_tagA, qualityA}, {_tagB, qualityB} -> qualityA > qualityB end, acceptLanguages)
+  defp prioritize_languages(accept_languages) do
+    accept_languages
+    |> parse_language_header
+    |> reformat_languages_for_cowboy_rest
+    |> Enum.sort(fn {_tagA, qualityA}, {_tagB, qualityB} -> qualityA > qualityB end)
   end
 
 
