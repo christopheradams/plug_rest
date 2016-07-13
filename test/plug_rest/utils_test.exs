@@ -50,4 +50,27 @@ defmodule PlugRest.UtilsTest do
 
     assert PlugRest.Utils.print_media_type({type, subtype, params}) == media_type
   end
+
+  test "parses empty languages header as empty list" do
+    assert parse_language_header([]) == []
+  end
+
+  test "parse multiple languages in header" do
+    languages = ["da, en-gb;q=0.8, en;q=0.7"]
+
+    actual = parse_language_header(languages)
+    expected = [{"da", %{}}, {"en-gb", %{"q" => "0.8"}}, {"en", %{"q" => "0.7"}}]
+
+    assert actual == expected
+
+  end
+
+  test "reformats language header into format that can be prioritized by cowboy_rest" do
+    languages = ["da, en-gb;q=0.8, en;q=0.7"]
+
+    actual = languages |> parse_language_header |> reformat_languages_for_cowboy_rest
+    expected = [{"da", 1.0}, {"en-gb", 0.8}, {"en", 0.7}]
+
+    assert actual == expected
+  end
 end

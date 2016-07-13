@@ -33,5 +33,25 @@ defmodule PlugRest.Utils do
   def print_media_type({type, subtype, _params}) do
     "#{type}/#{subtype}"
   end
+
+  def parse_language_header([]) do
+    []
+  end
+
+  def parse_language_header([languages]) when is_binary(languages) do
+    Plug.Conn.Utils.list(languages)
+    |> Enum.map(fn(x) ->
+      {hd(String.split(x, ";")), Plug.Conn.Utils.params(x)}
+    end)
+  end
+
+  def reformat_languages_for_cowboy_rest(languages) do
+    languages
+    |> Enum.map(fn({tag, params}) ->
+      quality = case Float.parse(params["q"] || "1") do
+        {q, _} -> q
+        _ -> 1 end
+      {tag, quality} end)
+  end
 end
 
