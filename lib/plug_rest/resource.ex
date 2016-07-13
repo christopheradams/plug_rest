@@ -610,7 +610,7 @@ defmodule PlugRest.Resource do
 
   defp if_match_exists(conn, state) do
     state2 = %{state | exists: true}
-    case get_req_header(conn, "if-match") do
+    case parse_req_header(conn, "if-match") do
       [] ->
         if_unmodified_since_exists(conn, state2)
       :* ->

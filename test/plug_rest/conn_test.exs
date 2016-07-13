@@ -49,5 +49,41 @@ defmodule PlugRest.ConnTest do
 
     assert actual_headers == expected_headers
   end
+
+  test "parse if-match header" do
+    if_match = "\"xyzzy\""
+
+    actual_headers = conn(:get, "/")
+    |> put_req_header("if-match", if_match)
+    |> parse_req_header("if-match")
+
+    expected_headers = ["\"xyzzy\""]
+
+    assert actual_headers == expected_headers
+  end
+
+  test "parse multiple if-match values" do
+    if_match = "\"xyzzy\", \"r2d2xxxx\", \"c3piozzzz\""
+
+    actual_headers = conn(:get, "/")
+    |> put_req_header("if-match", if_match)
+    |> parse_req_header("if-match")
+
+    expected_headers = ["\"xyzzy\",", "\"r2d2xxxx\",", "\"c3piozzzz\""]
+
+    assert actual_headers == expected_headers
+  end
+
+  test "parse wildcard if-match" do
+    if_match = "*"
+
+    actual_headers = conn(:get, "/")
+    |> put_req_header("if-match", if_match)
+    |> parse_req_header("if-match")
+
+    expected_headers = [:*]
+
+    assert actual_headers == expected_headers
+  end
 end
 

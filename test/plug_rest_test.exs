@@ -302,6 +302,14 @@ defmodule PlugRestTest do
   test "resource not exists returns 404" do
     build_conn(:get, "/resource_not_exists") |> test_status(404)
   end
+
+  test "if match precondition fails" do
+    conn(:get, "/")
+    |> put_req_header("if-match", "\"xyzzy\"")
+    |> Router.call([])
+    |> test_status(412)
+  end
+
   defp build_conn(method, path) do
     conn(method, path) |> Router.call([])
   end

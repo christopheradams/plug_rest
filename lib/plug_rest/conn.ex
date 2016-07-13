@@ -7,6 +7,14 @@ defmodule PlugRest.Conn do
     |> format_media_types
   end
 
+  def parse_req_header(conn, header) when header == "if-match" do
+    case get_req_header(conn, header) do
+      [] -> []
+      ["*"] -> [:*]
+      [x] -> String.split(x)
+    end
+  end
+
   def parse_req_header(conn, header) do
     get_req_header(conn, header)
     |> parse_header
