@@ -254,7 +254,7 @@ defmodule PlugRestTest do
     |> test_header("content-type", "application/json; charset=utf-8")
   end
 
-  test "content language" do
+  test "language negotiation" do
     conn(:get, "/languages_resource")
     |> put_req_header("accept-language", "da, en-gb;q=0.8, en;q=0.7")
     |> Router.call([])
