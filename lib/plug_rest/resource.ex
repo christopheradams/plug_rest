@@ -580,7 +580,7 @@ defmodule PlugRest.Resource do
                 [] ->
                   resource_exists(conn2, state2)
                 [[", ", h] | variances5] ->
-                  conn3 = put_resp_header(conn2, "vary", [h | variances5])
+                  conn3 = put_resp_header(conn2, "vary", List.to_string([h | variances5]))
                   resource_exists(conn3, state2)
             end
       end
