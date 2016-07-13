@@ -117,6 +117,10 @@ defmodule PlugRestTest do
       ], conn, state}
     end
 
+    def languages_provided(conn, state) do
+      {["de", "en"], conn, state}
+    end
+
     def to_html(conn, state) do
       {"Media", conn, state}
     end
@@ -265,6 +269,7 @@ defmodule PlugRestTest do
     |> Router.call([])
     |> test_status(200)
     |> test_header("content-type", "application/json; charset=utf-8")
+    |> test_header("vary", "accept-language, accept")
   end
 
   test "language negotiation" do
@@ -273,6 +278,7 @@ defmodule PlugRestTest do
     |> Router.call([])
     |> test_status(200)
     |> test_header("content-language", "en")
+    |> test_header("vary", "accept-language")
   end
 
   test "charset negotiation" do
@@ -281,6 +287,7 @@ defmodule PlugRestTest do
     |> Router.call([])
     |> test_status(200)
     |> test_header("content-type", "text/html; charset=unicode-1-1")
+    |> test_header("vary", "accept-charset")
   end
 
   defp build_conn(method, path) do
