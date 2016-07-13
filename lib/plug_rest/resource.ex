@@ -299,7 +299,8 @@ defmodule PlugRest.Resource do
 
 
   defp normalize_content_types({content_type, callback}) when is_binary(content_type) do
-    {Plug.Conn.Utils.media_type(content_type), callback}
+    {:ok, type, subtype, params} = Plug.Conn.Utils.media_type(content_type)
+    {{type, subtype, params}, callback}
   end
 
   defp normalize_content_types(normalized) do
