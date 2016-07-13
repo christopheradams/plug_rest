@@ -1,5 +1,34 @@
 defmodule PlugRest.UtilsTest do
   use ExUnit.Case
+  import PlugRest.Utils
+
+  test "parses empty accept header as empty list" do
+    assert parse_accept_header([]) == []
+  end
+
+  test "parses complex accept header into separate media types" do
+    accept = ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8;err"]
+
+    actual_media_types = parse_accept_header(accept)
+    expected_media_types = [{"text", "html", %{}},
+                            {"application", "xhtml+xml", %{}},
+                            {"application", "xml", %{"q" => "0.9"}},
+                            {"*", "*", %{"q" => "0.8"}}]
+
+    assert actual_media_types == expected_media_types
+  end
+
+  test "reformats acccept header into format that can be prioritized by cowboy_rest" do
+    accept = ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8;"]
+
+    actual_types = accept |> parse_accept_header |> reformat_media_types_for_cowboy_rest
+    expected_types = [{{"text", "html", %{}}, 1.0, %{}},
+      {{"application", "xhtml+xml", %{}}, 1.0, %{}},
+      {{"application", "xml", %{"q" => "0.9"}}, 0.9, %{}},
+      {{"*", "*", %{"q" => "0.8"}}, 0.8, %{}}]
+
+    assert actual_types == expected_types
+  end
 
   test "prints media type binary to string" do
     media_type = "text/html"
