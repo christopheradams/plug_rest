@@ -5,7 +5,16 @@ defmodule PlugRest.Conn do
   def parse_req_header(conn, header) when header == "content-type" do
     [content_type] = get_req_header(conn, header)
     {:ok, type, subtype, params} = content_type(content_type)
-    {type, subtype, params}
+
+    ## Ensure that any value of charset is lowercase
+    params2 = case Map.fetch(params, "charset") do
+                :error ->
+                  params
+                {:ok, charset} ->
+                  Map.put(params, "charset", String.downcase(charset))
+              end
+
+    {type, subtype, params2}
   end
 
   def parse_req_header(conn, header) when header == "accept" do

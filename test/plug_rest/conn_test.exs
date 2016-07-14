@@ -23,6 +23,18 @@ defmodule PlugRest.ConnTest do
     assert actual_header == expected_header
   end
 
+  test "parsing charset in content-type should return lower case" do
+    content_type = "text/plain;charset=UTF-8"
+
+    actual_header = conn(:post, "/")
+    |> put_req_header("content-type", content_type)
+    |> parse_req_header("content-type")
+
+    expected_header = {"text", "plain", %{"charset" => "utf-8"}}
+
+    assert actual_header == expected_header
+  end
+
   test "parse content type accept header" do
     accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8;err"
 
