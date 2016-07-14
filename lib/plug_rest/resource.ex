@@ -922,7 +922,7 @@ defmodule PlugRest.Resource do
         cTA2 = for(p <- cTA, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state}
         try() do
-          case get_req_header(conn2, "content-type") do
+          case parse_req_header(conn2, "content-type") do
             content_type ->
               choose_content_type(conn2, state2, content_type, cTA2)
           end

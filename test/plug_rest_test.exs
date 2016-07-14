@@ -91,12 +91,24 @@ defmodule PlugRestTest do
   defmodule JsonResource do
     @behaviour PlugRest.Resource
 
+    def allowed_methods(conn, state) do
+      {["GET", "POST"], conn, state}
+    end
+
     def content_types_provided(conn, state) do
       {[{{"application", "json", %{}}, :to_json}], conn, state}
     end
 
+    def content_types_accepted(conn, state) do
+      {[{{"application", "json", %{}}, :from_json}], conn, state}
+    end
+
     def to_json(conn, state) do
       {"{}", conn, state}
+    end
+
+    def from_json(conn, state) do
+      {{true, "/new"}, conn, state}
     end
   end
 
@@ -365,6 +377,21 @@ defmodule PlugRestTest do
     |> test_status(200)
     |> test_header("content-type", "text/html; charset=unicode-1-1")
     |> test_header("vary", "accept-charset")
+  end
+
+  test "post unaccepted returns 415" do
+    conn(:post, "/allowed_methods", "{}")
+    |> put_req_header("content-type", "application/json")
+    |> Router.call([])
+    |> test_status(415)
+  end
+
+  test "post accepted content type with new location" do
+    conn(:post, "/json_resource", "{}")
+    |> put_req_header("content-type", "application/json")
+    |> Router.call([])
+    |> test_status(303)
+    |> test_header("location", "/new")
   end
 
   test "resource not exists returns 404" do
