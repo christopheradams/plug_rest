@@ -11,6 +11,18 @@ defmodule PlugRest.ConnTest do
     assert headers == []
   end
 
+  test "parse content type header" do
+    content_type = "application/json"
+
+    actual_header = conn(:post, "/")
+    |> put_req_header("content-type", content_type)
+    |> parse_req_header("content-type")
+
+    expected_header = {"application", "json", %{}}
+
+    assert actual_header == expected_header
+  end
+
   test "parse content type accept header" do
     accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8;err"
 

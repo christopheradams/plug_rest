@@ -1,5 +1,12 @@
 defmodule PlugRest.Conn do
   import Plug.Conn
+  import Plug.Conn.Utils
+
+  def parse_req_header(conn, header) when header == "content-type" do
+    [content_type] = get_req_header(conn, header)
+    {:ok, type, subtype, params} = content_type(content_type)
+    {type, subtype, params}
+  end
 
   def parse_req_header(conn, header) when header == "accept" do
     get_req_header(conn, header)
