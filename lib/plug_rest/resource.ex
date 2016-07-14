@@ -5,6 +5,11 @@ defmodule PlugRest.Resource do
 
   ## REST handler callbacks.
 
+  @callback init(conn, state) :: {[binary()], conn, state}
+                               | {:stop, conn, state}
+          when conn: %Plug.Conn{}, state: any()
+  @optional_callbacks [init: 2]
+
   @callback allowed_methods(conn, state) :: {[binary()], conn, state}
                                           | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
@@ -140,10 +145,10 @@ defmodule PlugRest.Resource do
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [variances: 2]
 
-  def upgrade(conn, handler, _opts \\ []) do
+  def upgrade(conn, handler, handler_state) do
     method = conn.method
-    state = %PlugRest.State{method: method, handler: handler}
-    service_available(conn, state)
+    state = %PlugRest.State{method: method, handler: handler, handler_state: handler_state}
+    expect(conn, state, :init, :ok, &service_available/2, 500)
   end
 
   defp service_available(conn, state) do

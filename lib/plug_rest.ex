@@ -18,15 +18,15 @@ defmodule PlugRest do
     end
   end
 
-  defmacro resource(path, handler) do
-    add_route(path, handler)
+  defmacro resource(path, handler, handler_state \\ []) do
+    add_route(path, handler, handler_state)
   end
 
-  defp add_route(path, handler) do
+  defp add_route(path, handler, handler_state) do
     {_vars, match} = Plug.Router.Utils.build_path_match(path)
     quote do
       defp do_match(conn, unquote(match)) do
-        PlugRest.Resource.upgrade(conn, unquote(handler))
+        PlugRest.Resource.upgrade(conn, unquote(handler), unquote(handler_state))
       end
     end
   end

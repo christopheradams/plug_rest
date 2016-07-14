@@ -12,11 +12,15 @@ defmodule PlugRestTest do
     end
   end
 
-  defmodule ServiceUnavailableResource do
+  defmodule ServiceAvailableResource do
     @behaviour PlugRest.Resource
 
-    def service_available(conn, state) do
+    def service_available(conn, false = state) do
       {false, conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"Service Available", conn, state}
     end
   end
 
@@ -154,10 +158,10 @@ defmodule PlugRestTest do
     end
   end
 
-  defmodule ResourceNotExists do
-    @bheaviour PlugRest.Resource
+  defmodule ResourceExists do
+    @behaviour PlugRest.Resource
 
-    def resource_exists(conn, state) do
+    def resource_exists(conn, false = state) do
       {false, conn, state}
     end
   end
@@ -166,7 +170,7 @@ defmodule PlugRestTest do
     use PlugRest
 
     resource "/", IndexResource
-    resource "/service_unavailable", ServiceUnavailableResource
+    resource "/service_unavailable", ServiceAvailableResource, false
     resource "/known_methods", KnownMethodsResource
     resource "/uri_too_long", UriTooLongResource
     resource "/allowed_methods", AllowedMethodsResource
@@ -181,7 +185,7 @@ defmodule PlugRestTest do
     resource "/binary_ctp_resource", BinaryCtpResource
     resource "/languages_resource", LanguagesResource
     resource "/charset_resource", CharsetResource
-    resource "/resource_not_exists", ResourceNotExists
+    resource "/resource_not_exists", ResourceExists, false
   end
 
   test "basic DSL is available" do
