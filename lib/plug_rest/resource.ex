@@ -1228,7 +1228,7 @@ defmodule PlugRest.Resource do
     conn |> send_resp(conn.status, state.body)
   end
 
-  defp error_terminate(conn, _state, _class, reason, _callback) do
-    conn |> send_resp(500, reason)
+  defp error_terminate(conn, _state, _class, _reason, _callback) do
+    conn |> send_resp(500, "")
   end
 end
