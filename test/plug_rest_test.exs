@@ -166,6 +166,66 @@ defmodule PlugRestTest do
     end
   end
 
+  defmodule PreviouslyExisted do
+    @behaviour PlugRest.Resource
+
+    def resource_exists(conn, state) do
+      {false, conn, state}
+    end
+
+    def previously_existed(conn, false = state) do
+      {false, conn, state}
+    end
+  end
+
+  defmodule MovedPermanentlyResource do
+    @behaviour PlugRest.Resource
+
+    def resource_exists(conn, state) do
+      {false, conn, state}
+    end
+
+    def previously_existed(conn, state) do
+      {true, conn, state}
+    end
+
+    def moved_permanently(conn, state) do
+      {{true, "/moved"}, conn, state}
+    end
+  end
+
+  defmodule MovedTemporarilyResource do
+    @behaviour PlugRest.Resource
+
+    def resource_exists(conn, state) do
+      {false, conn, state}
+    end
+
+    def previously_existed(conn, state) do
+      {true, conn, state}
+    end
+
+    def moved_temporarily(conn, state) do
+      {{true, "/temp"}, conn, state}
+    end
+  end
+
+  defmodule GoneResource do
+    @behaviour PlugRest.Resource
+
+    def resource_exists(conn, state) do
+      {false, conn, state}
+    end
+
+    def previously_existed(conn, state) do
+      {true, conn, state}
+    end
+
+    def moved_temporarily(conn, state) do
+      {false, conn, state}
+    end
+  end
+
   defmodule Router do
     use PlugRest
 
@@ -186,6 +246,10 @@ defmodule PlugRestTest do
     resource "/languages_resource", LanguagesResource
     resource "/charset_resource", CharsetResource
     resource "/resource_not_exists", ResourceExists, false
+    resource "/previously_existed", PreviouslyExisted, false
+    resource "/moved_permanently", MovedPermanentlyResource
+    resource "/moved_temporarily", MovedTemporarilyResource
+    resource "/gone", GoneResource
   end
 
   test "basic DSL is available" do
@@ -305,6 +369,24 @@ defmodule PlugRestTest do
 
   test "resource not exists returns 404" do
     build_conn(:get, "/resource_not_exists") |> test_status(404)
+  end
+
+  test "resource not exists, previously existed returns 404" do
+    build_conn(:get, "/previously_existed") |> test_status(404)
+  end
+
+  test "moved permanently returns new location" do
+    build_conn(:get, "/moved_permanently") |> test_status(301)
+    |> test_header("location", "/moved")
+  end
+
+  test "moved temporarily returns new location" do
+    build_conn(:get, "/moved_temporarily") |> test_status(307)
+    |> test_header("location", "/temp")
+  end
+
+  test "gone returns 410" do
+    build_conn(:get, "/gone") |> test_status(410)
   end
 
   test "if match precondition fails" do
