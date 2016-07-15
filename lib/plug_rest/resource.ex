@@ -690,7 +690,7 @@ defmodule PlugRest.Resource do
 
 
   defp if_none_match_exists(conn, state) do
-    case get_req_header(conn, "if-none-match") do
+    case parse_req_header(conn, "if-none-match") do
       [] ->
         if_modified_since_exists(conn, state)
       :* ->
@@ -703,23 +703,23 @@ defmodule PlugRest.Resource do
 
   defp if_none_match(conn, state, etagsList) do
     try() do
-      generate_etag(conn, state)
+      case generate_etag(conn, state) do
+        {etag, conn2, state2} ->
+          case etag do
+            :undefined ->
+              precondition_failed(conn2, state2)
+            ^etag ->
+              case is_weak_match(etag, etagsList) do
+                true ->
+                  precondition_is_head_get(conn2, state2)
+                false ->
+                  method(conn2, state2)
+              end
+          end
+      end
     catch
       class, reason ->
         error_terminate(conn, state, class, reason, :generate_etag)
-    else
-      {etag, conn2, state2} ->
-        case etag do
-          :undefined ->
-            precondition_failed(conn2, state2)
-          ^etag ->
-            case is_weak_match(etag, etagsList) do
-              true ->
-                precondition_is_head_get(conn2, state2)
-              false ->
-                method(conn2, state2)
-            end
-        end
     end
   end
 

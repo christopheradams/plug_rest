@@ -493,6 +493,33 @@ defmodule SuiteTest do
     |> test_status(500)
   end
 
+  test "rest resource if none match" do
+    conn(:get, "/resetags?type=tuple-weak")
+    |> put_req_header("if-none-match", "W/\"etag-header-value\"")
+    |> Router.call([])
+    |> test_status(304)
+    |> test_header("etag", "W/\"etag-header-value\"")
+
+    conn(:get, "/resetags?type=tuple-strong")
+    |> put_req_header("if-none-match", "\"etag-header-value\"")
+    |> Router.call([])
+    |> test_status(304)
+    |> test_header("etag", "\"etag-header-value\"")
+
+    conn(:get, "/resetags?type=binary-weak-quoted")
+    |> put_req_header("if-none-match", "\"etag-header-value\"")
+    |> Router.call([])
+    |> test_status(304)
+    |> test_header("etag", "W/\"etag-header-value\"")
+
+    conn(:get, "/resetags?type=binary-strong-quoted")
+    |> put_req_header("if-none-match", "\"etag-header-value\"")
+    |> Router.call([])
+    |> test_status(304)
+    |> test_header("etag", "\"etag-header-value\"")
+
+  end
+
   defp build_conn(method, path) do
     conn(method, path) |> Router.call([])
   end

@@ -31,6 +31,20 @@ defmodule PlugRest.Conn do
     end
   end
 
+  def parse_req_header(conn, header) when header == "if-none-match" do
+    case get_req_header(conn, header) do
+      [] -> []
+      ["*"] -> [:*]
+      [etags] ->
+        etags
+        |> String.split
+        |> Enum.map(fn(e) ->
+          {etag} = List.to_tuple(:cowboy_http.entity_tag_match(e))
+          etag
+        end)
+    end
+  end
+
   def parse_req_header(conn, header) do
     get_req_header(conn, header)
     |> parse_header

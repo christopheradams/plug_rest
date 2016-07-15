@@ -109,5 +109,32 @@ defmodule PlugRest.ConnTest do
 
     assert actual_headers == expected_headers
   end
+
+  test "parse strong if-none-match" do
+
+    if_none_match = "\"xyzzy\""
+
+    actual_headers = conn(:get, "/")
+    |> put_req_header("if-none-match", if_none_match)
+    |> parse_req_header("if-none-match")
+
+    expected_headers = [{:strong, "xyzzy"}]
+
+    assert actual_headers == expected_headers
+  end
+
+
+  test "parse weak if-none-match" do
+
+    if_none_match = "W/\"xyzzy\""
+
+    actual_headers = conn(:get, "/")
+    |> put_req_header("if-none-match", if_none_match)
+    |> parse_req_header("if-none-match")
+
+    expected_headers = [{:weak, "xyzzy"}]
+
+    assert actual_headers == expected_headers
+  end
 end
 
