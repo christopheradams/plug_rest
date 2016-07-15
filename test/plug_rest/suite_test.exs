@@ -227,7 +227,7 @@ defmodule SuiteTest do
     def patch_text_plain(conn, state) do
       case read_body(conn)  do
         {:ok, "stop", conn0} ->
-          {:stop, Plug.Conn.send_resp(400, conn0), state}
+          {:stop, Plug.Conn.put_status(conn0, 400), state}
         {:ok, "false", conn0} ->
           {false, conn0, state}
         {:ok, _body, conn0} ->
@@ -291,7 +291,7 @@ defmodule SuiteTest do
 
 
     def generate_etag(conn, state) do
-      %{type: type} = :cowboy_conn.match_qs([:type], conn)
+      %{"type" => type} = fetch_query_params(conn).query_params
       case(type) do
         "tuple-weak" ->
           {{:weak, "etag-header-value"}, conn, state}
@@ -302,10 +302,8 @@ defmodule SuiteTest do
         "binary-strong-quoted" ->
           {"\"etag-header-value\"", conn, state}
         "binary-strong-unquoted" ->
-          :ct_helper_error_h.ignore(:cow_http_hd, :parse_etag, 1)
           {"etag-header-value", conn, state}
         "binary-weak-unquoted" ->
-          :ct_helper_error_h.ignore(:cow_http_hd, :parse_etag, 1)
           {"W/etag-header-value", conn, state}
       end
     end
@@ -469,6 +467,30 @@ defmodule SuiteTest do
     |> put_req_header("content-type", "text/plain")
     |> Router.call([])
     |> test_status(204)
+  end
+
+  test "rest resource etags" do
+    build_conn(:get, "/resetags?type=tuple-weak")
+    |> test_status(200)
+    |> test_header("etag", "W/\"etag-header-value\"")
+
+    build_conn(:get, "/resetags?type=tuple-strong")
+    |> test_status(200)
+    |> test_header("etag", "\"etag-header-value\"")
+
+    build_conn(:get, "/resetags?type=binary-weak-quoted")
+    |> test_status(200)
+    |> test_header("etag", "W/\"etag-header-value\"")
+
+    build_conn(:get, "/resetags?type=binary-strong-quoted")
+    |> test_status(200)
+    |> test_header("etag", "\"etag-header-value\"")
+
+    build_conn(:get, "/resetags?type=binary-strong-unquoted")
+    |> test_status(500)
+
+    build_conn(:get, "/resetags?type=binary-weak-unquoted")
+    |> test_status(500)
   end
 
   defp build_conn(method, path) do

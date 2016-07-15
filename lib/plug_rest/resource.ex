@@ -1079,7 +1079,7 @@ defmodule PlugRest.Resource do
       :undefined ->
         {conn2, state2}
       ^etag ->
-        conn3 = put_resp_header(conn2, "etag", encode_etag(etag))
+        conn3 = put_resp_header(conn2, "etag", List.to_string(encode_etag(etag)))
         {conn3, state2}
     end
   end
@@ -1122,7 +1122,7 @@ defmodule PlugRest.Resource do
       :no_call ->
         {:undefined, conn, %{state | etag: :no_call}}
       {etag, conn2, handler_state} when is_binary(etag) ->
-        etag2 = :cowboy_http.entity_tag_match(etag)
+        {etag2} = List.to_tuple(:cowboy_http.entity_tag_match(etag))
         {etag2, conn2, %{state | handler_state: handler_state, etag: etag2}}
       {etag, conn2, handler_state} ->
         {etag, conn2, %{state | handler_state: handler_state, etag: etag}}
