@@ -163,18 +163,20 @@ defmodule SuiteTest do
 
 
     def content_types_provided(conn, state) do
-      {[{{"text", "plain", :*}, :get_text_plain}], conn, state}
+      {[{{"text", "plain", %{}}, :get_text_plain}], conn, state}
     end
 
 
     def get_text_plain(conn, state) do
-      {_, _, param} = :maps.get(:media_type, conn, {{"text", "plain"}, []})
+      [media_type] = get_req_header(conn, "accept")
+      {:ok, _, _, param} = Plug.Conn.Utils.media_type(media_type)
       body = case(:if) do
         :if when param == :* ->
           "'*'"
-        :if when param == [] ->
+        :if when param == %{} ->
           "[]"
         :if when param != [] ->
+                 IO.inspect(param)
           :erlang.iolist_to_binary(for({key, value} <- param, into: [], do: [key, ?=, value]))
       end
       {body, conn, state}
@@ -182,7 +184,7 @@ defmodule SuiteTest do
 
 
     def content_types_accepted(conn, state) do
-      {[{{"text", "plain", :*}, :put_text_plain}], conn, state}
+      {[{{"text", "plain", %{}}, :put_text_plain}], conn, state}
     end
 
 
@@ -359,6 +361,30 @@ defmodule SuiteTest do
     resource "/rest_empty_resource", :rest_empty_resource
   end
 
+  test "rest param all" do
+    conn(:get, "/param_all")
+    |> put_req_header("accept", "text/plain")
+    |> Router.call([])
+    |> test_status(200)
+    |> test_body("[]")
+
+    conn(:get, "/param_all")
+    |> put_req_header("accept", "text/plain;level=1")
+    |> Router.call([])
+    |> test_status(200)
+    |> test_body("level=1")
+
+  end
+
+  test "rest params all" do
+    conn(:get, "/param_all")
+    |> put_req_header("accept", "text/plain;level=1;q=0.8, text/plain;level=2;q=0.5")
+    |> Router.call([])
+    |> test_status(200)
+    |> test_body("level=1")
+
+  end
+
   test "rest status" do
     build_conn(:get, "/simple")
     |> test_status(200)
@@ -517,7 +543,6 @@ defmodule SuiteTest do
     |> Router.call([])
     |> test_status(304)
     |> test_header("etag", "\"etag-header-value\"")
-
   end
 
   defp build_conn(method, path) do
@@ -532,6 +557,11 @@ defmodule SuiteTest do
 
   defp test_header(conn, key, value) do
     assert get_resp_header(conn, key) == [value]
+    conn
+  end
+
+  defp test_body(conn, body) do
+    assert body == conn.resp_body
     conn
   end
 end
