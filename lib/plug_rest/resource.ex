@@ -942,7 +942,7 @@ defmodule PlugRest.Resource do
     process_content_type(conn, state, fun)
   end
 
-  defp choose_content_type(conn, state, {type, subType, param}, [{{type, subType, acceptedParam}, fun} | _tail]) when acceptedParam === :* or acceptedParam === param do
+  defp choose_content_type(conn, state, {type, subType, param}, [{{type, subType, acceptedParam}, fun} | _tail]) when acceptedParam === %{} or acceptedParam === param do
     process_content_type(conn, state, fun)
   end
 

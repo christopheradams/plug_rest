@@ -51,11 +51,11 @@ defmodule PlugRest.Conn do
     |> reformat_tags
   end
 
-  defp parse_accept_header([]) do
+  def parse_accept_header([]) do
     []
   end
 
-  defp parse_accept_header([accept]) when is_binary(accept) do
+  def parse_accept_header([accept]) when is_binary(accept) do
     accept
     |> Plug.Conn.Utils.list
     |> Enum.map(fn "*"->"*/*"; e -> e end)
