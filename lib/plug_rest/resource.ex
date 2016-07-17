@@ -683,18 +683,18 @@ defmodule PlugRest.Resource do
 
   defp if_unmodified_since(conn, state, ifUnmodifiedSince) do
     try() do
-      last_modified(conn, state)
+      case last_modified(conn, state) do
+        {lastModified, conn2, state2} ->
+          case lastModified > ifUnmodifiedSince do
+            true ->
+              precondition_failed(conn2, state2)
+            false ->
+              if_none_match_exists(conn2, state2)
+          end
+      end
     catch
       class, reason ->
         error_terminate(conn, state, class, reason, :last_modified)
-    else
-      {lastModified, conn2, state2} ->
-        case lastModified > ifUnmodifiedSince do
-          true ->
-            precondition_failed(conn2, state2)
-          false ->
-            if_none_match_exists(conn2, state2)
-        end
     end
   end
 
@@ -758,7 +758,7 @@ defmodule PlugRest.Resource do
 
   defp if_modified_since_exists(conn, state) do
     try() do
-      case get_req_header(conn, "if-modified-since") do
+      case get_rest_header(conn, :if_modified_since) do
         [] ->
           method(conn, state)
         ifModifiedSince ->
@@ -807,13 +807,13 @@ defmodule PlugRest.Resource do
       case set_resp_etag(conn2, state) do
         {conn3, state2} ->
           try() do
-            set_resp_expires(conn3, state2)
+            case set_resp_expires(conn3, state2) do
+            {req4, state3} ->
+              respond(req4, state3, 304)
+            end
           catch
             class, reason ->
               error_terminate(conn, state2, class, reason, :expires)
-          else
-            {req4, state3} ->
-              respond(req4, state3, 304)
           end
       end
     catch

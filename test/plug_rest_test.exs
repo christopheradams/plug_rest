@@ -238,6 +238,19 @@ defmodule PlugRestTest do
     end
   end
 
+  defmodule LastModifiedResource do
+    @behaviour PlugRest.Resource
+
+    def last_modified(conn, state) do
+      modified = {{2016, 7, 17}, {11, 49, 29}}
+      {modified, conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"Modified", conn, state}
+    end
+  end
+
   defmodule Router do
     use PlugRest
 
@@ -262,6 +275,7 @@ defmodule PlugRestTest do
     resource "/moved_permanently", MovedPermanentlyResource
     resource "/moved_temporarily", MovedTemporarilyResource
     resource "/gone", GoneResource
+    resource "/last_modified", LastModifiedResource
   end
 
   test "basic DSL is available" do
@@ -421,6 +435,13 @@ defmodule PlugRestTest do
     |> put_req_header("if-match", "\"xyzzy\"")
     |> Router.call([])
     |> test_status(412)
+  end
+
+  test "last modified" do
+    conn(:get, "/last_modified")
+    |> put_req_header("if-modified-since", "Sun, 17 Jul 2016 12:51:31 GMT")
+    |> Router.call([])
+    |> test_status(304)
   end
 
   defp build_conn(method, path) do

@@ -24,6 +24,16 @@ defmodule PlugRest.Conn do
   Parses Plug connection headers for use in REST Resource functions
   """
 
+  @spec get_rest_header(conn, :if_modified_since) :: [] | :calendar.time
+  def get_rest_header(conn, :if_modified_since) do
+    case get_req_header(conn, "if-modified-since") do
+      [] ->
+        []
+      [date] ->
+        date |> String.to_charlist |> :httpd_util.convert_request_date
+    end
+  end
+
   @spec parse_req_header(conn, header) :: media_type | list()
   def parse_req_header(conn, header) when header == "content-type" do
     [content_type] = get_req_header(conn, header)
