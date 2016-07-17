@@ -444,6 +444,14 @@ defmodule PlugRestTest do
     |> test_status(304)
   end
 
+  test "last unmodified" do
+    conn(:get, "/last_modified")
+    |> put_req_header("if-unmodified-since", "Sun, 17 Jul 2016 12:51:31 GMT")
+    |> put_req_header("if-none-match", "*")
+    |> Router.call([])
+    |> test_status(304)
+  end
+
   defp build_conn(method, path) do
     conn(method, path) |> Router.call([])
   end

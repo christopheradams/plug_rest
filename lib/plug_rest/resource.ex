@@ -668,7 +668,7 @@ defmodule PlugRest.Resource do
 
   defp if_unmodified_since_exists(conn, state) do
     try() do
-      case get_req_header(conn, "if-unmodified-since") do
+      case get_rest_header(conn, :if_unmodified_since) do
         [] ->
           if_none_match_exists(conn, state)
         ifUnmodifiedSince ->

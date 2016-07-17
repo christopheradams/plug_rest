@@ -148,5 +148,17 @@ defmodule PlugRest.ConnTest do
 
     assert actual_headers == expected_headers
   end
+
+  test "parse if-unmodified-since header" do
+    if_unmodified_since = "Sun, 17 Jul 2016 19:54:31 GMT"
+
+    actual_headers = conn(:get, "/")
+    |> put_req_header("if-unmodified-since", if_unmodified_since)
+    |> get_rest_header(:if_unmodified_since)
+
+    expected_headers = {{2016, 7, 17}, {19, 54, 31}}
+
+    assert actual_headers == expected_headers
+  end
 end
 

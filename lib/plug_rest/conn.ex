@@ -29,6 +29,11 @@ defmodule PlugRest.Conn do
     parse_date_header(conn, "if-modified-since")
   end
 
+  @spec get_rest_header(conn, :if_unmodified_since) :: [] | :calendar.time
+  def get_rest_header(conn, :if_unmodified_since) do
+    parse_date_header(conn, "if-unmodified-since")
+  end
+
   @spec parse_date_header(conn, String.t) :: [] | :calendar.time
   defp parse_date_header(conn, header) do
     case get_req_header(conn, header) do
