@@ -618,7 +618,7 @@ defmodule PlugRest.Resource do
     case parse_req_header(conn, "if-match") do
       [] ->
         if_unmodified_since_exists(conn, state2)
-      %{} ->
+      [%{}] ->
         if_unmodified_since_exists(conn, state2)
       eTagsList ->
         if_match(conn, state2, eTagsList)
