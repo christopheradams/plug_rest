@@ -360,25 +360,31 @@ defmodule SuiteTest do
     resource "/rest_empty_resource", :rest_empty_resource
   end
 
-  test "rest param all" do
+  test "rest accept without param" do
     conn(:get, "/param_all")
     |> put_req_header("accept", "text/plain")
     |> Router.call([])
     |> test_status(200)
     |> test_body("[]")
+  end
 
+  test "rest accept with param" do
     conn(:get, "/param_all")
     |> put_req_header("accept", "text/plain;level=1")
     |> Router.call([])
     |> test_status(200)
     |> test_body("params")
+  end
 
+  test "rest accept with param and quality" do
     conn(:get, "/param_all")
     |> put_req_header("accept", "text/plain;level=1;q=0.8, text/plain;level=2;q=0.5")
     |> Router.call([])
     |> test_status(200)
     |> test_body("params")
+  end
 
+  test "rest without accept" do
     conn(:get, "/param_all")
     |> Router.call([])
     |> test_status(200)
