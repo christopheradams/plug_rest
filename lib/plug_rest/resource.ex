@@ -1,14 +1,24 @@
 defmodule PlugRest.Resource do
+  @moduledoc """
+  Define callbacks and REST semantics for a Resource behaviour
+
+  Based on Cowboy's cowboy_rest module. It operates on a Plug connection and a
+  handler module which implements one or more of the optional callbacks.
+
+  """
+
   import PlugRest.Utils
   import PlugRest.Conn
   import Plug.Conn
 
-  ## REST handler callbacks.
+  ## Common handler callbacks
 
   @callback init(conn, state) :: {[binary()], conn, state}
                                | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [init: 2]
+
+  ## REST handler callbacks
 
   @callback allowed_methods(conn, state) :: {[binary()], conn, state}
                                           | {:stop, conn, state}

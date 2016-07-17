@@ -1,16 +1,39 @@
 defmodule PlugRest.Conn do
+  @moduledoc """
+  Helper functions for parsing Plug connection headers
+
+  """
+
   import Plug.Conn
   import Plug.Conn.Utils
 
+  @type conn :: %Plug.Conn{}
+
+  @type type :: String.t
+  @type subtype :: String.t
+  @type params :: any()
+  @type header :: String.t
+
+  @type media_type :: {type, subtype, params}
+
+  @type priority_type :: {media_type, String.t, map()}
+
+  @type header_value :: {String.t, map()}
+
+  @doc """
+  Parses Plug connection headers for use in REST Resource functions
+  """
+
+  @spec parse_req_header(conn, header) :: media_type | list()
   def parse_req_header(conn, header) when header == "content-type" do
     [content_type] = get_req_header(conn, header)
     {:ok, type, subtype, params} = content_type(content_type)
 
     ## Ensure that any value of charset is lowercase
-    params2 = case Map.fetch(params, "charset") do
-                :error ->
+    params2 = case Map.get(params, "charset") do
+                nil ->
                   params
-                {:ok, charset} ->
+                charset ->
                   Map.put(params, "charset", String.downcase(charset))
               end
 
@@ -51,10 +74,12 @@ defmodule PlugRest.Conn do
     |> reformat_tags
   end
 
+  @spec parse_accept_header([]) :: []
   def parse_accept_header([]) do
     []
   end
 
+  @spec parse_accept_header([String.t, ...]) :: [media_type]
   def parse_accept_header([accept]) when is_binary(accept) do
     accept
     |> Plug.Conn.Utils.list
@@ -63,6 +88,7 @@ defmodule PlugRest.Conn do
     |> Enum.map(fn({:ok, t, s, p}) -> {t, s, p} end)
   end
 
+  @spec format_media_types([media_type]) :: [priority_type]
   def format_media_types(media_types) do
     media_types
     |> Enum.map(fn({type, subtype, params}) ->
@@ -72,10 +98,12 @@ defmodule PlugRest.Conn do
       {{type, subtype, params}, quality, %{}} end)
   end
 
+  @spec parse_header([]) :: []
   defp parse_header([]) do
     []
   end
 
+  @spec parse_header([String.t, ...]) :: [header_value]
   defp parse_header([header]) when is_binary(header) do
     Plug.Conn.Utils.list(header)
     |> Enum.map(fn(x) ->
@@ -83,6 +111,7 @@ defmodule PlugRest.Conn do
     end)
   end
 
+  @spec reformat_tags([header_value]) :: [priority_type]
   defp reformat_tags(tags) do
     tags
     |> Enum.map(fn({tag, params}) ->
@@ -91,5 +120,4 @@ defmodule PlugRest.Conn do
         _ -> 1 end
       {tag, quality} end)
   end
-
 end
