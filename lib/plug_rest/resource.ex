@@ -429,7 +429,7 @@ defmodule PlugRest.Resource do
     choose_language(conn, state, accept)
   end
 
-  defp match_language(conn, state, _accept, [provided | _tail], {:*, _quality}) do
+  defp match_language(conn, state, _accept, [provided | _tail], {%{}, _quality}) do
     set_language(conn, %{state | language_a: provided})
   end
 
@@ -618,7 +618,7 @@ defmodule PlugRest.Resource do
     case parse_req_header(conn, "if-match") do
       [] ->
         if_unmodified_since_exists(conn, state2)
-      :* ->
+      %{} ->
         if_unmodified_since_exists(conn, state2)
       eTagsList ->
         if_match(conn, state2, eTagsList)
@@ -693,7 +693,7 @@ defmodule PlugRest.Resource do
     case parse_req_header(conn, "if-none-match") do
       [] ->
         if_modified_since_exists(conn, state)
-      :* ->
+      [%{}] ->
         precondition_is_head_get(conn, state)
       etagsList ->
         if_none_match(conn, state, etagsList)
@@ -938,7 +938,7 @@ defmodule PlugRest.Resource do
     respond(conn, state, 415)
   end
 
-  defp choose_content_type(conn, state, content_type, [{accepted, fun} | _tail]) when accepted === :* or accepted === content_type do
+  defp choose_content_type(conn, state, content_type, [{accepted, fun} | _tail]) when accepted === %{} or accepted === content_type do
     process_content_type(conn, state, fun)
   end
 

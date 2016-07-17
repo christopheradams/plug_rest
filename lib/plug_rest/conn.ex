@@ -26,7 +26,7 @@ defmodule PlugRest.Conn do
   def parse_req_header(conn, header) when header == "if-match" do
     case get_req_header(conn, header) do
       [] -> []
-      ["*"] -> [:*]
+      ["*"] -> [%{}]
       [x] -> String.split(x)
     end
   end
@@ -34,7 +34,7 @@ defmodule PlugRest.Conn do
   def parse_req_header(conn, header) when header == "if-none-match" do
     case get_req_header(conn, header) do
       [] -> []
-      ["*"] -> [:*]
+      ["*"] -> [%{}]
       [etags] ->
         etags
         |> String.split
