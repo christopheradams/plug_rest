@@ -1,6 +1,6 @@
 defmodule PlugRest.Conn do
   @moduledoc """
-  Helper functions for parsing Plug connection headers
+  Helper functions for parsing Plug connection request headers
 
   """
 
@@ -16,26 +16,28 @@ defmodule PlugRest.Conn do
 
   @type media_type :: {type, subtype, params}
 
-  @type priority_type :: {media_type, String.t, map()}
+  @type priority_type :: {media_type, float(), map()}
+
+  @type quality_type :: {String.t, float()}
 
   @type header_value :: {String.t, map()}
 
   @doc """
-  Parses Plug connection headers for use in REST Resource functions
+  Parses request date header as Erlang date/time tuples
+
+  Possible headers are:
+    * if-modified-since
+    * if-unmodified-since
+
+  ## Examples
+
+      iex > PlugRest.Conn.parse_date_header(conn, "if-modified-since")
+      {{2016, 7, 17}, {19, 54, 31}}
+
   """
 
-  @spec get_rest_header(conn, :if_modified_since) :: [] | :calendar.time
-  def get_rest_header(conn, :if_modified_since) do
-    parse_date_header(conn, "if-modified-since")
-  end
-
-  @spec get_rest_header(conn, :if_unmodified_since) :: [] | :calendar.time
-  def get_rest_header(conn, :if_unmodified_since) do
-    parse_date_header(conn, "if-unmodified-since")
-  end
-
   @spec parse_date_header(conn, String.t) :: [] | :calendar.time
-  defp parse_date_header(conn, header) do
+  def parse_date_header(conn, header) do
     case get_req_header(conn, header) do
       [] ->
         []
@@ -44,8 +46,21 @@ defmodule PlugRest.Conn do
     end
   end
 
-  @spec parse_req_header(conn, header) :: media_type | list()
-  def parse_req_header(conn, header) when header == "content-type" do
+  @doc """
+  Parses media-type header as a {type, subtype, params} tuple
+
+  Possible headers are:
+    * content-type
+
+  ## Examples
+
+      iex > PlugRest.Conn.parse_media_type_header(conn, "content-type")
+      {"application", "json", %{}}
+
+  """
+
+  @spec parse_media_type_header(conn, String.t) :: media_type
+  def parse_media_type_header(conn, header) do
     [content_type] = get_req_header(conn, header)
     {:ok, type, subtype, params} = content_type(content_type)
 
@@ -55,26 +70,45 @@ defmodule PlugRest.Conn do
                   params
                 charset ->
                   Map.put(params, "charset", String.downcase(charset))
-              end
+    end
 
     {type, subtype, params2}
   end
 
-  def parse_req_header(conn, header) when header == "accept" do
+  @doc """
+  Parses media range header into a structure that can be sorted by quality
+
+  Possible headers are:
+    * accept
+
+  ## Examples
+
+      iex > PlugRest.Conn.parse_media_range_header(conn, "accept")
+      [{{"text", "html", %{}}, 1.0, %{}}]
+  """
+
+  @spec parse_media_range_header(conn, header) :: [priority_type]
+  def parse_media_range_header(conn, header) do
     get_req_header(conn, header)
     |> parse_accept_header
     |> format_media_types
   end
 
-  def parse_req_header(conn, header) when header == "if-match" do
-    case get_req_header(conn, header) do
-      [] -> []
-      ["*"] -> [%{}]
-      [x] -> String.split(x)
-    end
-  end
+  @doc """
+  Parses an entity tag header into a list of etags
 
-  def parse_req_header(conn, header) when header == "if-none-match" do
+  Possible headers are:
+    * if-match
+    * if-none-match
+
+  ## Examples
+      iex > PlugRest.Conn.parse_entity_tag_header(conn, "if-none-match")
+      [{:strong, "xyzzy"}]
+
+  """
+
+  @spec parse_entity_tag_header(conn, header) :: list()
+  def parse_entity_tag_header(conn, header) do
     case get_req_header(conn, header) do
       [] -> []
       ["*"] -> [%{}]
@@ -88,7 +122,20 @@ defmodule PlugRest.Conn do
     end
   end
 
-  def parse_req_header(conn, header) do
+  @doc """
+  Parses other accept headers into types that can be sorted by quality
+
+  Possible headers are:
+    * accept-language
+    * accept-charset
+
+  ## Examples
+      iex > PlugRest.Conn.parse_quality_header(conn, "accept-language")
+      [{"da", 1.0}, {"en-gb", 0.8}, {"en", 0.7}]
+  """
+
+  @spec parse_quality_header(conn, String.t) :: [quality_type]
+  def parse_quality_header(conn, header) when is_binary(header) do
     get_req_header(conn, header)
     |> parse_header
     |> reformat_tags
@@ -109,7 +156,7 @@ defmodule PlugRest.Conn do
   end
 
   @spec format_media_types([media_type]) :: [priority_type]
-  def format_media_types(media_types) do
+  defp format_media_types(media_types) do
     media_types
     |> Enum.map(fn({type, subtype, params}) ->
       quality = case Float.parse(params["q"] || "1") do
@@ -131,7 +178,7 @@ defmodule PlugRest.Conn do
     end)
   end
 
-  @spec reformat_tags([header_value]) :: [priority_type]
+  @spec reformat_tags([header_value]) :: [quality_type]
   defp reformat_tags(tags) do
     tags
     |> Enum.map(fn({tag, params}) ->

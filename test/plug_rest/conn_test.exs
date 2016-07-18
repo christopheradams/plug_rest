@@ -4,19 +4,12 @@ defmodule PlugRest.ConnTest do
 
   import PlugRest.Conn
 
-  test "parse non-existent header" do
-    headers = conn(:get, "/")
-    |> parse_req_header("accept-language")
-
-    assert headers == []
-  end
-
   test "parse content type header" do
     content_type = "application/json"
 
     actual_header = conn(:post, "/")
     |> put_req_header("content-type", content_type)
-    |> parse_req_header("content-type")
+    |> parse_media_type_header("content-type")
 
     expected_header = {"application", "json", %{}}
 
@@ -28,7 +21,7 @@ defmodule PlugRest.ConnTest do
 
     actual_header = conn(:post, "/")
     |> put_req_header("content-type", content_type)
-    |> parse_req_header("content-type")
+    |> parse_media_type_header("content-type")
 
     expected_header = {"text", "plain", %{"charset" => "utf-8"}}
 
@@ -40,7 +33,7 @@ defmodule PlugRest.ConnTest do
 
     actual_media_types = conn(:get, "/")
     |> put_req_header("accept", accept)
-    |> parse_req_header("accept")
+    |> parse_media_range_header("accept")
 
     expected_media_types = [{{"text", "html", %{}}, 1.0, %{}},
       {{"application", "xhtml+xml", %{}}, 1.0, %{}},
@@ -55,7 +48,7 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("accept-language", accept)
-    |> parse_req_header("accept-language")
+    |> parse_quality_header("accept-language")
 
     expected_headers = [{"da", 1.0}, {"en-gb", 0.8}, {"en", 0.7}]
 
@@ -67,7 +60,7 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("accept-charset", accept)
-    |> parse_req_header("accept-charset")
+    |> parse_quality_header("accept-charset")
 
     expected_headers = [{"iso-8859-5", 1.0}, {"unicode-1-1", 0.8}]
 
@@ -79,9 +72,9 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("if-match", if_match)
-    |> parse_req_header("if-match")
+    |> parse_entity_tag_header("if-match")
 
-    expected_headers = ["\"xyzzy\""]
+    expected_headers = [{:strong, "xyzzy"}]
 
     assert actual_headers == expected_headers
   end
@@ -91,9 +84,9 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("if-match", if_match)
-    |> parse_req_header("if-match")
+    |> parse_entity_tag_header("if-match")
 
-    expected_headers = ["\"xyzzy\",", "\"r2d2xxxx\",", "\"c3piozzzz\""]
+    expected_headers = [{:strong, "xyzzy"}, {:strong, "r2d2xxxx"}, {:strong, "c3piozzzz"}]
 
     assert actual_headers == expected_headers
   end
@@ -103,7 +96,7 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("if-match", if_match)
-    |> parse_req_header("if-match")
+    |> parse_entity_tag_header("if-match")
 
     expected_headers = [%{}]
 
@@ -116,7 +109,7 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("if-none-match", if_none_match)
-    |> parse_req_header("if-none-match")
+    |> parse_entity_tag_header("if-none-match")
 
     expected_headers = [{:strong, "xyzzy"}]
 
@@ -130,7 +123,7 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("if-none-match", if_none_match)
-    |> parse_req_header("if-none-match")
+    |> parse_entity_tag_header("if-none-match")
 
     expected_headers = [{:weak, "xyzzy"}]
 
@@ -142,7 +135,7 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("if-modified-since", if_modified_since)
-    |> get_rest_header(:if_modified_since)
+    |> parse_date_header("if-modified-since")
 
     expected_headers = {{2016, 7, 17}, {19, 54, 31}}
 
@@ -154,7 +147,7 @@ defmodule PlugRest.ConnTest do
 
     actual_headers = conn(:get, "/")
     |> put_req_header("if-unmodified-since", if_unmodified_since)
-    |> get_rest_header(:if_unmodified_since)
+    |> parse_date_header("if-unmodified-since")
 
     expected_headers = {{2016, 7, 17}, {19, 54, 31}}
 

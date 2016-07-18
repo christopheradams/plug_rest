@@ -277,7 +277,7 @@ defmodule PlugRest.Resource do
       :no_call ->
         state2 = %{state | content_types_p: [{{"text", "html", %{}}, :to_html}]}
         try do
-          case parse_req_header(conn, "accept") do
+          case parse_media_range_header(conn, "accept") do
             [] ->
               conn
               |> put_resp_content_type(print_media_type({"text", "html", %{}}))
@@ -297,7 +297,7 @@ defmodule PlugRest.Resource do
         cTP2 = for(p <- cTP, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state, content_types_p: cTP2}
         try do
-          case parse_req_header(conn2, "accept") do
+          case parse_media_range_header(conn2, "accept") do
             [] ->
               {pMT, _fun} = headCTP = hd(cTP2)
               conn2
@@ -409,7 +409,7 @@ defmodule PlugRest.Resource do
         not_acceptable(conn2, %{state | handler_state: handler_state})
       {lP, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, languages_p: lP}
-        case parse_req_header(conn2, "accept-language") do
+        case parse_quality_header(conn2, "accept-language") do
           [] ->
             set_language(conn2, %{state2 | language_a: hd(lP)})
           acceptLanguage ->
@@ -475,7 +475,7 @@ defmodule PlugRest.Resource do
         not_acceptable(conn2, %{state | handler_state: handler_state})
       {cP, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, charsets_p: cP}
-        case parse_req_header(conn2, "accept-charset") do
+        case parse_quality_header(conn2, "accept-charset") do
           [] ->
             set_content_type(conn2, %{state2 | charset_a: hd(cP)})
           acceptCharset ->
@@ -625,7 +625,7 @@ defmodule PlugRest.Resource do
 
   defp if_match_exists(conn, state) do
     state2 = %{state | exists: true}
-    case parse_req_header(conn, "if-match") do
+    case parse_entity_tag_header(conn, "if-match") do
       [] ->
         if_unmodified_since_exists(conn, state2)
       [%{}] ->
@@ -668,7 +668,7 @@ defmodule PlugRest.Resource do
 
   defp if_unmodified_since_exists(conn, state) do
     try() do
-      case get_rest_header(conn, :if_unmodified_since) do
+      case parse_date_header(conn, "if-unmodified-since") do
         [] ->
           if_none_match_exists(conn, state)
         ifUnmodifiedSince ->
@@ -700,7 +700,7 @@ defmodule PlugRest.Resource do
 
 
   defp if_none_match_exists(conn, state) do
-    case parse_req_header(conn, "if-none-match") do
+    case parse_entity_tag_header(conn, "if-none-match") do
       [] ->
         if_modified_since_exists(conn, state)
       [%{}] ->
@@ -758,7 +758,7 @@ defmodule PlugRest.Resource do
 
   defp if_modified_since_exists(conn, state) do
     try() do
-      case get_rest_header(conn, :if_modified_since) do
+      case parse_date_header(conn, "if-modified-since") do
         [] ->
           method(conn, state)
         ifModifiedSince ->
@@ -932,7 +932,7 @@ defmodule PlugRest.Resource do
         cTA2 = for(p <- cTA, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state}
         try() do
-          case parse_req_header(conn2, "content-type") do
+          case parse_media_type_header(conn2, "content-type") do
             content_type ->
               choose_content_type(conn2, state2, content_type, cTA2)
           end
