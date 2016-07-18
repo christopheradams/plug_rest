@@ -7,6 +7,7 @@ defmodule PlugRest.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     dialyzer: [plt_add_deps: true],
      description: description(),
      package: package(),
      deps: deps()]
@@ -30,7 +31,8 @@ defmodule PlugRest.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:plug, "~> 1.0"},
-     {:cowboy, "~> 1.0"}]
+     {:cowboy, "~> 1.0"},
+     {:dialyxir, "~> 0.3.5", only: [:dev]}]
 
   end
 
