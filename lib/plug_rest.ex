@@ -23,10 +23,32 @@ defmodule PlugRest do
   end
 
   defp add_route(path, handler, handler_state) do
-    {_vars, match} = Plug.Router.Utils.build_path_match(path)
+    {vars, match} = Plug.Router.Utils.build_path_match(path)
+
+    binding = for var <- vars do
+      {Atom.to_string(var), Macro.var(var, nil)}
+    end
+
     quote do
       defp do_match(conn, unquote(match)) do
-        PlugRest.Resource.upgrade(conn, unquote(handler), unquote(handler_state))
+
+        params =
+          case conn.params do
+            %Plug.Conn.Unfetched{} -> %{}
+            p -> p
+          end
+
+        # Save any dynamic path segments into conn.params key/value pairs
+        params2 =
+          Enum.reduce(
+            unquote(binding),
+            params,
+            fn({k,v}, p) -> Map.put(p, k, v) end
+          )
+
+        conn2 = %{conn | params: params2}
+
+        PlugRest.Resource.upgrade(conn2, unquote(handler), unquote(handler_state))
       end
     end
   end

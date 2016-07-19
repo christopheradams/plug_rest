@@ -251,6 +251,16 @@ defmodule PlugRestTest do
     end
   end
 
+  defmodule UserCommentResource do
+    @behaviour PlugRest.Resource
+
+    def to_html(conn, state) do
+      user_id = conn.params["user_id"]
+      comment_id = conn.params["comment_id"]
+      {"#{user_id} : #{comment_id}", conn, state}
+    end
+  end
+
   defmodule Router do
     use PlugRest
 
@@ -276,6 +286,8 @@ defmodule PlugRestTest do
     resource "/moved_temporarily", MovedTemporarilyResource
     resource "/gone", GoneResource
     resource "/last_modified", LastModifiedResource
+
+    resource "/users/:user_id/comments/:comment_id", UserCommentResource
   end
 
   test "basic DSL is available" do
@@ -450,6 +462,14 @@ defmodule PlugRestTest do
     |> put_req_header("if-none-match", "*")
     |> Router.call([])
     |> test_status(304)
+  end
+
+  test "dynamic path populates connection params" do
+    conn = conn(:get, "/users/1234/comments/987")
+    |> Router.call([])
+
+    test_status(conn, 200)
+    assert conn.resp_body == "1234 : 987"
   end
 
   defp build_conn(method, path) do
