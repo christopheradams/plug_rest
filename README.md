@@ -1,6 +1,46 @@
 # PlugRest
 
-**TODO: Add description**
+A port of Cowboy's cowboy_rest module to Plug.
+
+## Hello World
+
+Define a router to match a path with a resource handler:
+
+    defmodule MyRouter do
+        use PlugRest
+
+        resource "/hello", HelloResource
+    end
+
+Define the resource handler and implement the optional callbacks:
+
+    defmodule HelloResource do
+        @behaviour PlugRest.Resource
+
+        def allowed_methods(conn, state) do
+            {["GET"], conn, state}
+        end
+
+        def content_types_provided(conn, state) do
+            {[{{"text", "html", %{}}, :to_html}], conn, state}
+        end
+
+        def to_html(conn, state) do
+            {"Hello world", conn, state}
+        end
+    end
+
+To run it in an `iex` session:
+
+    $ iex -S mix
+    iex> c "path/to/my_router.ex"
+    [MyRouter]
+    iex> c "path/to/hello_resource.ex"
+    [HelloResource]
+    iex> {:ok, _} = Plug.Adapters.Cowboy.http MyRouter, []
+    {:ok, #PID<...>}
+
+Your resource will be available at `http://localhost:4000/hello`
 
 ## Installation
 
@@ -10,7 +50,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:plug_rest, "~> 0.1.0"}]
+      [{:plug_rest, "~> 0.2.0"}]
     end
     ```
 
@@ -18,7 +58,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def application do
-      [applications: [:plug_rest]]
+      [applications: [:cowboy, :plug, :plug_rest]]
     end
     ```
 
