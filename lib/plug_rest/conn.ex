@@ -42,7 +42,7 @@ defmodule PlugRest.Conn do
       [] ->
         []
       [date] ->
-        date |> String.to_charlist |> :httpd_util.convert_request_date
+        date |> String.to_char_list |> :httpd_util.convert_request_date
     end
   end
 

@@ -4,7 +4,7 @@ defmodule PlugRest.Mixfile do
   def project do
     [app: :plug_rest,
      version: "0.2.0",
-     elixir: "~> 1.3",
+     elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      dialyzer: [plt_add_deps: true],
