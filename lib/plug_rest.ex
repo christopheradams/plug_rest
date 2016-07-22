@@ -12,7 +12,8 @@ defmodule PlugRest do
 
       plug :rest
 
-      defp rest(%{path_info: path_info} = conn, opts) do
+      @doc false
+      def rest(%{path_info: path_info} = conn, _opts) do
         do_match(conn, Enum.map(conn.path_info, &URI.decode/1))
       end
     end
