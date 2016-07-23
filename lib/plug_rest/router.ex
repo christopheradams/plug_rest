@@ -1,14 +1,14 @@
-defmodule PlugRest do
+defmodule PlugRest.Router do
 
   @moduledoc """
-  A DSL to define a resource-oriented REST Plug.
+  A DSL supplementing Plug Router with a resource-oriented routing algorithm.
   """
 
   @doc false
   defmacro __using__(_) do
     quote location: :keep do
       use Plug.Router
-      import PlugRest
+      import PlugRest.Router
 
       plug :match
       plug :dispatch

@@ -262,7 +262,7 @@ defmodule PlugRestTest do
   end
 
   defmodule Router do
-    use PlugRest
+    use PlugRest.Router
 
     resource "/", IndexResource
     resource "/service_unavailable", ServiceAvailableResource, false

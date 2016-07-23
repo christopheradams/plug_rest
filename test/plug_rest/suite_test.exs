@@ -2,7 +2,7 @@ defmodule SuiteTest do
   use ExUnit.Case
   use Plug.Test
 
-  import PlugRest
+  import PlugRest.Router
 
   defmodule :rest_empty_resource do
 
@@ -340,7 +340,7 @@ defmodule SuiteTest do
   end
 
   defmodule Router do
-    use PlugRest
+    use PlugRest.Router
 
     resource "/param_all", :rest_param_all
     resource "/bad_accept", :rest_simple_resource
