@@ -2,12 +2,16 @@
 
 A port of Cowboy's cowboy_rest module to Plug.
 
+PlugRest supplements `Plug.Router` with an additional `resource`
+macro, which matches a URL path with a resource handler module
+implementing REST semantics via a series of optional callbacks.
+
 ## Hello World
 
 Define a router to match a path with a resource handler:
 
     defmodule MyRouter do
-        use PlugRest
+        use PlugRest.Router
 
         resource "/hello", HelloResource
     end
@@ -50,7 +54,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:plug_rest, "~> 0.2.0"}]
+      [{:plug_rest, "~> 0.3.0"}]
     end
     ```
 

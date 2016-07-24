@@ -1,7 +1,7 @@
 defmodule PlugRest.Router do
 
   @moduledoc """
-  A DSL supplementing Plug Router with a resource-oriented routing algorithm.
+  A DSL to supplement Plug Router with a resource-oriented routing algorithm.
   """
 
   @doc false
