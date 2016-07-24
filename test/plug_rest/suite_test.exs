@@ -1,8 +1,6 @@
-defmodule SuiteTest do
+defmodule PlugRest.SuiteTest do
   use ExUnit.Case
   use Plug.Test
-
-  import PlugRest.Router
 
   defmodule :rest_empty_resource do
 
@@ -339,7 +337,7 @@ defmodule SuiteTest do
 
   end
 
-  defmodule Router do
+  defmodule RestRouter do
     use PlugRest.Router
 
     resource "/param_all", :rest_param_all
@@ -363,7 +361,7 @@ defmodule SuiteTest do
   test "rest accept without param" do
     conn(:get, "/param_all")
     |> put_req_header("accept", "text/plain")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(200)
     |> test_body("[]")
   end
@@ -371,7 +369,7 @@ defmodule SuiteTest do
   test "rest accept with param" do
     conn(:get, "/param_all")
     |> put_req_header("accept", "text/plain;level=1")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(200)
     |> test_body("params")
   end
@@ -379,14 +377,14 @@ defmodule SuiteTest do
   test "rest accept with param and quality" do
     conn(:get, "/param_all")
     |> put_req_header("accept", "text/plain;level=1;q=0.8, text/plain;level=2;q=0.5")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(200)
     |> test_body("params")
   end
 
   test "rest without accept" do
     conn(:get, "/param_all")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(200)
     |> test_body("'*'")
   end
@@ -394,14 +392,14 @@ defmodule SuiteTest do
   test "rest content-type without param" do
     conn(:put, "/param_all", "Hello world!")
     |> put_req_header("content-type", "text/plain")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(204)
   end
 
   test "rest content-type with param" do
     conn(:put, "/param_all", "Hello world!")
     |> put_req_header("content-type", "text/plain; charset=utf-8")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(204)
   end
 
@@ -416,14 +414,14 @@ defmodule SuiteTest do
   test "rest bad accept" do
     conn(:get, "/bad_accept")
     |> put_req_header("accept", "1")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(400)
   end
 
   test "rest bad content type" do
     conn(:patch, "/bad_content_type", "Whatever")
     |> put_req_header("content-type", "text/plain, text/html")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(415)
   end
 
@@ -448,14 +446,14 @@ defmodule SuiteTest do
   test "rest forbidden post" do
     conn(:post, "/forbidden_post", "Hello world!")
     |> put_req_header("content-type", "text/plain")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(403)
   end
 
   test "rest simple post" do
     conn(:post, "/simple_post", "Hello world!")
     |> put_req_header("content-type", "text/plain")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(303)
   end
 
@@ -467,7 +465,7 @@ defmodule SuiteTest do
   test "rest missing put callbacks" do
     conn(:put, "/missing_put_callbacks")
     |> put_req_header("content-type", "application/json")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(500)
   end
 
@@ -485,36 +483,36 @@ defmodule SuiteTest do
   test "rest patch" do
     conn(:patch, "/patch", "whatever")
     |> put_req_header("content-type", "text/plain")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(204)
 
     conn(:patch, "/patch", "false")
     |> put_req_header("content-type", "text/plain")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(400)
 
     conn(:patch, "/patch", "stop")
     |> put_req_header("content-type", "text/plain")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(400)
 
     conn(:patch, "/patch", "bad_content_type")
     |> put_req_header("content-type", "application/json")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(415)
   end
 
   test "" do
     conn(:post, "/post_charset", "12345")
     |> put_req_header("content-type", "text/plain;charset=UTF-8")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(204)
   end
 
   test "rest post only" do
     conn(:post, "/postonly", "12345")
     |> put_req_header("content-type", "text/plain")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(204)
   end
 
@@ -545,31 +543,31 @@ defmodule SuiteTest do
   test "rest resource if none match" do
     conn(:get, "/resetags?type=tuple-weak")
     |> put_req_header("if-none-match", "W/\"etag-header-value\"")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(304)
     |> test_header("etag", "W/\"etag-header-value\"")
 
     conn(:get, "/resetags?type=tuple-strong")
     |> put_req_header("if-none-match", "\"etag-header-value\"")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(304)
     |> test_header("etag", "\"etag-header-value\"")
 
     conn(:get, "/resetags?type=binary-weak-quoted")
     |> put_req_header("if-none-match", "\"etag-header-value\"")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(304)
     |> test_header("etag", "W/\"etag-header-value\"")
 
     conn(:get, "/resetags?type=binary-strong-quoted")
     |> put_req_header("if-none-match", "\"etag-header-value\"")
-    |> Router.call([])
+    |> RestRouter.call([])
     |> test_status(304)
     |> test_header("etag", "\"etag-header-value\"")
   end
 
   defp build_conn(method, path) do
-    conn(method, path) |> Router.call([])
+    conn(method, path) |> RestRouter.call([])
   end
 
   defp test_status(conn, status) do
