@@ -286,6 +286,14 @@ defmodule PlugRest.RouterTest do
     resource "/last_modified", LastModifiedResource
 
     resource "/users/:user_id/comments/:comment_id", UserCommentResource
+
+    match "/match" do
+      send_resp(conn, 200, "Matches!")
+    end
+
+    match _ do
+      send_resp(conn, 404, "Not found!")
+    end
   end
 
   test "basic DSL is available" do
@@ -295,6 +303,20 @@ defmodule PlugRest.RouterTest do
 
     test_status(conn, 200)
     assert conn.resp_body == "Plug REST"
+  end
+
+  test "match can match known route" do
+    conn = build_conn(:get, "/match")
+    |> test_status(200)
+
+    assert conn.resp_body == "Matches!"
+  end
+
+  test "match any can catch unknown route" do
+    conn = build_conn(:get, "/unknown")
+    |> test_status(404)
+
+    assert conn.resp_body == "Not found!"
   end
 
   test "service unavailable returns 503" do
