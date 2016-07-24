@@ -156,6 +156,7 @@ defmodule PlugRest.Resource do
   @optional_callbacks [variances: 2]
 
   def upgrade(conn, handler, handler_state) do
+    true = Code.ensure_loaded?(handler)
     method = conn.method
     state = %PlugRest.State{method: method, handler: handler, handler_state: handler_state}
     expect(conn, state, :init, :ok, &service_available/2, 500)
