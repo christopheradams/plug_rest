@@ -40,25 +40,25 @@ If starting a new project, generate a supervisor application:
 
     $ mix new my_app --sup
 
-Add `PlugRest` to your project in two steps:
+Add PlugRest to your project in two steps:
 
-  1. Add `:cowboy`, `:plug`, and `:plug_rest` to your list of dependencies in `mix.exs`:
+1. Add `:cowboy`, `:plug`, and `:plug_rest` to your list of dependencies in `mix.exs`:
 
-```elixir
-def deps do
-  [{:cowboy, "~> 1.0.0"},
-   {:plug, "~> 1.0"},
-   {:plug_rest, "~> 0.3.0"}]
-end
-```
+    ```elixir
+    def deps do
+      [{:cowboy, "~> 1.0.0"},
+       {:plug, "~> 1.0"},
+       {:plug_rest, "~> 0.3.0"}]
+    end
+    ```
 
-  2. Add these dependencies to your applications list:
+2. Add these dependencies to your applications list:
 
-```elixir
-def application do
-  [applications: [:cowboy, :plug, :plug_rest]]
-end
-```
+    ```elixir
+      def application do
+        [applications: [:cowboy, :plug, :plug_rest]]
+    end
+    ```
 
 ### Resources
 
