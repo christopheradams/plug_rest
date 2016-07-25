@@ -1069,8 +1069,9 @@ defmodule PlugRest.Resource do
         {:stop, conn2, handler_state2} ->
           terminate(conn2, %{state | handler_state: handler_state2})
         {body, conn2, handler_state2} ->
-          state2 = %{state | handler_state: handler_state2, body: body}
-          multiple_choices(conn2, state2)
+          conn3 = %{conn2 | resp_body: body}
+          state2 = %{state | handler_state: handler_state2}
+          multiple_choices(conn3, state2)
       end
     catch
       class, reason = {:case_clause, :no_call} ->
@@ -1235,8 +1236,13 @@ defmodule PlugRest.Resource do
     conn |> put_status(status_code) |> terminate(state)
   end
 
-  defp terminate(conn, state) do
-    conn |> send_resp(conn.status, state.body)
+  defp terminate(%{resp_body: nil} = conn, state) do
+    conn2 = %{conn | resp_body: ""}
+    terminate(conn2, state)
+  end
+
+  defp terminate(conn, _state) do
+    conn |> send_resp(conn.status, conn.resp_body)
   end
 
   defp error_terminate(conn, _state, _class, _reason, _callback) do

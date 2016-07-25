@@ -14,6 +14,5 @@ defmodule PlugRest.State do
     exists: false,
     etag: :undefined,
     last_modified: :undefined,
-    expires: :undefined,
-    body: []
+    expires: :undefined
 end
