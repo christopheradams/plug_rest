@@ -1,5 +1,7 @@
 # PlugRest
 
+[![Build Status](https://travis-ci.org/christopheradams/plug_rest.svg?branch=master)](https://travis-ci.org/christopheradams/plug_rest)
+
 A port of Cowboy's cowboy_rest module to Plug.
 
 PlugRest supplements `Plug.Router` with an additional `resource`
