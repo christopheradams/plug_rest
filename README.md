@@ -126,3 +126,27 @@ Compile your application and then run it:
 
 Your server will be running and the resource will be available at
 "http://localhost:4001/hello".
+
+## Information
+
+The Cowboy documentation has more details on the REST protocol:
+
+* [REST principles](https://github.com/ninenines/cowboy/blob/master/doc/src/guide/rest_principles.asciidoc)
+* [REST handlers](https://github.com/ninenines/cowboy/blob/master/doc/src/guide/rest_handlers.asciidoc)
+* [REST flowcharts](https://github.com/ninenines/cowboy/blob/master/doc/src/guide/rest_flowcharts.asciidoc)
+
+Differences between PlugRest and cowboy_rest:
+
+* In PlugRest, each callback accepts a Plug `conn` struct instead of a
+  Cowboy `Req` record.
+* In PlugRest, the `init/2` callback is not required. However, if it
+  does exist, it should return `{:ok, conn, state}`.
+
+### Upgrading
+
+PlugRest is still in an initial development phase. Expect breaking
+changes at least in each minor version.
+
+#### 0.3.x
+
+In your router, change `use PlugRest` to `use PlugRest.Router`.
