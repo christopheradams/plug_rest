@@ -294,16 +294,16 @@ defmodule PlugRest.Resource do
         terminate(conn2, %{state | handler_state: handler_state})
       {[], conn2, handler_state} ->
         not_acceptable(conn2, %{state | handler_state: handler_state})
-      {cTP, conn2, handler_state} ->
-        cTP2 = for(p <- cTP, into: [], do: normalize_content_types(p))
-        state2 = %{state | handler_state: handler_state, content_types_p: cTP2}
+      {c_tp, conn2, handler_state} ->
+        c_tp2 = for(p <- c_tp, into: [], do: normalize_content_types(p))
+        state2 = %{state | handler_state: handler_state, content_types_p: c_tp2}
         try do
           case parse_media_range_header(conn2, "accept") do
             [] ->
-              {pMT, _fun} = headCTP = hd(cTP2)
+              {p_mt, _fun} = head_ctp = hd(c_tp2)
               conn2
-              |> put_resp_content_type(print_media_type(pMT))
-              |> languages_provided(%{state2 | content_type_a: headCTP})
+              |> put_resp_content_type(print_media_type(p_mt))
+              |> languages_provided(%{state2 | content_type_a: head_ctp})
             accept ->
               choose_media_type(conn2, state2, prioritize_accept(accept))
           end
@@ -328,20 +328,20 @@ defmodule PlugRest.Resource do
   defp prioritize_accept(accept) do
     accept
     |> Enum.sort(fn
-      {mediaTypeA, quality, _acceptParamsA}, {mediaTypeB, quality, _acceptParamsB} ->
-        prioritize_mediatype(mediaTypeA, mediaTypeB)
-      {_mediaTypeA, qualityA, _acceptParamsA}, {_mediaTypeB, qualityB, _acceptParamsB} ->
-        qualityA > qualityB
+      {media_type_a, quality, _accept_params_a}, {media_type_b, quality, _accept_params_b} ->
+        prioritize_mediatype(media_type_a, media_type_b)
+      {_media_type_a, quality_a, _accept_params_a}, {_media_type_b, quality_b, _accept_params_b} ->
+        quality_a > quality_b
     end)
   end
 
 
-  defp prioritize_mediatype({typeA, subTypeA, paramsA}, {typeB, subTypeB, paramsB}) do
-    case typeB do
-      ^typeA ->
-        case subTypeB do
-          ^subTypeA ->
-            length(paramsA) > length(paramsB)
+  defp prioritize_mediatype({type_a, sub_type_a, params_a}, {type_b, sub_type_b, params_b}) do
+    case type_b do
+      ^type_a ->
+        case sub_type_b do
+          ^sub_type_a ->
+            length(params_a) > length(params_b)
           "*" ->
             true
           _any ->
@@ -359,43 +359,43 @@ defmodule PlugRest.Resource do
     not_acceptable(conn, state)
   end
 
-  defp choose_media_type(conn, %{content_types_p: cTP} = state, [mediaType | tail]) do
-    match_media_type(conn, state, tail, cTP, mediaType)
+  defp choose_media_type(conn, %{content_types_p: c_tp} = state, [media_type | tail]) do
+    match_media_type(conn, state, tail, c_tp, media_type)
   end
 
 
-  defp match_media_type(conn, state, accept, [], _mediaType) do
+  defp match_media_type(conn, state, accept, [], _media_type) do
     choose_media_type(conn, state, accept)
   end
 
-  defp match_media_type(conn, state, accept, cTP, mediaType = {{"*", "*", _params_A}, _qA, _aPA}) do
-    match_media_type_params(conn, state, accept, cTP, mediaType)
+  defp match_media_type(conn, state, accept, c_tp, media_type = {{"*", "*", _params_a}, _q_a, _a_pa}) do
+    match_media_type_params(conn, state, accept, c_tp, media_type)
   end
 
-  defp match_media_type(conn, state, accept, cTP = [{{type, subType_P, _pP}, _fun} | _tail], mediaType = {{type, subType_A, _pA}, _qA, _aPA}) when subType_P === subType_A or subType_A === "*" do
-    match_media_type_params(conn, state, accept, cTP, mediaType)
+  defp match_media_type(conn, state, accept, c_tp = [{{type, sub_type_p, _p_p}, _fun} | _tail], media_type = {{type, sub_type_a, _p_a}, _q_a, _a_pa}) when sub_type_p === sub_type_a or sub_type_a === "*" do
+    match_media_type_params(conn, state, accept, c_tp, media_type)
   end
 
-  defp match_media_type(conn, state, accept, [_any | tail], mediaType) do
-    match_media_type(conn, state, accept, tail, mediaType)
+  defp match_media_type(conn, state, accept, [_any | tail], media_type) do
+    match_media_type(conn, state, accept, tail, media_type)
   end
 
 
-  defp match_media_type_params(conn, state, _accept, [provided = {{tP, sTP, %{}}, _fun} | _tail], {{_tA, _sTA, params_A}, _qA, _aPA}) do
-    pMT = {tP, sTP, params_A}
+  defp match_media_type_params(conn, state, _accept, [provided = {{t_p, s_tp, %{}}, _fun} | _tail], {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
+    p_mt = {t_p, s_tp, params_a}
     conn
-    |> put_resp_content_type(print_media_type(pMT))
+    |> put_resp_content_type(print_media_type(p_mt))
     |> languages_provided(%{state | content_type_a: provided})
   end
 
-  defp match_media_type_params(conn, state, accept, [provided = {pMT = {_tP, _sTP, params_P}, _fun} | tail], mediaType = {{_tA, _sTA, params_A}, _qA, _aPA}) do
-    case :lists.sort(params_P) === :lists.sort(params_A) do
+  defp match_media_type_params(conn, state, accept, [provided = {p_mt = {_t_p, _s_tp, params_p}, _fun} | tail], media_type = {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
+    case :lists.sort(params_p) === :lists.sort(params_a) do
       true ->
         conn
-        |> put_resp_content_type(print_media_type(pMT))
+        |> put_resp_content_type(print_media_type(p_mt))
         |> languages_provided(%{state | content_type_a: provided})
       false ->
-        match_media_type(conn, state, accept, tail, mediaType)
+        match_media_type(conn, state, accept, tail, media_type)
     end
   end
 
@@ -408,14 +408,14 @@ defmodule PlugRest.Resource do
         terminate(conn2, %{state | handler_state: handler_state})
       {[], conn2, handler_state} ->
         not_acceptable(conn2, %{state | handler_state: handler_state})
-      {lP, conn2, handler_state} ->
-        state2 = %{state | handler_state: handler_state, languages_p: lP}
+      {l_p, conn2, handler_state} ->
+        state2 = %{state | handler_state: handler_state, languages_p: l_p}
         case parse_quality_header(conn2, "accept-language") do
           [] ->
-            set_language(conn2, %{state2 | language_a: hd(lP)})
-          acceptLanguage ->
-            acceptLanguage2 = prioritize_languages(acceptLanguage)
-            choose_language(conn2, state2, acceptLanguage2)
+            set_language(conn2, %{state2 | language_a: hd(l_p)})
+          accept_language ->
+            accept_language2 = prioritize_languages(accept_language)
+            choose_language(conn2, state2, accept_language2)
         end
     end
   end
@@ -423,7 +423,7 @@ defmodule PlugRest.Resource do
 
   defp prioritize_languages(accept_languages) do
     accept_languages
-    |> Enum.sort(fn {_tagA, qualityA}, {_tagB, qualityB} -> qualityA > qualityB end)
+    |> Enum.sort(fn {_tag_a, quality_a}, {_tag_b, quality_b} -> quality_a > quality_b end)
   end
 
 
@@ -431,8 +431,8 @@ defmodule PlugRest.Resource do
     not_acceptable(conn, state)
   end
 
-  defp choose_language(conn, %{languages_p: lP} = state, [language | tail]) do
-    match_language(conn, state, tail, lP, language)
+  defp choose_language(conn, %{languages_p: l_p} = state, [language | tail]) do
+    match_language(conn, state, tail, l_p, language)
   end
 
 
@@ -474,30 +474,30 @@ defmodule PlugRest.Resource do
         terminate(conn2, %{state | handler_state: handler_state})
       {[], conn2, handler_state} ->
         not_acceptable(conn2, %{state | handler_state: handler_state})
-      {cP, conn2, handler_state} ->
-        state2 = %{state | handler_state: handler_state, charsets_p: cP}
+      {c_p, conn2, handler_state} ->
+        state2 = %{state | handler_state: handler_state, charsets_p: c_p}
         case parse_quality_header(conn2, "accept-charset") do
           [] ->
-            set_content_type(conn2, %{state2 | charset_a: hd(cP)})
-          acceptCharset ->
-            acceptCharset2 = prioritize_charsets(acceptCharset)
-            choose_charset(conn2, state2, acceptCharset2)
+            set_content_type(conn2, %{state2 | charset_a: hd(c_p)})
+          accept_charset ->
+            accept_charset2 = prioritize_charsets(accept_charset)
+            choose_charset(conn2, state2, accept_charset2)
         end
     end
   end
 
 
-  defp prioritize_charsets(acceptCharsets) do
-    acceptCharsets2 = :lists.sort(fn {_charsetA, qualityA}, {_charsetB, qualityB} -> qualityA > qualityB end, acceptCharsets)
-    case :lists.keymember("*", 1, acceptCharsets2) do
+  defp prioritize_charsets(accept_charsets) do
+    accept_charsets2 = :lists.sort(fn {_charset_a, quality_a}, {_charset_b, quality_b} -> quality_a > quality_b end, accept_charsets)
+    case :lists.keymember("*", 1, accept_charsets2) do
       true ->
-        acceptCharsets2
+        accept_charsets2
       false ->
-        case :lists.keymember("iso-8859-1", 1, acceptCharsets2) do
+        case :lists.keymember("iso-8859-1", 1, accept_charsets2) do
           true ->
-            acceptCharsets2
+            accept_charsets2
           false ->
-            [{"iso-8859-1", 1000} | acceptCharsets2]
+            [{"iso-8859-1", 1000} | accept_charsets2]
         end
     end
   end
@@ -507,8 +507,8 @@ defmodule PlugRest.Resource do
     not_acceptable(conn, state)
   end
 
-  defp choose_charset(conn, %{charsets_p: cP} = state, [charset | tail]) do
-    match_charset(conn, state, tail, cP, charset)
+  defp choose_charset(conn, %{charsets_p: c_p} = state, [charset | tail]) do
+    match_charset(conn, state, tail, c_p, charset)
   end
 
 
@@ -525,9 +525,9 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp set_content_type(conn, %{content_type_a: {{type, subType, params}, _fun}, charset_a: charset} = state) do
-    paramsBin = set_content_type_build_params(params, [])
-    content_type = print_media_type({type, subType, paramsBin})
+  defp set_content_type(conn, %{content_type_a: {{type, sub_type, params}, _fun}, charset_a: charset} = state) do
+    params_bin = set_content_type_build_params(params, [])
+    content_type = print_media_type({type, sub_type, params_bin})
     conn2 = case charset do
       :undefined ->
         put_resp_content_type(conn, content_type)
@@ -566,8 +566,8 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp variances(conn, %{content_types_p: cTP, languages_p: lP, charsets_p: cP} = state) do
-    var_variances = case cTP do
+  defp variances(conn, %{content_types_p: c_tp, languages_p: l_p, charsets_p: c_p} = state) do
+    var_variances = case c_tp do
       [] ->
         []
       [_] ->
@@ -575,7 +575,7 @@ defmodule PlugRest.Resource do
       [_ | _] ->
         ["accept"]
     end
-    variances2 = case lP do
+    variances2 = case l_p do
       [] ->
         var_variances
       [_] ->
@@ -583,7 +583,7 @@ defmodule PlugRest.Resource do
       [_ | _] ->
         ["accept-language" | var_variances]
     end
-    variances3 = case cP do
+    variances3 = case c_p do
       [] ->
         variances2
       [_] ->
@@ -613,8 +613,8 @@ defmodule PlugRest.Resource do
     case unsafe_call(conn, state, :variances) do
       :no_call ->
         {var_variances, conn, state}
-      {handlerVariances, conn2, handler_state} ->
-        {var_variances ++ handlerVariances, conn2, %{state | handler_state: handler_state}}
+      {handler_variances, conn2, handler_state} ->
+        {var_variances ++ handler_variances, conn2, %{state | handler_state: handler_state}}
     end
   end
 
@@ -631,19 +631,19 @@ defmodule PlugRest.Resource do
         if_unmodified_since_exists(conn, state2)
       [%{}] ->
         if_unmodified_since_exists(conn, state2)
-      eTagsList ->
-        if_match(conn, state2, eTagsList)
+      etags_list ->
+        if_match(conn, state2, etags_list)
     end
   end
 
 
-  defp if_match(conn, state, etagsList) do
+  defp if_match(conn, state, etags_list) do
     try() do
       case generate_etag(conn, state) do
         {{:weak, _}, conn2, state2} ->
           precondition_failed(conn2, state2)
         {etag, conn2, state2} ->
-          case :lists.member(etag, etagsList) do
+          case :lists.member(etag, etags_list) do
             true ->
               if_none_match_exists(conn2, state2)
             false ->
@@ -672,8 +672,8 @@ defmodule PlugRest.Resource do
       case parse_date_header(conn, "if-unmodified-since") do
         [] ->
           if_none_match_exists(conn, state)
-        ifUnmodifiedSince ->
-          if_unmodified_since(conn, state, ifUnmodifiedSince)
+        if_unmodified_since ->
+          if_unmodified_since(conn, state, if_unmodified_since)
       end
     catch
       _, _ ->
@@ -682,11 +682,11 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp if_unmodified_since(conn, state, ifUnmodifiedSince) do
+  defp if_unmodified_since(conn, state, if_unmodified_since) do
     try() do
       case last_modified(conn, state) do
-        {lastModified, conn2, state2} ->
-          case lastModified > ifUnmodifiedSince do
+        {last_modified, conn2, state2} ->
+          case last_modified > if_unmodified_since do
             true ->
               precondition_failed(conn2, state2)
             false ->
@@ -706,13 +706,13 @@ defmodule PlugRest.Resource do
         if_modified_since_exists(conn, state)
       [%{}] ->
         precondition_is_head_get(conn, state)
-      etagsList ->
-        if_none_match(conn, state, etagsList)
+      etags_list ->
+        if_none_match(conn, state, etags_list)
     end
   end
 
 
-  defp if_none_match(conn, state, etagsList) do
+  defp if_none_match(conn, state, etags_list) do
     try() do
       case generate_etag(conn, state) do
         {etag, conn2, state2} ->
@@ -720,7 +720,7 @@ defmodule PlugRest.Resource do
             :undefined ->
               precondition_failed(conn2, state2)
             ^etag ->
-              case is_weak_match(etag, etagsList) do
+              case is_weak_match(etag, etags_list) do
                 true ->
                   precondition_is_head_get(conn2, state2)
                 false ->
@@ -762,8 +762,8 @@ defmodule PlugRest.Resource do
       case parse_date_header(conn, "if-modified-since") do
         [] ->
           method(conn, state)
-        ifModifiedSince ->
-          if_modified_since_now(conn, state, ifModifiedSince)
+        if_modified_since ->
+          if_modified_since_now(conn, state, if_modified_since)
       end
     catch
       _, _ ->
@@ -772,23 +772,23 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp if_modified_since_now(conn, state, ifModifiedSince) do
-    case ifModifiedSince > :erlang.universaltime() do
+  defp if_modified_since_now(conn, state, if_modified_since) do
+    case if_modified_since > :erlang.universaltime() do
       true ->
         method(conn, state)
       false ->
-        if_modified_since(conn, state, ifModifiedSince)
+        if_modified_since(conn, state, if_modified_since)
     end
   end
 
 
-  defp if_modified_since(conn, state, ifModifiedSince) do
+  defp if_modified_since(conn, state, if_modified_since) do
     try() do
       case last_modified(conn, state) do
         {:no_call, conn2, state2} ->
           method(conn2, state2)
-        {lastModified, conn2, state2} ->
-          case lastModified > ifModifiedSince do
+        {last_modified, conn2, state2} ->
+          case last_modified > if_modified_since do
             true ->
               method(conn2, state2)
             false ->
@@ -838,17 +838,17 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp moved_permanently(conn, state, onFalse) do
+  defp moved_permanently(conn, state, on_false) do
     case call(conn, state, :moved_permanently) do
       {{true, location}, conn2, handler_state} ->
         conn3 = put_resp_header(conn2, "location", location)
         respond(conn3, %{state | handler_state: handler_state}, 301)
       {false, conn2, handler_state} ->
-        onFalse.(conn2, %{state | handler_state: handler_state})
+        on_false.(conn2, %{state | handler_state: handler_state})
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
       :no_call ->
-        onFalse.(conn, state)
+        on_false.(conn, state)
     end
   end
 
@@ -873,17 +873,17 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp is_post_to_missing_resource(conn, %{method: "POST"} = state, onFalse) do
-    allow_missing_post(conn, state, onFalse)
+  defp is_post_to_missing_resource(conn, %{method: "POST"} = state, on_false) do
+    allow_missing_post(conn, state, on_false)
   end
 
-  defp is_post_to_missing_resource(conn, state, onFalse) do
-    respond(conn, state, onFalse)
+  defp is_post_to_missing_resource(conn, state, on_false) do
+    respond(conn, state, on_false)
   end
 
 
-  defp allow_missing_post(conn, state, onFalse) do
-    expect(conn, state, :allow_missing_post, true, &accept_resource/2, onFalse)
+  defp allow_missing_post(conn, state, on_false) do
+    expect(conn, state, :allow_missing_post, true, &accept_resource/2, on_false)
   end
 
 
@@ -929,13 +929,13 @@ defmodule PlugRest.Resource do
         respond(conn, state, 415)
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
-      {cTA, conn2, handler_state} ->
-        cTA2 = for(p <- cTA, into: [], do: normalize_content_types(p))
+      {c_ta, conn2, handler_state} ->
+        c_ta2 = for(p <- c_ta, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state}
         try() do
           case parse_media_type_header(conn2, "content-type") do
             content_type ->
-              choose_content_type(conn2, state2, content_type, cTA2)
+              choose_content_type(conn2, state2, content_type, c_ta2)
           end
         catch
           _, _ ->
@@ -953,7 +953,7 @@ defmodule PlugRest.Resource do
     process_content_type(conn, state, fun)
   end
 
-  defp choose_content_type(conn, state, {type, subType, param}, [{{type, subType, acceptedParam}, fun} | _tail]) when acceptedParam === %{} or acceptedParam === param do
+  defp choose_content_type(conn, state, {type, sub_type, param}, [{{type, sub_type, accepted_param}, fun} | _tail]) when accepted_param === %{} or accepted_param === param do
     process_content_type(conn, state, fun)
   end
 
@@ -976,9 +976,9 @@ defmodule PlugRest.Resource do
         {false, conn2, handler_state2} ->
           state2 = %{state | handler_state: handler_state2}
           respond(conn2, state2, 400)
-        {{true, resURL}, conn2, handler_state2} when var_method === "POST" ->
+        {{true, res_url}, conn2, handler_state2} when var_method === "POST" ->
           state2 = %{state | handler_state: handler_state2}
-          conn3 = put_resp_header(conn2, "location", resURL)
+          conn3 = put_resp_header(conn2, "location", res_url)
           case :if do
             :if when exists ->
               respond(conn3, state2, 303)
@@ -1033,13 +1033,13 @@ defmodule PlugRest.Resource do
   defp set_resp_body_last_modified(conn, state) do
     try() do
       case last_modified(conn, state) do
-        {lastModified, conn2, state2} ->
-          case lastModified do
-            ^lastModified when is_atom(lastModified) ->
+        {last_modified, conn2, state2} ->
+          case last_modified do
+            ^last_modified when is_atom(last_modified) ->
               set_resp_body_expires(conn2, state2)
-            ^lastModified ->
-              lastModifiedBin = :cowboy_clock.rfc1123(lastModified)
-              conn3 = put_resp_header(conn2, "last-modified", lastModifiedBin)
+            ^last_modified ->
+              last_modified_bin = :cowboy_clock.rfc1123(last_modified)
+              conn3 = put_resp_header(conn2, "last-modified", last_modified_bin)
               set_resp_body_expires(conn3, state2)
           end
       end
@@ -1118,8 +1118,8 @@ defmodule PlugRest.Resource do
         conn3 = put_resp_header(conn2, "expires", var_expires)
         {conn3, state2}
       ^var_expires ->
-        expiresBin = :cowboy_clock.rfc1123(var_expires)
-        conn3 = put_resp_header(conn2, "expires", expiresBin)
+        expires_bin = :cowboy_clock.rfc1123(var_expires)
+        conn3 = put_resp_header(conn2, "expires", expires_bin)
         {conn3, state2}
     end
   end
@@ -1154,13 +1154,13 @@ defmodule PlugRest.Resource do
     case unsafe_call(conn, state, :last_modified) do
       :no_call ->
         {:undefined, conn, %{state | last_modified: :no_call}}
-      {lastModified, conn2, handler_state} ->
-        {lastModified, conn2, %{state | handler_state: handler_state, last_modified: lastModified}}
+      {last_modified, conn2, handler_state} ->
+        {last_modified, conn2, %{state | handler_state: handler_state, last_modified: last_modified}}
     end
   end
 
-  defp last_modified(conn, %{last_modified: lastModified} = state) do
-    {lastModified, conn, state}
+  defp last_modified(conn, %{last_modified: last_modified} = state) do
+    {last_modified, conn, state}
   end
 
 
