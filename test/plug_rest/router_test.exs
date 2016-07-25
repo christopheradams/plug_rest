@@ -285,6 +285,8 @@ defmodule PlugRest.RouterTest do
     resource "/gone", GoneResource
     resource "/last_modified", LastModifiedResource
 
+    resource "/does_not_exist", DoesNotExistModule
+
     resource "/users/:user_id/comments/:comment_id", UserCommentResource
 
     match "/match" do
@@ -317,6 +319,10 @@ defmodule PlugRest.RouterTest do
     |> test_status(404)
 
     assert conn.resp_body == "Not found!"
+  end
+
+  test "resource module that does not exist returns 500" do
+    build_conn(:get, "/does_not_exist") |> test_status(500)
   end
 
   test "service unavailable returns 503" do
