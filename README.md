@@ -151,9 +151,7 @@ Differences between PlugRest and cowboy_rest:
 PlugRest is still in an initial development phase. Expect breaking
 changes at least in each minor version.
 
-#### 0.3.x
-
-In your router, change `use PlugRest` to `use PlugRest.Router`.
+See the [CHANGELOG](CHANGELOG.md) for more information.
 
 ## License
 
