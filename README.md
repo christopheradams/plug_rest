@@ -154,3 +154,11 @@ changes at least in each minor version.
 #### 0.3.x
 
 In your router, change `use PlugRest` to `use PlugRest.Router`.
+
+## License
+
+PlugRest copyright &copy; 2016, [Christopher Adams](https://github.com/christopheradams)
+
+cowboy_rest copyright &copy; 2011-2014, Loïc Hoguin <essen@ninenines.eu>
+
+Cowboy logo copyright &copy; 2016, [dikaio](https://github.com/dikaio)
