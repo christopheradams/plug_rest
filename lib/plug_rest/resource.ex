@@ -1246,6 +1246,11 @@ defmodule PlugRest.Resource do
     terminate(conn, state2)
   end
 
+  defp terminate(conn, %{resp_body: {:chunked, body}} = _state) do
+    conn2 = conn |> send_chunked(conn.status)
+    Enum.into(body, conn2)
+  end
+
   defp terminate(conn, state) do
     conn |> send_resp(conn.status, state.resp_body)
   end

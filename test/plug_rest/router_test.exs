@@ -259,6 +259,15 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule ChunkedResource do
+    @behaviour PlugRest.Resource
+
+    def to_html(conn, state) do
+      body = ["HELLO", "WORLD"]
+      {{:chunked, body}, conn, state}
+    end
+  end
+
   defmodule RestRouter do
     use PlugRest.Router
 
@@ -288,6 +297,8 @@ defmodule PlugRest.RouterTest do
     resource "/does_not_exist", DoesNotExistModule
 
     resource "/users/:user_id/comments/:comment_id", UserCommentResource
+
+    resource "/chunked", ChunkedResource
 
     match "/match" do
       send_resp(conn, 200, "Matches!")
@@ -496,6 +507,15 @@ defmodule PlugRest.RouterTest do
 
     test_status(conn, 200)
     assert conn.resp_body == "1234 : 987"
+  end
+
+  test "chunked body" do
+    conn = build_conn(:get, "/chunked")
+
+    assert conn.state == :chunked
+    assert conn.status == 200
+
+    assert conn.resp_body == "HELLOWORLD"
   end
 
   defp build_conn(method, path) do
