@@ -129,7 +129,35 @@ Compile your application and then run it:
     $ iex -S mix
 
 Your server will be running and the resource will be available at
-"http://localhost:4001/hello".
+`http://localhost:4001/hello`.
+
+### Testing
+
+Use `Plug.Test` to help verify your resources's responses to separate
+requests. Create a file at `test/resources/hello_resource_test.exs` to
+hold your test:
+
+```elixir
+defmodule MyApp.HelloResourceTest do
+  use ExUnit.Case
+  use Plug.Test
+
+  alias MyApp.Router
+
+  test "get hello resource" do
+    conn = conn(:get, "/hello")
+
+    conn = Router.call(conn, [])
+
+    assert conn.status == 200
+    assert conn.resp_body == "Hello world"
+  end
+end
+```
+
+Run the test with:
+
+    $ mix test
 
 ## Information
 
