@@ -597,7 +597,7 @@ defmodule PlugRest.Resource do
       [_ | _] ->
         ["accept-charset" | variances2]
     end
-    try() do
+    try do
       case variances(conn, state, variances3) do
         {variances4, conn2, state2} ->
           case for(v <- variances4, into: [], do: [", ", v]) do
@@ -644,7 +644,7 @@ defmodule PlugRest.Resource do
 
 
   defp if_match(conn, state, etags_list) do
-    try() do
+    try do
       case generate_etag(conn, state) do
         {{:weak, _}, conn2, state2} ->
           precondition_failed(conn2, state2)
@@ -674,7 +674,7 @@ defmodule PlugRest.Resource do
 
 
   defp if_unmodified_since_exists(conn, state) do
-    try() do
+    try do
       case parse_date_header(conn, "if-unmodified-since") do
         [] ->
           if_none_match_exists(conn, state)
@@ -689,7 +689,7 @@ defmodule PlugRest.Resource do
 
 
   defp if_unmodified_since(conn, state, if_unmodified_since) do
-    try() do
+    try do
       case last_modified(conn, state) do
         {last_modified, conn2, state2} ->
           case last_modified > if_unmodified_since do
@@ -719,7 +719,7 @@ defmodule PlugRest.Resource do
 
 
   defp if_none_match(conn, state, etags_list) do
-    try() do
+    try do
       case generate_etag(conn, state) do
         {etag, conn2, state2} ->
           case etag do
@@ -764,7 +764,7 @@ defmodule PlugRest.Resource do
 
 
   defp if_modified_since_exists(conn, state) do
-    try() do
+    try do
       case parse_date_header(conn, "if-modified-since") do
         [] ->
           method(conn, state)
@@ -789,7 +789,7 @@ defmodule PlugRest.Resource do
 
 
   defp if_modified_since(conn, state, if_modified_since) do
-    try() do
+    try do
       case last_modified(conn, state) do
         {:no_call, conn2, state2} ->
           method(conn2, state2)
@@ -810,10 +810,10 @@ defmodule PlugRest.Resource do
 
   defp not_modified(conn, state) do
     conn2 = delete_resp_header(conn, "content-type")
-    try() do
+    try do
       case set_resp_etag(conn2, state) do
         {conn3, state2} ->
-          try() do
+          try do
             case set_resp_expires(conn3, state2) do
             {req4, state3} ->
               respond(req4, state3, 304)
@@ -938,7 +938,7 @@ defmodule PlugRest.Resource do
       {c_ta, conn2, handler_state} ->
         c_ta2 = for(p <- c_ta, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state}
-        try() do
+        try do
           case parse_media_type_header(conn2, "content-type") do
             content_type ->
               choose_content_type(conn2, state2, content_type, c_ta2)
@@ -969,7 +969,7 @@ defmodule PlugRest.Resource do
 
 
   defp process_content_type(conn, %{method: var_method, exists: exists} = state, fun) do
-    try() do
+    try do
       case call(conn, state, fun) do
         {:stop, conn2, handler_state2} ->
           terminate(conn2, %{state | handler_state: handler_state2})
@@ -1024,7 +1024,7 @@ defmodule PlugRest.Resource do
 
 
   defp set_resp_body_etag(conn, state) do
-    try() do
+    try do
       case set_resp_etag(conn, state) do
         {conn2, state2} ->
           set_resp_body_last_modified(conn2, state2)
@@ -1037,7 +1037,7 @@ defmodule PlugRest.Resource do
 
 
   defp set_resp_body_last_modified(conn, state) do
-    try() do
+    try do
       case last_modified(conn, state) do
         {last_modified, conn2, state2} ->
           case last_modified do
@@ -1057,7 +1057,7 @@ defmodule PlugRest.Resource do
 
 
   defp set_resp_body_expires(conn, state) do
-    try() do
+    try do
       case set_resp_expires(conn, state) do
         {conn2, state2} ->
           set_resp_body(conn2, state2)
@@ -1070,7 +1070,7 @@ defmodule PlugRest.Resource do
 
 
   defp set_resp_body(conn, %{content_type_a: {_, callback}} = state) do
-    try() do
+    try do
       case call(conn, state, callback) do
         {:stop, conn2, handler_state2} ->
           terminate(conn2, %{state | handler_state: handler_state2})
