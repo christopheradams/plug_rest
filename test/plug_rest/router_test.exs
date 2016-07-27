@@ -253,8 +253,15 @@ defmodule PlugRest.RouterTest do
     @behaviour PlugRest.Resource
 
     def to_html(conn, state) do
-      user_id = conn.params["user_id"]
-      comment_id = conn.params["comment_id"]
+      ## Accesing path params through conn.params is deprecated
+      _user_id = conn.params["user_id"]
+      _comment_id = conn.params["comment_id"]
+
+      ## Use read_path_params(conn) instead
+      params = PlugRest.Conn.read_path_params(conn)
+      user_id = params["user_id"]
+      comment_id = params["comment_id"]
+
       {"#{user_id} : #{comment_id}", conn, state}
     end
   end

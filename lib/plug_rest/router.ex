@@ -37,6 +37,7 @@ defmodule PlugRest.Router do
             p -> p
           end
 
+        # Using conn.params to store path params is deprecated
         # Save any dynamic path segments into conn.params key/value pairs
         params2 =
           Enum.reduce(
@@ -46,7 +47,8 @@ defmodule PlugRest.Router do
           )
 
         conn2 = %{connection | params: params2}
-        PlugRest.Resource.upgrade(conn2, unquote(handler), unquote(handler_state))
+        conn3 = conn2 |> put_private(:plug_rest_path_params, params2)
+        PlugRest.Resource.upgrade(conn3, unquote(handler), unquote(handler_state))
       end
     end
   end

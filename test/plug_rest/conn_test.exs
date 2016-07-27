@@ -4,6 +4,20 @@ defmodule PlugRest.ConnTest do
 
   import PlugRest.Conn
 
+  test "read path params" do
+    path_params = %{"id" => "1234"}
+    conn = conn(:get, "/test")
+    |> put_private(:plug_rest_path_params, path_params)
+
+    assert read_path_params(conn) == path_params
+  end
+
+  test "read non-existent path params" do
+    conn = conn(:get, "/test")
+
+    assert read_path_params(conn) == %{}
+  end
+
   test "parse content type header" do
     content_type = "application/json"
 

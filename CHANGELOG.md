@@ -1,5 +1,14 @@
 ## Changelog
 
+## v0.3.6
+
+* Enhancements
+  * Use `PlugRest.Conn.read_path_params/2` to access values of dynamic
+    segments of resource paths
+
+* Deprecations
+  * Deprecate `conn.params` for url params in favor of `read_url_params/2`
+
 ## v0.3.5
 
 * Enhancements
