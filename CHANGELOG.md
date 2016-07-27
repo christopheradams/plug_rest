@@ -1,9 +1,20 @@
 ## Changelog
 
+## v0.3.5
+
+* Enhancements
+  * Content provided callbacks (like `to_html`) can return `{:chunked,
+    enumerable}` for the body
+
+## v0.3.3
+
+* Enhancements
+  * Return 500 response if resource handler does not exist
+
 ## v0.3.0
 
 * Enhancements
-  * Use `Plug.Router` interntally and make match macros available
+  * Use `Plug.Router` internally and make match macros available
   * Make compatible with Elixir 1.2
 
 * Bug fixes

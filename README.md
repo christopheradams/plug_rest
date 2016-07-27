@@ -166,13 +166,22 @@ The Cowboy documentation has more details on the REST protocol:
 * [REST principles](https://github.com/ninenines/cowboy/blob/master/doc/src/guide/rest_principles.asciidoc)
 * [REST handlers](https://github.com/ninenines/cowboy/blob/master/doc/src/guide/rest_handlers.asciidoc)
 * [REST flowcharts](https://github.com/ninenines/cowboy/blob/master/doc/src/guide/rest_flowcharts.asciidoc)
+* [cowboy_rest](https://github.com/ninenines/cowboy/blob/master/doc/src/manual/cowboy_rest.asciidoc)
 
 Differences between PlugRest and cowboy_rest:
 
-* In PlugRest, each callback accepts a Plug `conn` struct instead of a
-  Cowboy `Req` record.
-* In PlugRest, the `init/2` callback is not required. However, if it
-  does exist, it should return `{:ok, conn, state}`.
+* Each callback accepts a Plug `conn` struct instead of a Cowboy `Req`
+  record.
+* The `init/2` callback is not required. However, if it does exist, it
+  should return `{:ok, conn, state}`.
+* The content callbacks (like `to_html`) return `{body, conn, state}`
+  where the body is one of `iodata` or `{:chunked, Enum.t}`.
+* Media types take the form `{binary, binary, %{binary => binary}}`,
+  following `Plug.Conn.Utils` parsers.
+* The content types provided and accepted callbacks can describe each
+  type with a String `"text/html"` or tuple `{"text", "html", %{}}`,
+* In a media type `{type, subtype, params}` tuple, the params are a
+  map rather than a list of tuples.
 
 ### Upgrading
 
