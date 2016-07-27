@@ -1,9 +1,15 @@
 ## Changelog
 
+## v0.3.7
+
+* Enhancements
+  * Add `using` macro to `PlugRest.Resource` that adopts the module's
+    behaviour and imports `PlugRest.Conn.read_path_params/1`
+
 ## v0.3.6
 
 * Enhancements
-  * Use `PlugRest.Conn.read_path_params/2` to access values of dynamic
+  * Use `PlugRest.Conn.read_path_params/1` to access values of dynamic
     segments of resource paths
 
 * Deprecations

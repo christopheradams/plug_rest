@@ -11,6 +11,15 @@ defmodule PlugRest.Resource do
   import PlugRest.Conn
   import Plug.Conn
 
+  @doc false
+  defmacro __using__(_) do
+    quote do
+      @behaviour PlugRest.Resource
+
+      import PlugRest.Conn, only: [read_path_params: 1]
+    end
+  end
+
   ## Common handler callbacks
 
   @callback init(conn, state) :: {[binary()], conn, state}
