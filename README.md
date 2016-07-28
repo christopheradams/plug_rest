@@ -178,6 +178,19 @@ Run the test with:
 
     $ mix test
 
+## Phoenix
+
+You can use PlugRest in your Phoenix app. Add `:plug_rest` to your
+dependencies, save your REST router at `web/rest_router.ex`, and put
+your resources in `web/resources/`. Then use the `forward` macro in
+your Phoenix `web/router.ex`:
+
+```elixir
+  forward "/rest", HelloPhoenix.RestRouter
+```
+
+The resource will be served at `http://localhost:4001/rest/hello`.
+
 ## Information
 
 The Cowboy documentation has more details on the REST protocol:
