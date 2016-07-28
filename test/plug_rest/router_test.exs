@@ -3,7 +3,7 @@ defmodule PlugRest.RouterTest do
   use Plug.Test
 
   defmodule IndexResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def to_html(conn, state) do
       {"Plug REST", conn, state}
@@ -11,7 +11,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule ServiceAvailableResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def service_available(conn, false = state) do
       {false, conn, state}
@@ -23,7 +23,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule KnownMethodsResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def known_methods(conn, state) do
       {["GET", "POST"], conn, state}
@@ -31,7 +31,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule UriTooLongResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def uri_too_long(conn, state) do
       {true, conn, state}
@@ -39,7 +39,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule AllowedMethodsResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def allowed_methods(conn, state) do
       {["HEAD", "GET", "POST", "OPTIONS"], conn, state}
@@ -47,7 +47,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule MalformedRequestResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def malformed_request(conn, state) do
       {true, conn, state}
@@ -55,7 +55,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule UnauthorizedResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def is_authorized(conn, state) do
       {{false, "AuthHeader"}, conn, state}
@@ -63,7 +63,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule ForbiddenResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def forbidden(conn, state) do
       {true, conn, state}
@@ -71,7 +71,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule InvalidContentHeadersResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def valid_content_headers(conn, state) do
       {false, conn, state}
@@ -79,7 +79,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule InvalidEntityLengthResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def valid_entity_length(conn, state) do
       {false, conn, state}
@@ -87,7 +87,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule JsonResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def allowed_methods(conn, state) do
       {["GET", "POST"], conn, state}
@@ -111,7 +111,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule BinaryCtpResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def content_types_provided(conn, state) do
       {[{"application/json", :to_json}], conn, state}
@@ -123,7 +123,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule HypermediaResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def content_types_provided(conn, state) do
       {[{{"text", "html", %{}}, :to_html},
@@ -145,7 +145,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule LanguagesResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def languages_provided(conn, state) do
       {["de", "en"], conn, state}
@@ -157,7 +157,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule CharsetResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def charsets_provided(conn, state) do
       {["utf-8", "unicode-1-1"], conn, state}
@@ -169,7 +169,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule ResourceExists do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def resource_exists(conn, false = state) do
       {false, conn, state}
@@ -177,7 +177,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule PreviouslyExisted do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def resource_exists(conn, state) do
       {false, conn, state}
@@ -189,7 +189,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule MovedPermanentlyResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def resource_exists(conn, state) do
       {false, conn, state}
@@ -205,7 +205,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule MovedTemporarilyResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def resource_exists(conn, state) do
       {false, conn, state}
@@ -221,7 +221,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule GoneResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def resource_exists(conn, state) do
       {false, conn, state}
@@ -237,7 +237,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule LastModifiedResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def last_modified(conn, state) do
       modified = {{2016, 7, 17}, {11, 49, 29}}
@@ -267,7 +267,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule ChunkedResource do
-    @behaviour PlugRest.Resource
+    use PlugRest.Resource
 
     def to_html(conn, state) do
       body = ["HELLO", "WORLD"]
