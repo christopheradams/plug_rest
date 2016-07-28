@@ -111,6 +111,24 @@ You can also use the `match` macros from `Plug.Router`.
 In the example above, we match on all routes with `_` and return a
 `404` response in case none of the above routes matched.
 
+#### Dynamic path segments
+
+Router paths can have segments that match URLs dynamically:
+
+```elixir
+  resource "/users/:id", MyApp.UserResource
+```
+
+The path parameters can be accessed in your resource with `read_path_params/1`:
+
+```elixir
+    def to_html(conn, state) do
+      params = read_path_params(conn)
+      user_id = params["id"]
+      {"Hello #{user_id}", conn, state}
+    end
+```
+
 ### Application
 
 Finally, add the Router to your supervision tree by editing
