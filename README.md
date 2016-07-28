@@ -27,7 +27,7 @@ Define the resource handler and implement the optional callbacks:
 
 ```elixir
 defmodule HelloResource do
-  @behaviour PlugRest.Resource
+  use PlugRest.Resource
 
   def to_html(conn, state) do
     {"Hello world", conn, state}
@@ -49,7 +49,7 @@ Add PlugRest to your project in two steps:
     def deps do
       [{:cowboy, "~> 1.0.0"},
        {:plug, "~> 1.0"},
-       {:plug_rest, "~> 0.3.0"}]
+       {:plug_rest, "~> 0.4.0"}]
     end
     ```
 
@@ -68,7 +68,7 @@ Handler:
 
 ```elixir
 defmodule MyApp.HelloResource do
-  @behaviour PlugRest.Resource
+  use PlugRest.Resource
 
   def allowed_methods(conn, state) do
     {["GET"], conn, state}

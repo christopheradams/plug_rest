@@ -1,5 +1,10 @@
 ## Changelog
 
+## v0.4.0
+
+* Backwards incompatible changes
+  * Dynamic path segments are no longer available in `conn.params`
+
 ## v0.3.7
 
 * Enhancements

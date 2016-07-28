@@ -29,26 +29,17 @@ defmodule PlugRest.Router do
     quote do
       match unquote(path) do
 
-        connection = var!(conn)
-
         params =
-          case connection.params do
-            %Plug.Conn.Unfetched{} -> %{}
-            p -> p
-          end
-
-        # Using conn.params to store path params is deprecated
-        # Save any dynamic path segments into conn.params key/value pairs
-        params2 =
           Enum.reduce(
             unquote(binding),
-            params,
+            %{},
             fn({k,v}, p) -> Map.put(p, k, v) end
           )
 
-        conn2 = %{connection | params: params2}
-        conn3 = conn2 |> put_private(:plug_rest_path_params, params2)
-        PlugRest.Resource.upgrade(conn3, unquote(handler), unquote(handler_state))
+        # Save dynamic path segments into private connection storage
+        conn2 = var!(conn) |> put_private(:plug_rest_path_params, params)
+
+        PlugRest.Resource.upgrade(conn2, unquote(handler), unquote(handler_state))
       end
     end
   end
