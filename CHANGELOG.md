@@ -1,5 +1,9 @@
 ## Changelog
 
+## v0.4.1
+* Enhancements
+  * Import `Plug.Conn` when using `PlugRest.Resource`
+
 ## v0.4.0
 
 * Backwards incompatible changes

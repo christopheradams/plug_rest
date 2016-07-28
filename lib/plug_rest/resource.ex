@@ -16,6 +16,7 @@ defmodule PlugRest.Resource do
     quote do
       @behaviour PlugRest.Resource
 
+      import Plug.Conn
       import PlugRest.Conn, only: [read_path_params: 1]
     end
   end
