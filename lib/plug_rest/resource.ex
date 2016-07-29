@@ -23,7 +23,7 @@ defmodule PlugRest.Resource do
 
   ## Common handler callbacks
 
-  @callback init(conn, state) :: {[binary()], conn, state}
+  @callback init(conn, state) :: {:ok, conn, state}
                                | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [init: 2]
@@ -45,12 +45,12 @@ defmodule PlugRest.Resource do
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [charsets_provided: 2]
 
-  @callback content_types_accepted(conn, state) :: {[{binary() | {binary(), binary(), '*' | [{binary(), binary()}]}, atom()}], conn, state}
+  @callback content_types_accepted(conn, state) :: {[{binary() | {binary(), binary(), %{binary() => binary()}}, atom()}], conn, state}
                                                  | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [content_types_accepted: 2]
 
-  @callback content_types_provided(conn, state) :: {[{binary() | {binary(), binary(), '*' | [{binary(), binary()}]}, atom()}], conn, state}
+  @callback content_types_provided(conn, state) :: {[{binary() | {binary(), binary(), %{binary() => binary()}}, atom()}], conn, state}
                                                  | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [content_types_provided: 2]
@@ -80,7 +80,7 @@ defmodule PlugRest.Resource do
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [generate_etag: 2]
 
-  @callback is_authorized(conn, state) :: {true | {false, iodata()}, conn, state}
+  @callback is_authorized(conn, state) :: {true | {false, binary()}, conn, state}
                                         | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [is_authorized: 2]
@@ -110,12 +110,12 @@ defmodule PlugRest.Resource do
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [malformed_request: 2]
 
-  @callback moved_permanently(conn, state) :: {{true, iodata()} | false, conn, state}
+  @callback moved_permanently(conn, state) :: {{true, binary()} | false, conn, state}
                                             | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [moved_permanently: 2]
 
-  @callback moved_temporarily(conn, state) :: {{true, iodata()} | false, conn, state}
+  @callback moved_temporarily(conn, state) :: {{true, binary()} | false, conn, state}
                                             | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [moved_temporarily: 2]
