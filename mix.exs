@@ -1,7 +1,7 @@
 defmodule PlugRest.Mixfile do
   use Mix.Project
 
-  @version "0.4.5"
+  @version "0.4.6"
 
   def project do
     [app: :plug_rest,
@@ -10,6 +10,7 @@ defmodule PlugRest.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      dialyzer: [plt_add_deps: true],
+     docs: [extras: ["README.md"]],
      description: description(),
      package: package(),
      deps: deps()]
@@ -34,6 +35,7 @@ defmodule PlugRest.Mixfile do
   defp deps do
     [{:plug, "~> 1.0"},
      {:cowboy, "~> 1.0"},
+     {:ex_doc, ">= 0.0.0", only: :dev},
      {:dialyxir, "~> 0.3.5", only: [:dev]}]
 
   end
