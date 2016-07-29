@@ -1,5 +1,10 @@
 ## Changelog
 
+## v0.4.5
+
+* Bug fixes
+  * Fix specs for some resource callback return types
+
 ## v0.4.1
 
 * Enhancements

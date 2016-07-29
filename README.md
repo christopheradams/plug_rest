@@ -49,7 +49,7 @@ Add PlugRest to your project in two steps:
     def deps do
       [{:cowboy, "~> 1.0.0"},
        {:plug, "~> 1.0"},
-       {:plug_rest, "~> 0.4.0"}]
+       {:plug_rest, "~> 0.4.5"}]
     end
     ```
 
