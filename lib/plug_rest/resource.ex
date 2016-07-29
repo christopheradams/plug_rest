@@ -347,9 +347,11 @@ defmodule PlugRest.Resource do
   defp prioritize_accept(accept) do
     accept
     |> Enum.sort(fn
-      {media_type_a, quality, _accept_params_a}, {media_type_b, quality, _accept_params_b} ->
+      {media_type_a, quality, _accept_params_a},
+      {media_type_b, quality, _accept_params_b} ->
         prioritize_mediatype(media_type_a, media_type_b)
-      {_media_type_a, quality_a, _accept_params_a}, {_media_type_b, quality_b, _accept_params_b} ->
+      {_media_type_a, quality_a, _accept_params_a},
+      {_media_type_b, quality_b, _accept_params_b} ->
         quality_a > quality_b
     end)
   end
@@ -387,11 +389,14 @@ defmodule PlugRest.Resource do
     choose_media_type(conn, state, accept)
   end
 
-  defp match_media_type(conn, state, accept, c_tp, media_type = {{"*", "*", _params_a}, _q_a, _a_pa}) do
+  defp match_media_type(conn, state, accept, c_tp,
+  media_type = {{"*", "*", _params_a}, _q_a, _a_pa}) do
     match_media_type_params(conn, state, accept, c_tp, media_type)
   end
 
-  defp match_media_type(conn, state, accept, c_tp = [{{type, sub_type_p, _p_p}, _fun} | _tail], media_type = {{type, sub_type_a, _p_a}, _q_a, _a_pa}) when sub_type_p === sub_type_a or sub_type_a === "*" do
+  defp match_media_type(conn, state, accept, c_tp = [{{type, sub_type_p, _p_p}, _fun} | _tail],
+  media_type = {{type, sub_type_a, _p_a}, _q_a, _a_pa})
+  when sub_type_p === sub_type_a or sub_type_a === "*" do
     match_media_type_params(conn, state, accept, c_tp, media_type)
   end
 
@@ -400,14 +405,18 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp match_media_type_params(conn, state, _accept, [provided = {{t_p, s_tp, %{}}, _fun} | _tail], {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
+  defp match_media_type_params(conn, state, _accept,
+  [provided = {{t_p, s_tp, %{}}, _fun} | _tail],
+  {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
     p_mt = {t_p, s_tp, params_a}
     conn
     |> put_resp_content_type(print_media_type(p_mt))
     |> languages_provided(%{state | content_type_a: provided})
   end
 
-  defp match_media_type_params(conn, state, accept, [provided = {p_mt = {_t_p, _s_tp, params_p}, _fun} | tail], media_type = {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
+  defp match_media_type_params(conn, state, accept,
+  [provided = {p_mt = {_t_p, _s_tp, params_p}, _fun} | tail],
+  media_type = {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
     case :lists.sort(params_p) === :lists.sort(params_a) do
       true ->
         conn
@@ -507,7 +516,8 @@ defmodule PlugRest.Resource do
 
 
   defp prioritize_charsets(accept_charsets) do
-    accept_charsets2 = :lists.sort(fn {_charset_a, quality_a}, {_charset_b, quality_b} -> quality_a > quality_b end, accept_charsets)
+    accept_charsets2 = :lists.sort(fn {_charset_a, quality_a}, {_charset_b, quality_b} ->
+      quality_a > quality_b end, accept_charsets)
     case :lists.keymember("*", 1, accept_charsets2) do
       true ->
         accept_charsets2
@@ -544,7 +554,8 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp set_content_type(conn, %{content_type_a: {{type, sub_type, params}, _fun}, charset_a: charset} = state) do
+  defp set_content_type(conn, %{content_type_a: {{type, sub_type, params}, _fun},
+  charset_a: charset} = state) do
     params_bin = set_content_type_build_params(params, [])
     content_type = print_media_type({type, sub_type, params_bin})
     conn2 = case charset do
@@ -767,7 +778,8 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp precondition_is_head_get(conn, %{method: var_method} = state) when var_method === "HEAD" or var_method === "GET" do
+  defp precondition_is_head_get(conn, %{method: var_method} = state)
+  when var_method === "HEAD" or var_method === "GET" do
     not_modified(conn, state)
   end
 
@@ -873,7 +885,9 @@ defmodule PlugRest.Resource do
 
 
   defp previously_existed(conn, state) do
-    expect(conn, state, :previously_existed, false, fn r, s -> is_post_to_missing_resource(r, s, 404) end, fn r, s -> moved_permanently(r, s, &moved_temporarily/2) end)
+    expect(conn, state, :previously_existed, false,
+      fn r, s -> is_post_to_missing_resource(r, s, 404) end,
+      fn r, s -> moved_permanently(r, s, &moved_temporarily/2) end)
   end
 
 
@@ -914,11 +928,13 @@ defmodule PlugRest.Resource do
     is_conflict(conn, state)
   end
 
-  defp method(conn, %{method: var_method} = state) when var_method === "POST" or var_method === "PATCH" do
+  defp method(conn, %{method: var_method} = state)
+  when var_method === "POST" or var_method === "PATCH" do
     accept_resource(conn, state)
   end
 
-  defp method(conn, %{method: var_method} = state) when var_method === "GET" or var_method === "HEAD" do
+  defp method(conn, %{method: var_method} = state)
+  when var_method === "GET" or var_method === "HEAD" do
     set_resp_body_etag(conn, state)
   end
 
@@ -968,11 +984,14 @@ defmodule PlugRest.Resource do
     respond(conn, state, 415)
   end
 
-  defp choose_content_type(conn, state, content_type, [{accepted, fun} | _tail]) when accepted === %{} or accepted === content_type do
+  defp choose_content_type(conn, state, content_type, [{accepted, fun} | _tail])
+  when accepted === %{} or accepted === content_type do
     process_content_type(conn, state, fun)
   end
 
-  defp choose_content_type(conn, state, {type, sub_type, param}, [{{type, sub_type, accepted_param}, fun} | _tail]) when accepted_param === %{} or accepted_param === param do
+  defp choose_content_type(conn, state, {type, sub_type, param},
+  [{{type, sub_type, accepted_param}, fun} | _tail])
+  when accepted_param === %{} or accepted_param === param do
     process_content_type(conn, state, fun)
   end
 
@@ -1116,8 +1135,6 @@ defmodule PlugRest.Resource do
 
 
   @spec encode_etag({:strong | :weak, binary()}) :: iolist()
-
-
   defp encode_etag({:strong, etag}) do
     [?", etag, ?"]
   end
@@ -1173,7 +1190,8 @@ defmodule PlugRest.Resource do
       :no_call ->
         {:undefined, conn, %{state | last_modified: :no_call}}
       {last_modified, conn2, handler_state} ->
-        {last_modified, conn2, %{state | handler_state: handler_state, last_modified: last_modified}}
+        {last_modified, conn2,
+         %{state | handler_state: handler_state, last_modified: last_modified}}
     end
   end
 
