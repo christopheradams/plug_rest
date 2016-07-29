@@ -305,10 +305,6 @@ defmodule PlugRest.RouterTest do
     match "/match" do
       send_resp(conn, 200, "Matches!")
     end
-
-    match _ do
-      send_resp(conn, 404, "Not found!")
-    end
   end
 
   test "basic DSL is available" do
@@ -331,7 +327,7 @@ defmodule PlugRest.RouterTest do
     conn = build_conn(:get, "/unknown")
     |> test_status(404)
 
-    assert conn.resp_body == "Not found!"
+    assert conn.resp_body == ""
   end
 
   test "resource module that does not exist returns 500" do

@@ -31,9 +31,21 @@ defmodule PlugRest.Router do
     quote location: :keep do
       use Plug.Router
       import PlugRest.Router
+      @before_compile PlugRest.Router
 
       plug :match
       plug :dispatch
+    end
+  end
+
+
+  @doc false
+  defmacro __before_compile__(_env) do
+    quote do
+      import Plug.Router, only: [match: 2]
+      match _ do
+        send_resp(var!(conn), 404, "")
+      end
     end
   end
 

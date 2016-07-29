@@ -49,7 +49,7 @@ Add PlugRest to your project in two steps:
     def deps do
       [{:cowboy, "~> 1.0.0"},
        {:plug, "~> 1.0"},
-       {:plug_rest, "~> 0.4.5"}]
+       {:plug_rest, "~> 0.5.0"}]
     end
     ```
 
@@ -97,10 +97,6 @@ defmodule MyApp.Router do
   match "/match" do
     send_resp(conn, 200, "Match")
   end
-
-  match _ do
-    send_resp(conn, 404, "Not found")
-  end
 end
 ```
 
@@ -108,8 +104,11 @@ The PlugRest Router adds a `resource` macro which accepts a URL path
 and a Module that will handle all the callbacks on the Resource.
 
 You can also use the `match` macros from `Plug.Router`.
-In the example above, we match on all routes with `_` and return a
-`404` response in case none of the above routes matched.
+This provides an escape hatch to bypass the REST mechanism for a
+particular route and send a Plug response manually.
+
+If no routes match, the PlugRest will send a response with a `404`
+status code to the client automatically.
 
 #### Dynamic path segments
 

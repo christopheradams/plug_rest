@@ -1,5 +1,14 @@
 ## Changelog
 
+## v0.5.0
+
+* Enhancements
+  * Send 404 response by default when no routes match
+
+* Deprecations
+  * Using `match _ do` in your Router to handle 404 responses is no
+    longer necessary and will show a compiler warning when present
+
 ## v0.4.5
 
 * Bug fixes
