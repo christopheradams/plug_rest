@@ -21,6 +21,9 @@ defmodule PlugRest.Resource do
     end
   end
 
+  @type media_type :: {binary(), binary(), %{binary() => binary()}}
+  @type content_handler :: {binary() | media_type, atom()}
+
   ## Common handler callbacks
 
   @callback init(conn, state) :: {:ok, conn, state}
@@ -45,12 +48,12 @@ defmodule PlugRest.Resource do
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [charsets_provided: 2]
 
-  @callback content_types_accepted(conn, state) :: {[{binary() | {binary(), binary(), %{binary() => binary()}}, atom()}], conn, state}
+  @callback content_types_accepted(conn, state) :: {[content_handler], conn, state}
                                                  | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [content_types_accepted: 2]
 
-  @callback content_types_provided(conn, state) :: {[{binary() | {binary(), binary(), %{binary() => binary()}}, atom()}], conn, state}
+  @callback content_types_provided(conn, state) :: {[content_handler], conn, state}
                                                  | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [content_types_provided: 2]
