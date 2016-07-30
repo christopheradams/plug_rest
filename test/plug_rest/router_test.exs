@@ -86,6 +86,40 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule ConflictResource do
+    use PlugRest.Resource
+
+    def allowed_methods(conn, state) do
+      {["PUT"], conn, state}
+    end
+
+    def is_conflict(conn, state) do
+      {:true, conn, state}
+    end
+  end
+
+  defmodule DeleteResource do
+    use PlugRest.Router
+
+    def allowed_methods(conn, state) do
+      {["DELETE"], conn, state}
+    end
+
+    def delete_resource(conn, state) do
+      {true, conn, state}
+    end
+
+    def delete_completed(conn, state) do
+      %{"completed" => completed} = fetch_query_params(conn).query_params
+      case completed do
+        "true" ->
+          {true, conn, state}
+        _ ->
+          {false, conn, state}
+      end
+    end
+  end
+
   defmodule JsonResource do
     use PlugRest.Resource
 
@@ -283,6 +317,8 @@ defmodule PlugRest.RouterTest do
     resource "/forbidden", ForbiddenResource
     resource "/invalid_content_headers", InvalidContentHeadersResource
     resource "/invalid_entity_length", InvalidEntityLengthResource
+    resource "/conflict", ConflictResource
+    resource "/delete", DeleteResource
     resource "/json_resource", JsonResource
     resource "/hypermedia_resource", HypermediaResource
     resource "/content_negotiation", HypermediaResource
@@ -370,6 +406,18 @@ defmodule PlugRest.RouterTest do
     build_conn(:get, "/invalid_entity_length") |> test_status(413)
   end
 
+  test "put when conflict" do
+    build_conn(:put, "/conflict") |> test_status(409)
+  end
+
+  test "delete resource" do
+    build_conn(:delete, "/delete?completed=true") |> test_status(204)
+  end
+
+  test "delete not completed" do
+    build_conn(:delete, "/delete?completed=false") |> test_status(202)
+  end
+
   test "options sends allowed methods" do
     conn = build_conn(:options, "/")
     test_status(conn, 200)
@@ -420,6 +468,13 @@ defmodule PlugRest.RouterTest do
     |> test_status(200)
     |> test_header("content-type", "application/json; charset=utf-8")
     |> test_header("vary", "accept-language, accept")
+  end
+
+  test "content negotiation fails" do
+    conn(:get, "/content_negotiation")
+    |> put_req_header("accept", ",text/plain")
+    |> RestRouter.call([])
+    |> test_status(406)
   end
 
   test "language negotiation" do
