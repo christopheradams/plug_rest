@@ -382,6 +382,14 @@ defmodule PlugRest.SuiteTest do
     |> test_body("params")
   end
 
+  test "rest accept with param and quality, with different priority" do
+    conn(:get, "/param_all")
+    |> put_req_header("accept", "text/plain;level=1;q=0.5, text/plain;level=2;q=0.8")
+    |> RestRouter.call([])
+    |> test_status(200)
+    |> test_body("params")
+  end
+
   test "rest without accept" do
     conn(:get, "/param_all")
     |> RestRouter.call([])
@@ -401,9 +409,6 @@ defmodule PlugRest.SuiteTest do
     |> put_req_header("content-type", "text/plain; charset=utf-8")
     |> RestRouter.call([])
     |> test_status(204)
-  end
-
-  test "rest params all" do
   end
 
   test "rest status" do
