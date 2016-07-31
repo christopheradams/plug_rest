@@ -1,6 +1,7 @@
 defmodule PlugRest.Conn do
   @moduledoc """
   Helper functions for parsing Plug connection request headers
+  and accessing url path parameters
 
   """
 
@@ -22,25 +23,32 @@ defmodule PlugRest.Conn do
 
   @type header_value :: {String.t, map()}
 
+  @path_params_key :plug_rest_path_params
+
   @doc """
   Reads the dynamic segment values from a rest resource path
-
-  #Examples
-
-      iex > PlugRest.Conn.read_path_params(conn)
-      %{"id" => 123}
 
   """
   @spec read_path_params(conn, Keyword.t) :: %{binary => binary}
   def read_path_params(conn, opts \\ [])
 
-  def read_path_params(%Plug.Conn{private: %{plug_rest_path_params: params}},
+  def read_path_params(%Plug.Conn{private: %{@path_params_key => params}},
                       _opts) do
     params
   end
 
   def read_path_params(_conn, _opts) do
     %{}
+  end
+
+
+  @doc """
+  Sets the dynamic path segment values for a connection
+
+  """
+  @spec put_path_params(conn, %{binary => binary}) :: conn
+  def put_path_params(conn, params) do
+    put_private(conn, @path_params_key, params)
   end
 
 

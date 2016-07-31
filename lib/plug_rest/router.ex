@@ -86,7 +86,7 @@ defmodule PlugRest.Router do
           )
 
         # Save dynamic path segments into private connection storage
-        conn2 = var!(conn) |> put_private(:plug_rest_path_params, params)
+        conn2 = var!(conn) |> PlugRest.Conn.put_path_params(params)
 
         PlugRest.Resource.upgrade(conn2, unquote(handler), unquote(handler_state))
       end

@@ -4,10 +4,10 @@ defmodule PlugRest.ConnTest do
 
   import PlugRest.Conn
 
-  test "read path params" do
+  test "path params" do
     path_params = %{"id" => "1234"}
     conn = conn(:get, "/test")
-    |> put_private(:plug_rest_path_params, path_params)
+    |> put_path_params(path_params)
 
     assert read_path_params(conn) == path_params
   end
