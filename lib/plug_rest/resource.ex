@@ -130,7 +130,7 @@ defmodule PlugRest.Resource do
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [charsets_provided: 2]
 
-  @callback content_types_accepted(conn, state) :: {[content_handler], conn, state}
+  @callback content_types_accepted(conn, state) :: {[media_type], conn, state}
                                                  | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [content_types_accepted: 2]
