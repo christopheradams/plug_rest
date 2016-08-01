@@ -539,7 +539,7 @@ defmodule PlugRest.RouterTest do
     |> test_status(200)
   end
 
-  test "other" do
+  test "test no accept extension allowed, with extension" do
     conn(:get, "/no_ctp_params")
     |> put_req_header("accept", "text/html;level=2")
     |> RestRouter.call([])
