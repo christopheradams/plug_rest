@@ -100,7 +100,7 @@ defmodule PlugRest.Resource do
     end
   end
 
-  @type media_type :: {binary(), binary(), %{binary() => binary()}}
+  @type media_type :: {binary(), binary(), %{binary() => binary()} | :*}
   @type content_handler :: {binary() | media_type, atom()}
 
   @default_media_type {"text", "html", %{}}
@@ -488,9 +488,8 @@ defmodule PlugRest.Resource do
 
 
   defp match_media_type_params(conn, state, _accept,
-  [provided = {{t_p, s_tp, params_p}, _fun} | _tail],
-  {{_t_a, _s_ta, params_a}, _q_a, _a_pa})
-  when params_p == %{} do
+  [provided = {{t_p, s_tp, :*}, _fun} | _tail],
+  {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
     p_mt = {t_p, s_tp, params_a}
     conn
     |> put_media_type(p_mt)
@@ -641,7 +640,7 @@ defmodule PlugRest.Resource do
 
   defp set_content_type(conn, %{content_type_a: {{type, sub_type, params}, _fun},
   charset_a: charset} = state) do
-    params_bin = set_content_type_build_params(params, [])
+    params_bin = set_content_type_build_params(params)
     content_type = print_media_type({type, sub_type, params_bin})
     conn2 = case charset do
       :undefined ->
@@ -654,20 +653,12 @@ defmodule PlugRest.Resource do
   end
 
 
-  defp set_content_type_build_params(%{}, []) do
-    <<>>
+  defp set_content_type_build_params(:*) do
+    ""
   end
 
-  defp set_content_type_build_params([], []) do
-    <<>>
-  end
-
-  defp set_content_type_build_params([], acc) do
-    :lists.reverse(acc)
-  end
-
-  defp set_content_type_build_params([{attr, value} | tail], acc) do
-    set_content_type_build_params(tail, [[attr, "=", value], ";" | acc])
+  defp set_content_type_build_params(params) when is_map(params) do
+    Enum.map(params, fn ({k, v}) -> "#{k}=#{v}" end) |> Enum.join(";")
   end
 
 

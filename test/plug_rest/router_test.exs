@@ -178,11 +178,11 @@ defmodule PlugRest.RouterTest do
     end
   end
 
-  defmodule HtmlLevelsResource do
+  defmodule CtpParamsResource do
     use PlugRest.Resource
 
-    def content_types_provided(conn, state) do
-      {[{{"text", "html", %{"level" => "1"}}, :to_html}], conn, state}
+    def content_types_provided(conn, %{params: params} = state) do
+      {[{{"text", "html", params}, :to_html}], conn, state}
     end
 
     def to_html(conn, state) do
@@ -335,7 +335,9 @@ defmodule PlugRest.RouterTest do
     resource "/hypermedia_resource", HypermediaResource
     resource "/content_negotiation", HypermediaResource
     resource "/binary_ctp_resource", BinaryCtpResource
-    resource "/html_levels", HtmlLevelsResource
+    resource "/html_levels", CtpParamsResource, %{params: %{"level" => "1"}}
+    resource "/no_ctp_params", CtpParamsResource, %{params: %{}}
+    resource "/all_accept_ext", CtpParamsResource, %{params: :*}
     resource "/languages_resource", LanguagesResource
     resource "/charset_resource", CharsetResource
     resource "/resource_not_exists", ResourceExists, false
@@ -492,6 +494,20 @@ defmodule PlugRest.RouterTest do
 
   test "non-matching accept-extension in accept header" do
     conn(:get, "/html_levels")
+    |> put_req_header("accept", "text/html;level=2")
+    |> RestRouter.call([])
+    |> test_status(406)
+  end
+
+  test "no accept extension allowed in content types provided" do
+    conn(:get, "/no_ctp_params")
+    |> put_req_header("accept", "text/html")
+    |> RestRouter.call([])
+    |> test_status(200)
+  end
+
+  test "other" do
+    conn(:get, "/no_ctp_params")
     |> put_req_header("accept", "text/html;level=2")
     |> RestRouter.call([])
     |> test_status(406)

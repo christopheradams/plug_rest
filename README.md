@@ -207,12 +207,12 @@ Differences between PlugRest and cowboy_rest:
   should return `{:ok, conn, state}`.
 * The content callbacks (like `to_html`) return `{body, conn, state}`
   where the body is one of `iodata` or `{:chunked, Enum.t}`.
-* Media types take the form `{binary, binary, %{binary => binary}}`,
-  following `Plug.Conn.Utils` parsers.
 * The content types provided and accepted callbacks can describe each
-  type with a String `"text/html"` or tuple `{"text", "html", %{}}`,
-* In a media type `{type, subtype, params}` tuple, the params are a
-  map rather than a list of tuples.
+  media type with a String like `"text/html"`; or a tuple in the form
+  `{type, subtype, params}`, where params can be `%{}` (no params
+  acceptable), `:*` (all params acceptable), or a map of acceptable
+  params `%{"level" => "1"}`.
+
 
 ### Upgrading
 

@@ -161,7 +161,7 @@ defmodule PlugRest.SuiteTest do
 
 
     def content_types_provided(conn, state) do
-      {[{{"text", "plain", %{}}, :get_text_plain}], conn, state}
+      {[{{"text", "plain", :*}, :get_text_plain}], conn, state}
     end
 
 
