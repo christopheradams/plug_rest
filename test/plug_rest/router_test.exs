@@ -128,11 +128,11 @@ defmodule PlugRest.RouterTest do
     end
 
     def content_types_provided(conn, state) do
-      {[{{"application", "json", %{}}, :to_json}], conn, state}
+      {[{{"application", "json", :*}, :to_json}], conn, state}
     end
 
     def content_types_accepted(conn, state) do
-      {[{{"application", "json", %{}}, :from_json}], conn, state}
+      {[{{"application", "json", :*}, :from_json}], conn, state}
     end
 
     def to_json(conn, state) do
@@ -544,6 +544,13 @@ defmodule PlugRest.RouterTest do
     |> RestRouter.call([])
     |> test_status(303)
     |> test_header("location", "/new")
+  end
+
+  test "post accepted content type with charset" do
+    conn(:post, "/json_resource", "{}")
+    |> put_req_header("content-type", "application/json; charset=utf-8")
+    |> RestRouter.call([])
+    |> test_status(303)
   end
 
   test "resource not exists returns 404" do

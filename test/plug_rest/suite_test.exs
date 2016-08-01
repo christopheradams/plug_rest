@@ -180,7 +180,7 @@ defmodule PlugRest.SuiteTest do
 
 
     def content_types_accepted(conn, state) do
-      {[{{"text", "plain", %{}}, :put_text_plain}], conn, state}
+      {[{{"text", "plain", :*}, :put_text_plain}], conn, state}
     end
 
 

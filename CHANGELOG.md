@@ -8,6 +8,7 @@
 * Bug fixes
   * Fix content negotiation when media type params do not match
   * Let content types provided correctly match all or none accept-extensions
+  * Ditto for content types accepted
 
 ## v0.5.0
 
