@@ -24,6 +24,7 @@ defmodule PlugRest.Conn do
   @type header_value :: {String.t, map()}
 
   @path_params_key :plug_rest_path_params
+  @media_type_key :plug_rest_media_type
 
   @doc """
   Reads the dynamic segment values from a rest resource path
@@ -51,6 +52,30 @@ defmodule PlugRest.Conn do
     put_private(conn, @path_params_key, params)
   end
 
+  @doc """
+  Returns the requested media type
+
+  """
+  @spec get_media_type(conn, Keyword.t) :: media_type | String.t
+  def get_media_type(conn, opts \\ [])
+
+  def get_media_type(%Plug.Conn{private: %{@media_type_key => media_type}},
+                      _opts) do
+    media_type
+  end
+
+  def get_media_type(_conn, _opts) do
+    ""
+  end
+
+  @doc """
+  Puts the media type in the connection
+
+  """
+  @spec put_media_type(conn, media_type) :: conn
+  def put_media_type(conn, media_type) do
+    put_private(conn, @media_type_key, media_type)
+  end
 
   @doc """
   Parses request date header as Erlang date/time tuples

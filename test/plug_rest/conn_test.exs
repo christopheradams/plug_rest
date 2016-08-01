@@ -18,6 +18,20 @@ defmodule PlugRest.ConnTest do
     assert read_path_params(conn) == %{}
   end
 
+  test "media type" do
+    media_type = {"text", "html", %{}}
+    conn = conn(:get, "/test")
+    |> put_media_type(media_type)
+
+    assert get_media_type(conn) == media_type
+  end
+
+  test "get non-existent media type" do
+    conn = conn(:get, "/test")
+
+    assert get_media_type(conn) == ""
+  end
+
   test "parse content type header" do
     content_type = "application/json"
 
