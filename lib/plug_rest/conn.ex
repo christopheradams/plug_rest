@@ -8,7 +8,7 @@ defmodule PlugRest.Conn do
   import Plug.Conn
   import Plug.Conn.Utils
 
-  @type conn :: %Plug.Conn{}
+  @type conn :: Plug.Conn.t
 
   @type type :: String.t
   @type subtype :: String.t
