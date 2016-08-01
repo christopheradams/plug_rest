@@ -57,7 +57,7 @@ defmodule PlugRest.ConnTest do
   end
 
   test "parse content type accept header" do
-    accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8;err"
+    accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8;text/html;err"
 
     actual_media_types = conn(:get, "/")
     |> put_req_header("accept", accept)
@@ -65,8 +65,8 @@ defmodule PlugRest.ConnTest do
 
     expected_media_types = [{{"text", "html", %{}}, 1.0, %{}},
       {{"application", "xhtml+xml", %{}}, 1.0, %{}},
-      {{"application", "xml", %{"q" => "0.9"}}, 0.9, %{}},
-      {{"*", "*", %{"q" => "0.8"}}, 0.8, %{}}]
+      {{"application", "xml", %{}}, 0.9, %{}},
+      {{"*", "*", %{}}, 0.8, %{}}]
 
     assert actual_media_types == expected_media_types
   end

@@ -217,7 +217,7 @@ defmodule PlugRest.Conn do
       quality = case Float.parse(params["q"] || "1") do
         {q, _} -> q
         _ -> 1 end
-      {{type, subtype, params}, quality, %{}} end)
+      {{type, subtype, Map.delete(params, "q")}, quality, %{}} end)
   end
 
   @spec parse_header([]) :: []
