@@ -178,6 +178,18 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule HtmlLevelsResource do
+    use PlugRest.Resource
+
+    def content_types_provided(conn, state) do
+      {[{{"text", "html", %{"level" => "1"}}, :to_html}], conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"HTML", conn, state}
+    end
+  end
+
   defmodule LanguagesResource do
     use PlugRest.Resource
 
@@ -323,6 +335,7 @@ defmodule PlugRest.RouterTest do
     resource "/hypermedia_resource", HypermediaResource
     resource "/content_negotiation", HypermediaResource
     resource "/binary_ctp_resource", BinaryCtpResource
+    resource "/html_levels", HtmlLevelsResource
     resource "/languages_resource", LanguagesResource
     resource "/charset_resource", CharsetResource
     resource "/resource_not_exists", ResourceExists, false
@@ -473,6 +486,13 @@ defmodule PlugRest.RouterTest do
   test "content negotiation fails" do
     conn(:get, "/content_negotiation")
     |> put_req_header("accept", ",text/plain")
+    |> RestRouter.call([])
+    |> test_status(406)
+  end
+
+  test "non-matching accept-extension in accept header" do
+    conn(:get, "/html_levels")
+    |> put_req_header("accept", "text/html;level=2")
     |> RestRouter.call([])
     |> test_status(406)
   end

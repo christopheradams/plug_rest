@@ -488,8 +488,9 @@ defmodule PlugRest.Resource do
 
 
   defp match_media_type_params(conn, state, _accept,
-  [provided = {{t_p, s_tp, %{}}, _fun} | _tail],
-  {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
+  [provided = {{t_p, s_tp, params_p}, _fun} | _tail],
+  {{_t_a, _s_ta, params_a}, _q_a, _a_pa})
+  when params_p == %{} do
     p_mt = {t_p, s_tp, params_a}
     conn
     |> put_media_type(p_mt)
@@ -500,7 +501,7 @@ defmodule PlugRest.Resource do
   defp match_media_type_params(conn, state, accept,
   [provided = {p_mt = {_t_p, _s_tp, params_p}, _fun} | tail],
   media_type = {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
-    case :lists.sort(params_p) === :lists.sort(params_a) do
+    case params_p === params_a do
       true ->
         conn
         |> put_media_type(p_mt)
