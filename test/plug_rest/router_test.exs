@@ -571,6 +571,24 @@ defmodule PlugRest.RouterTest do
     assert conn.resp_body == "HELLOWORLD"
   end
 
+  test "save media type from request" do
+    conn = conn(:get, "/")
+    |> RestRouter.call([])
+
+    assert PlugRest.Conn.get_media_type(conn) == ""
+
+    conn = conn(:get, "/json_resource")
+    |> RestRouter.call([])
+
+    assert PlugRest.Conn.get_media_type(conn) == ""
+
+    conn = conn(:get, "/json_resource")
+    |> put_req_header("accept", "application/json")
+    |> RestRouter.call([])
+
+    assert PlugRest.Conn.get_media_type(conn) == {"application", "json", %{}}
+  end
+
   defp build_conn(method, path) do
     conn(method, path) |> RestRouter.call([])
   end

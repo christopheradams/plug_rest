@@ -492,6 +492,7 @@ defmodule PlugRest.Resource do
   {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
     p_mt = {t_p, s_tp, params_a}
     conn
+    |> put_media_type(p_mt)
     |> put_resp_content_type(print_media_type(p_mt))
     |> languages_provided(%{state | content_type_a: provided})
   end
@@ -502,6 +503,7 @@ defmodule PlugRest.Resource do
     case :lists.sort(params_p) === :lists.sort(params_a) do
       true ->
         conn
+        |> put_media_type(p_mt)
         |> put_resp_content_type(print_media_type(p_mt))
         |> languages_provided(%{state | content_type_a: provided})
       false ->

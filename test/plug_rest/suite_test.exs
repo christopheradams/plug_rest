@@ -166,15 +166,14 @@ defmodule PlugRest.SuiteTest do
 
 
     def get_text_plain(conn, state) do
-      accept = get_req_header(conn, "accept")
-      media_types = PlugRest.Conn.parse_accept_header(accept)
-      body = case List.first(media_types) do
-               nil ->
+      media_type = PlugRest.Conn.get_media_type(conn)
+      body = case media_type do
+               "" ->
                  "'*'"
-               {_, _, %{"level" => _}} ->
-                 "params"
+               {_, _, %{"level" => level}} ->
+                 "level=#{level}"
                {_, _, %{}} ->
-                 "[]"
+                 "%{}"
              end
       {body, conn, state}
     end
@@ -363,7 +362,7 @@ defmodule PlugRest.SuiteTest do
     |> put_req_header("accept", "text/plain")
     |> RestRouter.call([])
     |> test_status(200)
-    |> test_body("[]")
+    |> test_body("%{}")
   end
 
   test "rest accept with param" do
@@ -371,7 +370,7 @@ defmodule PlugRest.SuiteTest do
     |> put_req_header("accept", "text/plain;level=1")
     |> RestRouter.call([])
     |> test_status(200)
-    |> test_body("params")
+    |> test_body("level=1")
   end
 
   test "rest accept with param and quality" do
@@ -379,7 +378,7 @@ defmodule PlugRest.SuiteTest do
     |> put_req_header("accept", "text/plain;level=1;q=0.8, text/plain;level=2;q=0.5")
     |> RestRouter.call([])
     |> test_status(200)
-    |> test_body("params")
+    |> test_body("level=1")
   end
 
   test "rest accept with param and quality, with different priority" do
@@ -387,7 +386,7 @@ defmodule PlugRest.SuiteTest do
     |> put_req_header("accept", "text/plain;level=1;q=0.5, text/plain;level=2;q=0.8")
     |> RestRouter.call([])
     |> test_status(200)
-    |> test_body("params")
+    |> test_body("level=2")
   end
 
   test "rest without accept" do
