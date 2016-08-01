@@ -117,7 +117,12 @@ defmodule PlugRest.Conn do
   @spec parse_media_type_header(conn, String.t) :: media_type
   def parse_media_type_header(conn, header) do
     [content_type] = get_req_header(conn, header)
-    {:ok, type, subtype, params} = content_type(content_type)
+    {:ok, type, subtype, maybe_params_map} = content_type(content_type)
+
+    # Work around a type error in Plug, which thinks that params are
+    # [{"binary", "binary"}], and not %{"binary" => "binary"}
+    # TODO: deprecate when plug is upgraded to 1.2
+    params = Map.new(maybe_params_map)
 
     ## Ensure that any value of charset is lowercase
     params2 = case Map.get(params, "charset") do
