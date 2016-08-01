@@ -1,5 +1,13 @@
 ## Changelog
 
+## v0.5.1
+
+* Enhancements
+  * Save chosen media type from accept header into private conn storage
+
+* Bug fixes
+  * Fix content negotiation when media type params do not match
+
 ## v0.5.0
 
 * Enhancements
