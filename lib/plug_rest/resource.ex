@@ -103,6 +103,9 @@ defmodule PlugRest.Resource do
   @type media_type :: {binary(), binary(), %{binary() => binary()}}
   @type content_handler :: {binary() | media_type, atom()}
 
+  @default_media_type {"text", "html", %{}}
+  @default_content_handler {@default_media_type, :to_html}
+
   ## Common handler callbacks
 
   @callback init(conn, state) :: {:ok, conn, state}
@@ -374,13 +377,13 @@ defmodule PlugRest.Resource do
   defp content_types_provided(conn, state) do
     case call(conn, state, :content_types_provided) do
       :no_call ->
-        state2 = %{state | content_types_p: [{{"text", "html", %{}}, :to_html}]}
+        state2 = %{state | content_types_p: [@default_content_handler]}
         try do
           case parse_media_range_header(conn, "accept") do
             [] ->
               conn
-              |> put_resp_content_type(print_media_type({"text", "html", %{}}))
-              |> languages_provided(%{state2 | content_type_a: {{"text", "html", %{}}, :to_html}})
+              |> put_resp_content_type(print_media_type(@default_media_type))
+              |> languages_provided(%{state2 | content_type_a: @default_content_handler})
             accept ->
               choose_media_type(conn, state2, prioritize_accept(accept))
           end
