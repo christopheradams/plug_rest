@@ -178,6 +178,26 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule AcceptAnyResource do
+    use PlugRest.Resource
+
+    def allowed_methods(conn, state) do
+      {["GET", "POST"], conn, state}
+    end
+
+    def content_types_accepted(conn, state) do
+      {[{:*, :from_content}], conn, state}
+    end
+
+    def from_content(conn, state) do
+      {true, conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"html", conn, state}
+    end
+  end
+
   defmodule CtpParamsResource do
     use PlugRest.Resource
 
@@ -334,6 +354,7 @@ defmodule PlugRest.RouterTest do
     resource "/json_resource", JsonResource
     resource "/hypermedia_resource", HypermediaResource
     resource "/content_negotiation", HypermediaResource
+    resource "/accept_any", AcceptAnyResource
     resource "/binary_ctp_resource", BinaryCtpResource
     resource "/html_levels", CtpParamsResource, %{params: %{"level" => "1"}}
     resource "/no_ctp_params", CtpParamsResource, %{params: %{}}
@@ -492,6 +513,18 @@ defmodule PlugRest.RouterTest do
     |> test_status(406)
   end
 
+  test "accept any content type" do
+    conn(:post, "/accept_any", "text")
+    |> put_req_header("content-type", "text/plain")
+    |> RestRouter.call([])
+    |> test_status(204)
+
+    conn(:post, "/accept_any", "text")
+    |> put_req_header("content-type", "application/json")
+    |> RestRouter.call([])
+    |> test_status(204)
+  end
+
   test "non-matching accept-extension in accept header" do
     conn(:get, "/html_levels")
     |> put_req_header("accept", "text/html;level=2")
@@ -540,7 +573,7 @@ defmodule PlugRest.RouterTest do
 
   test "post accepted content type with new location" do
     conn(:post, "/json_resource", "{}")
-    |> put_req_header("content-type", "application/json")
+    |> put_req_header("content-type", "application/json; charset=utf-8")
     |> RestRouter.call([])
     |> test_status(303)
     |> test_header("location", "/new")
