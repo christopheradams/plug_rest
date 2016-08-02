@@ -1,5 +1,10 @@
 ## Changelog
 
+## v0.5.2
+
+* Bug fixes
+  * Fix compiler warnings when using /glob/*_rest paths
+
 ## v0.5.1
 
 * Enhancements
