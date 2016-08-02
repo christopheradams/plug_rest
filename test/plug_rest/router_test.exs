@@ -367,6 +367,7 @@ defmodule PlugRest.RouterTest do
     resource "/moved_temporarily", MovedTemporarilyResource
     resource "/gone", GoneResource
     resource "/last_modified", LastModifiedResource
+    resource "/modified_undefined", IndexResource
 
     resource "/does_not_exist", DoesNotExistModule
 
@@ -628,6 +629,13 @@ defmodule PlugRest.RouterTest do
     |> put_req_header("if-none-match", "*")
     |> RestRouter.call([])
     |> test_status(304)
+  end
+
+  test "modified undefined" do
+    conn(:get, "/modified_undefined")
+    |> put_req_header("if-unmodified-since", "Sun, 17 Jul 2016 12:51:31 GMT")
+    |> RestRouter.call([])
+    |> test_status(200)
   end
 
   test "dynamic path populates connection params" do
