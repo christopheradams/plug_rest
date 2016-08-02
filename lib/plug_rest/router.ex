@@ -23,6 +23,45 @@ defmodule PlugRest.Router do
   Because the router builds on Plug's own Router, you can add additional
   plugs into the pipeline. See the documentation for `Plug.Router` for
   more information.
+
+
+  ## Routes
+
+      resource "/hello", HelloResource
+
+  The example above will route any requests for "/hello" to the
+  `HelloResource` module.
+
+  A route can also specify parameters which will be available to the
+  resource:
+
+      resource "/hello/:name", HelloResource
+
+  The value of the dynamic path segment can be read inside the
+  `HelloResource` module:
+
+      %{"name" => name} = read_path_params(conn)
+
+  Routes allow globbing, which will match the end of the route. The glob
+  can be discarded:
+
+      # matches all routes starting with /hello
+      resource "/hello/*_rest", HelloResource
+
+  Or saved as a param for the resource to read:
+
+      # matches all routes starting with /hello and saves the rest
+      resource "/hello/*rest", HelloResource
+
+  If we make a request to "/hello/value" then `read_path_params/1` will
+  return:
+
+      %{"rest" => ["value"]}
+
+  If we make a request to "/hello/value/extra" then `read_path_params/1`
+  will return:
+
+      %{"rest" => ["value", "extra"]}
   """
 
 

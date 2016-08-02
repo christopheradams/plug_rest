@@ -327,6 +327,17 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule GlobResource do
+    use PlugRest.Resource
+
+    def to_html(conn, state) do
+      params = read_path_params(conn)
+      bar = Enum.join(params["bar"], ", ")
+
+      {"bar: #{bar}", conn, state}
+    end
+  end
+
   defmodule ChunkedResource do
     use PlugRest.Resource
 
@@ -373,11 +384,33 @@ defmodule PlugRest.RouterTest do
 
     resource "/users/:user_id/comments/:comment_id", UserCommentResource
 
+    resource "/glob/*_rest", IndexResource
+    resource "/glob_params/*bar", GlobResource
+
     resource "/chunked", ChunkedResource
 
     match "/match" do
       send_resp(conn, 200, "Matches!")
     end
+  end
+
+  test "glob resource dispatch" do
+    conn = build_conn(:get, "/glob/value")
+    |> test_status(200)
+
+    assert conn.resp_body == "Plug REST";
+  end
+
+  test "glob values resource dispatch" do
+    conn = build_conn(:get, "/glob_params/value")
+    |> test_status(200)
+
+    assert conn.resp_body == "bar: value";
+
+    conn = build_conn(:get, "/glob_params/item/extra")
+    |> test_status(200)
+
+    assert conn.resp_body == "bar: item, extra";
   end
 
   test "basic DSL is available" do
