@@ -110,9 +110,15 @@ defmodule PlugRest.Router do
   defp add_resource(path, handler, handler_state) do
     {vars, _match} = Plug.Router.Utils.build_path_match(path)
 
-    binding = for var <- vars do
-      {Atom.to_string(var), Macro.var(var, nil)}
-    end
+    # Transform the list of path variables into a data structure that will
+    # bind to real path parameters inside the macro, like:
+    # `[{"bar", {:bar, [], nil}}]`. The first step creates the binding. The
+    # second removes any underscored variables, since using them in the macro
+    # will raise a compiler warning.
+    binding =
+      vars
+      |> Enum.map(fn(var) -> {Atom.to_string(var), Macro.var(var, nil)} end)
+      |> Enum.filter(fn({var, _macro}) -> String.at(var, 0) !== "_" end)
 
     quote do
       match unquote(path) do
