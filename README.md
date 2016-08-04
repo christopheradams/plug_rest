@@ -201,8 +201,8 @@ You can also use the `match` macros from `Plug.Router`.
 This provides an escape hatch to bypass the REST mechanism for a
 particular route and send a Plug response manually.
 
-If no routes match, the PlugRest will send a response with a `404`
-status code to the client automatically.
+If no routes match, PlugRest will send a response with a `404` status
+code to the client automatically.
 
 #### Dynamic path segments
 
