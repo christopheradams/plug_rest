@@ -96,7 +96,7 @@ and route, we prefer to describe our resources in a declarative way,
 and let a library encapsulate all of the decisions, while providing
 sane defaults when the resource's behavior is undefined.
 
-Let's see how PlugRest handles the above scenarior. First we tell the
+Let's see how PlugRest handles the above scenario. First we tell the
 router about our resource:
 
 ```elixir
