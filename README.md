@@ -11,6 +11,11 @@ PlugRest supplements `Plug.Router` with an additional `resource`
 macro, which matches a URL path with a resource handler module
 implementing REST semantics via a series of optional callbacks.
 
+PlugRest is perfect for creating well-behaved and semantically correct
+hypermedia web applications.
+
+[Documentation for PlugRest is available online](http://hexdocs.pm/plug_rest/).
+
 ## Hello World
 
 Define a router to match a path with a resource handler:
@@ -34,6 +39,95 @@ defmodule HelloResource do
   end
 end
 ```
+
+## Why PlugRest?
+
+> The key abstraction of information in REST is a resource. <br/>
+> —Roy Fielding
+
+[Plug](https://github.com/elixir-lang/plug) forms the foundation of
+most web apps we write in Elixir, by letting us specify a pipeline of
+composable modules that transform HTTP requests and responses to
+define our application's behavior.
+
+Out of the box, the original Plug Router gives us a DSL in the form of
+macros which generate routes:
+
+```elixir
+get "/hello" do
+    send_resp(conn, 200, "world")
+end
+```
+
+The router is a plug which can match on an HTTP verb and a URL path,
+and dispatches the request to a function body operating on the
+connection.
+
+A Phoenix router works similarly: it generates routes that match verbs
+and paths, which dispatch to a controller "action".
+
+```elixir
+get "/hello", HelloController, :show
+```
+
+Phoenix has a few extra features that help us craft an API, such as
+the `resources` macro that generates eight different verb and path
+pairs, and an `accepts` plug that assists with content negotiation.
+
+In either case, we are given a single function in which to formulate a
+semantically correct HTTP response, including explicitly returning an
+HTTP status code if something goes wrong (or right).
+
+For example, if a resource does not exist, we have to implement a `404
+Not Found` response in every single action pertaining to that resource.
+
+Some types of responses are nearly closed off. For example, what happens
+when we `POST` a request to the above routes? Plug Router crashes and
+sends a `500 Internal Server Error`. Phoenix shrugs and says `404 Not
+Found`. The correct reply, of course, is `405 Method Not Allowed`
+along with a list of supported methods in the header.
+
+In the final analysis, Plug and Phoenix help us route requests, but
+it's not enough for a hypermedia API. In order words, the **rest** is
+up to us. :smirk:
+
+Instead of having to redefine HTTP semantics for every web application
+and route, we prefer to describe our resources in a declarative way,
+and let a library encapsulate all of the decisions, while providing
+sane defaults when the resource's behavior is undefined.
+
+Let's see how PlugRest handles the above scenarior. First we tell the
+router about our resource:
+
+```elixir
+resource "/hello", HelloResource
+```
+
+And that's it! By default our resource supports "HEAD", "GET", and
+"OPTIONS" methods. If we want to support `POST`, we implement an
+`allowed_methods/2` function in our resource:
+
+```elixir
+def allowed_methods(conn, state) do
+  {["HEAD", "GET", "OPTIONS", "POST"], conn, state}
+end
+```
+
+The [docs](https://hexdocs.pm/plug_rest/0.5.1/PlugRest.Resource.html)
+for `PlugRest.Resource` list all of the supported REST callbacks and
+their default values.
+
+Finally, it deserves mention that PlugRest is not the only library to
+take a resource-oriented approach to REST-based frameworks. Basho's
+[Webmachine](https://github.com/webmachine/webmachine) has been a
+stable standby for years, and inspired similar frameworks in many
+other programming languages. PlugRest's most immediate antecedent is
+the `cowboy_rest` module in the Cowboy webserver that currently
+underpins Phoenix and every other Plug-based Elixir app.
+
+You can use PlugRest in a standalone web app or as part of an existing
+Phoenix application. Details below!
+
 
 ## Installation
 
