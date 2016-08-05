@@ -643,7 +643,7 @@ defmodule PlugRest.Resource do
     params_bin = set_content_type_build_params(params)
     content_type = print_media_type({type, sub_type, params_bin})
     conn2 = case charset do
-      :undefined ->
+      nil ->
         put_resp_content_type(conn, content_type)
       ^charset ->
         put_resp_content_type(conn, content_type, charset)
