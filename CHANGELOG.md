@@ -2,6 +2,11 @@
 
 ## v0.6.0
 
+* Enhancements
+  * Content handler callbacks (like `to_html`) can return `{:file,
+    filename}` for the body, which will use `Plug.Conn.send_file/3` to
+    send the response
+
 * Backwards incompatible changes
   * The default values of `expires`, `generate_etag`, and
     `last_modified` are `nil` instead of `:undefined`

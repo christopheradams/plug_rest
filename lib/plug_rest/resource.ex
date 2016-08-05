@@ -84,6 +84,14 @@ defmodule PlugRest.Resource do
   through `content_types_accepted/2` and `content_types_provided/2`. It is
   conventional to name the functions after the content types that they
   handle, such as `from_html` and `to_html`.
+
+  The handler function which provides a representation of the resource
+  must return a three element tuple of the form `{body, conn, state}`,
+  where `body` is one of:
+
+  * `binary()`, which will be sent with `send_resp/3`
+  * `{:chunked, Enum.t}, which will use `send_chunked/2`
+  * `{:file, binary()}, which will use `send_file/3`
   """
 
   import PlugRest.Utils
@@ -1357,6 +1365,10 @@ defmodule PlugRest.Resource do
   defp terminate(conn, %{resp_body: {:chunked, body}} = _state) do
     conn2 = conn |> send_chunked(conn.status)
     Enum.into(body, conn2)
+  end
+
+  defp terminate(conn, %{resp_body: {:file, filename}} = _state) do
+    send_file(conn, conn.status, filename)
   end
 
   defp terminate(conn, state) do

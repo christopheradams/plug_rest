@@ -323,7 +323,8 @@ Differences between PlugRest and cowboy_rest:
 * The default values of `expires/2`, `generate_etag/2`, and
   `last_modified/2` are `nil` instead of `:undefined`
 * The content callbacks (like `to_html`) return `{body, conn, state}`
-  where the body is one of `iodata` or `{:chunked, Enum.t}`.
+  where the body is one of `binary()`, `{:chunked, Enum.t}`, or
+  `{:file, binary()}`.
 * The content types provided and accepted callbacks can describe each
   media type with a String like `"text/html"`; or a tuple in the form
   `{type, subtype, params}`, where params can be `%{}` (no params

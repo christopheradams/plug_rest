@@ -359,6 +359,17 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule SendFileResource do
+    use PlugRest.Resource
+
+    def to_html(conn, state) do
+      {:ok, cwd} = File.cwd()
+      file = "test/fixtures/hello_world.txt"
+      path = Path.absname(file, cwd)
+      {{:file, path}, conn, state}
+    end
+  end
+
   defmodule RestRouter do
     use PlugRest.Router
 
@@ -400,6 +411,7 @@ defmodule PlugRest.RouterTest do
     resource "/glob_params/*bar", GlobResource
 
     resource "/chunked", ChunkedResource
+    resource "/send_file", SendFileResource
 
     match "/match" do
       send_resp(conn, 200, "Matches!")
@@ -726,6 +738,15 @@ defmodule PlugRest.RouterTest do
     assert conn.status == 200
 
     assert conn.resp_body == "HELLOWORLD"
+  end
+
+  test "send_file body" do
+    conn = build_conn(:get, "/send_file")
+
+    assert conn.state == :sent
+    assert conn.status == 200
+
+    assert conn.resp_body =~ "Hello World"
   end
 
   test "save media type from request" do
