@@ -363,7 +363,6 @@ defmodule PlugRest.RouterTest do
     resource "/conflict", ConflictResource
     resource "/delete", DeleteResource
     resource "/json_resource", JsonResource
-    resource "/hypermedia_resource", HypermediaResource
     resource "/content_negotiation", HypermediaResource
     resource "/accept_any", AcceptAnyResource
     resource "/binary_ctp_resource", BinaryCtpResource
