@@ -1,5 +1,10 @@
 ## Changelog
 
+## v0.5.3
+
+* Enhancements
+  * Make current time function configurable, for testing purposes
+
 ## v0.5.2
 
 * Bug fixes

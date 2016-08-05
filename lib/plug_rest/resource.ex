@@ -880,7 +880,8 @@ defmodule PlugRest.Resource do
 
 
   defp if_modified_since_now(conn, state, if_modified_since) do
-    case if_modified_since > :erlang.universaltime() do
+    universaltime = Application.get_env(:plug_rest, :current_time_fun)
+    case if_modified_since > universaltime.() do
       true ->
         method(conn, state)
       false ->
