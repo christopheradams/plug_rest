@@ -14,7 +14,10 @@ implementing REST semantics via a series of optional callbacks.
 PlugRest is perfect for creating well-behaved and semantically correct
 hypermedia web applications.
 
-[Documentation for PlugRest is available online](http://hexdocs.pm/plug_rest/).
+[Documentation for PlugRest is available on hexdocs](http://hexdocs.pm/plug_rest/).<br/>
+[Source code is available on Github](https://github.com/christopheradams/plug_rest).<br/>
+[Package is available on hex](https://hex.pm/packages/plug_rest).
+
 
 ## Hello World
 
