@@ -537,6 +537,18 @@ defmodule PlugRest.RouterTest do
     |> test_status(200)
     |> test_header("content-type", "application/json; charset=utf-8")
     |> test_header("vary", "accept-language, accept")
+
+    conn(:get, "/content_negotiation")
+    |> put_req_header("accept", "*/*")
+    |> RestRouter.call([])
+    |> test_status(200)
+    |> test_header("content-type", "text/html; charset=utf-8")
+
+    conn(:get, "/content_negotiation")
+    |> put_req_header("accept", "text/*")
+    |> RestRouter.call([])
+    |> test_status(200)
+    |> test_header("content-type", "text/html; charset=utf-8")
   end
 
   test "content negotiation fails" do
