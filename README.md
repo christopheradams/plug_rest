@@ -320,6 +320,8 @@ Differences between PlugRest and cowboy_rest:
   record.
 * The `init/2` callback is not required. However, if it does exist, it
   should return `{:ok, conn, state}`.
+* The default values of `expires/2`, `generate_etag/2`, and
+  `last_modified/2` are `nil` instead of `:undefined`
 * The content callbacks (like `to_html`) return `{body, conn, state}`
   where the body is one of `iodata` or `{:chunked, Enum.t}`.
 * The content types provided and accepted callbacks can describe each

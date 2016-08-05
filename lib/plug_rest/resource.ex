@@ -59,14 +59,14 @@ defmodule PlugRest.Resource do
       content_types_provided : [{{"text", "html", %{}}, :to_html}]
       delete_completed       : true
       delete_resource        : false
-      expires                : :undefined
+      expires                : nil
       forbidden              : false
-      generate_etag          : :undefined
+      generate_etag          : nil
       is_authorized          : true
       is_conflict            : false
       known_methods          : ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
       languages_provided     : skip
-      last_modified          : :undefined
+      last_modified          : nil
       malformed_request      : false
       moved_permanently      : false
       moved_temporarily      : false
@@ -150,7 +150,7 @@ defmodule PlugRest.Resource do
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [delete_resource: 2]
 
-  @callback expires(conn, state) :: {:calendar.datetime() | binary() | :undefined, conn, state}
+  @callback expires(conn, state) :: {:calendar.datetime() | binary() | nil, conn, state}
                                   | {:stop, conn, state}
           when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [expires: 2]
@@ -823,7 +823,7 @@ defmodule PlugRest.Resource do
       case generate_etag(conn, state) do
         {etag, conn2, state2} ->
           case etag do
-            :undefined ->
+            nil ->
               precondition_failed(conn2, state2)
             ^etag ->
               case is_weak_match(etag, etags_list) do
@@ -893,7 +893,7 @@ defmodule PlugRest.Resource do
   defp if_modified_since(conn, state, if_modified_since) do
     try do
       case last_modified(conn, state) do
-        {:undefined, conn2, state2} ->
+        {nil, conn2, state2} ->
           method(conn2, state2)
         {last_modified, conn2, state2} ->
           case last_modified > if_modified_since do
@@ -1150,7 +1150,7 @@ defmodule PlugRest.Resource do
       case last_modified(conn, state) do
         {last_modified, conn2, state2} ->
           case last_modified do
-            ^last_modified when is_atom(last_modified) ->
+            ^last_modified when is_nil(last_modified) ->
               set_resp_body_expires(conn2, state2)
             ^last_modified ->
               last_modified_bin = :cowboy_clock.rfc1123(last_modified)
@@ -1202,7 +1202,7 @@ defmodule PlugRest.Resource do
   defp set_resp_etag(conn, state) do
     {etag, conn2, state2} = generate_etag(conn, state)
     case etag do
-      :undefined ->
+      nil ->
         {conn2, state2}
       ^etag ->
         conn3 = put_resp_header(conn2, "etag", List.to_string(encode_etag(etag)))
@@ -1224,7 +1224,7 @@ defmodule PlugRest.Resource do
   defp set_resp_expires(conn, state) do
     {var_expires, conn2, state2} = expires(conn, state)
     case var_expires do
-      ^var_expires when is_atom(var_expires) ->
+      ^var_expires when is_nil(var_expires) ->
         {conn2, state2}
       ^var_expires when is_binary(var_expires) ->
         conn3 = put_resp_header(conn2, "expires", var_expires)
@@ -1238,13 +1238,13 @@ defmodule PlugRest.Resource do
 
 
   defp generate_etag(conn, %{etag: :no_call} = state) do
-    {:undefined, conn, state}
+    {nil, conn, state}
   end
 
-  defp generate_etag(conn, %{etag: :undefined} = state) do
+  defp generate_etag(conn, %{etag: nil} = state) do
     case unsafe_call(conn, state, :generate_etag) do
       :no_call ->
-        {:undefined, conn, %{state | etag: :no_call}}
+        {nil, conn, %{state | etag: :no_call}}
       {etag, conn2, handler_state} when is_binary(etag) ->
         {etag2} = List.to_tuple(:cowboy_http.entity_tag_match(etag))
         {etag2, conn2, %{state | handler_state: handler_state, etag: etag2}}
@@ -1259,13 +1259,13 @@ defmodule PlugRest.Resource do
 
 
   defp last_modified(conn, %{last_modified: :no_call} = state) do
-    {:undefined, conn, state}
+    {nil, conn, state}
   end
 
-  defp last_modified(conn, %{last_modified: :undefined} = state) do
+  defp last_modified(conn, %{last_modified: nil} = state) do
     case unsafe_call(conn, state, :last_modified) do
       :no_call ->
-        {:undefined, conn, %{state | last_modified: :no_call}}
+        {nil, conn, %{state | last_modified: :no_call}}
       {last_modified, conn2, handler_state} ->
         {last_modified, conn2,
          %{state | handler_state: handler_state, last_modified: last_modified}}
@@ -1278,13 +1278,13 @@ defmodule PlugRest.Resource do
 
 
   defp expires(conn, %{expires: :no_call} = state) do
-    {:undefined, conn, state}
+    {nil, conn, state}
   end
 
-  defp expires(conn, %{expires: :undefined} = state) do
+  defp expires(conn, %{expires: nil} = state) do
     case unsafe_call(conn, state, :expires) do
       :no_call ->
-        {:undefined, conn, %{state | expires: :no_call}}
+        {nil, conn, %{state | expires: :no_call}}
       {var_expires, conn2, handler_state} ->
         {var_expires, conn2, %{state | handler_state: handler_state, expires: var_expires}}
     end

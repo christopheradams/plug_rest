@@ -1,5 +1,11 @@
 ## Changelog
 
+## v0.6.0
+
+* Backwards incompatible changes
+  * The default values of `expires`, `generate_etag`, and
+    `last_modified` are `nil` instead of `:undefined`
+
 ## v0.5.4
 
 * Bug fixes

@@ -319,7 +319,7 @@ defmodule PlugRest.RouterTest do
     use PlugRest.Resource
 
     def last_modified(conn, state) do
-      {:undefined, conn, state}
+      {nil, conn, state}
     end
 
     def to_html(conn, state) do

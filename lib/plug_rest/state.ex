@@ -12,8 +12,8 @@ defmodule PlugRest.State do
     charsets_p: [],
     charset_a: nil,
     exists: false,
-    etag: :undefined,
-    last_modified: :undefined,
-    expires: :undefined,
+    etag: nil,
+    last_modified: nil,
+    expires: nil,
     resp_body: nil
 end
