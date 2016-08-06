@@ -102,11 +102,13 @@ defmodule PlugRest.Router do
       resource "/pages/:page", PageResource, %{some_option: true}
 
   """
+  @spec resource(String.t, atom(), any()) :: Macro.t
   defmacro resource(path, handler, handler_state \\ []) do
     add_resource(path, handler, handler_state)
   end
 
   ## Compiles the resource into a match macro from Plug.Router
+  @spec add_resource(String.t, atom(), any()) :: Macro.t
   defp add_resource(path, handler, handler_state) do
     {vars, _match} = Plug.Router.Utils.build_path_match(path)
 

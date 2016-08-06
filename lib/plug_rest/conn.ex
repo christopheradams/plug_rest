@@ -23,6 +23,8 @@ defmodule PlugRest.Conn do
 
   @type header_value :: {String.t, map()}
 
+  @type etags_list :: list()
+
   @path_params_key :plug_rest_path_params
   @media_type_key :plug_rest_media_type
 
@@ -167,7 +169,7 @@ defmodule PlugRest.Conn do
 
   """
 
-  @spec parse_entity_tag_header(conn, header) :: list()
+  @spec parse_entity_tag_header(conn, header) :: etags_list
   def parse_entity_tag_header(conn, header) do
     case get_req_header(conn, header) do
       [] -> []
