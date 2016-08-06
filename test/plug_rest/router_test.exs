@@ -600,6 +600,15 @@ defmodule PlugRest.RouterTest do
     |> test_header("vary", "accept-language")
   end
 
+  test "accepting all languages" do
+    conn(:get, "/languages_resource")
+    |> put_req_header("accept-language", "en, *")
+    |> RestRouter.call([])
+    |> test_status(200)
+    |> test_header("content-language", "de")
+    |> test_header("vary", "accept-language")
+  end
+
   test "charset negotiation" do
     conn(:get, "/charset_resource")
     |> put_req_header("accept-charset", "iso-8859-5, unicode-1-1;q=0.8")

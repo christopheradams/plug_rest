@@ -1,5 +1,10 @@
 ## Changelog
 
+## v0.5.4
+
+* Bug fixes
+  * Fix pattern match for accept language wildcard
+
 ## v0.5.3
 
 * Enhancements

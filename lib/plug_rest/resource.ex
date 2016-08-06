@@ -552,7 +552,7 @@ defmodule PlugRest.Resource do
     choose_language(conn, state, accept)
   end
 
-  defp match_language(conn, state, _accept, [provided | _tail], {%{}, _quality}) do
+  defp match_language(conn, state, _accept, [provided | _tail], {"*", _quality}) do
     set_language(conn, %{state | language_a: provided})
   end
 
