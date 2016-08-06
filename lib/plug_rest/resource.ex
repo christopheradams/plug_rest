@@ -893,7 +893,7 @@ defmodule PlugRest.Resource do
   defp if_modified_since(conn, state, if_modified_since) do
     try do
       case last_modified(conn, state) do
-        {:no_call, conn2, state2} ->
+        {:undefined, conn2, state2} ->
           method(conn2, state2)
         {last_modified, conn2, state2} ->
           case last_modified > if_modified_since do

@@ -315,6 +315,18 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule NilModifiedResource do
+    use PlugRest.Resource
+
+    def last_modified(conn, state) do
+      {:undefined, conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"Modified", conn, state}
+    end
+  end
+
   defmodule UserCommentResource do
     use PlugRest.Resource
 
@@ -378,6 +390,7 @@ defmodule PlugRest.RouterTest do
     resource "/gone", GoneResource
     resource "/last_modified", LastModifiedResource
     resource "/modified_undefined", IndexResource
+    resource "/nil_modified", NilModifiedResource
 
     resource "/does_not_exist", DoesNotExistModule
 
@@ -686,7 +699,14 @@ defmodule PlugRest.RouterTest do
 
   test "modified undefined" do
     conn(:get, "/modified_undefined")
-    |> put_req_header("if-unmodified-since", "Sun, 17 Jul 2016 12:51:31 GMT")
+    |> put_req_header("if-modified-since", "Sun, 17 Jul 2016 12:51:31 GMT")
+    |> RestRouter.call([])
+    |> test_status(200)
+  end
+
+  test "modified nil" do
+    conn(:get, "/nil_modified")
+    |> put_req_header("if-modified-since", "Sun, 17 Jul 2016 12:51:31 GMT")
     |> RestRouter.call([])
     |> test_status(200)
   end

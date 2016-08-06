@@ -4,6 +4,7 @@
 
 * Bug fixes
   * Fix pattern match for accept language wildcard
+  * Fix `last_modified` pattern match in `if_modified_since`
 
 ## v0.5.3
 
