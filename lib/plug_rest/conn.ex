@@ -9,21 +9,14 @@ defmodule PlugRest.Conn do
   import Plug.Conn.Utils
 
   @type conn :: Plug.Conn.t
+  @type media_type    :: PlugRest.State.media_type
 
-  @type type :: String.t
-  @type subtype :: String.t
-  @type params :: any()
-  @type header :: String.t
-
-  @type media_type :: {type, subtype, params}
-
+  @type etags_list    :: list()
+  @type quality_type  :: {String.t, float()}
   @type priority_type :: {media_type, float(), map()}
 
-  @type quality_type :: {String.t, float()}
-
-  @type header_value :: {String.t, map()}
-
-  @type etags_list :: list()
+  @typep header       :: String.t
+  @typep header_value :: {String.t, map()}
 
   @path_params_key :plug_rest_path_params
   @media_type_key :plug_rest_media_type
