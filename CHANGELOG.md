@@ -10,6 +10,8 @@
 * Backwards incompatible changes
   * The default values of `expires`, `generate_etag`, and
     `last_modified` are `nil` instead of `:undefined`
+  * Resource initial state is set with an option keyword list:
+    `resource "/path", Handler, state: :ok`
 
 ## v0.5.4
 

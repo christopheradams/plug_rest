@@ -16,9 +16,11 @@ defmodule PlugRest.Router do
   `PlugRest.Resource` behaviour by implementing one or more of the callbacks
   which describe the resource.
 
+  ## Options
+
   The macro accepts an optional initial state for the resource. For example:
 
-      resource "/pages/:page", PageResource, %{some_option: true}
+      resource "/pages/:page", PageResource, state: %{option: true}
 
   Because the router builds on Plug's own Router, you can add additional
   plugs into the pipeline. See the documentation for `Plug.Router` for
@@ -102,14 +104,16 @@ defmodule PlugRest.Router do
       resource "/pages/:page", PageResource, %{some_option: true}
 
   """
-  @spec resource(String.t, atom(), any()) :: Macro.t
-  defmacro resource(path, handler, handler_state \\ []) do
-    add_resource(path, handler, handler_state)
+  @spec resource(String.t, atom(), list()) :: Macro.t
+  defmacro resource(path, handler, options \\ []) do
+    add_resource(path, handler, options)
   end
 
   ## Compiles the resource into a match macro from Plug.Router
-  @spec add_resource(String.t, atom(), any()) :: Macro.t
-  defp add_resource(path, handler, handler_state) do
+  @spec add_resource(String.t, atom(), list()) :: Macro.t
+  defp add_resource(path, handler, options) do
+    handler_state = Keyword.get(options, :state)
+
     {vars, _match} = Plug.Router.Utils.build_path_match(path)
 
     # Transform the list of path variables into a data structure that will

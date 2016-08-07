@@ -385,7 +385,7 @@ defmodule PlugRest.RouterTest do
     use PlugRest.Router
 
     resource "/", IndexResource
-    resource "/service_unavailable", ServiceAvailableResource, false
+    resource "/service_unavailable", ServiceAvailableResource, state: false
     resource "/known_methods", KnownMethodsResource
     resource "/uri_too_long", UriTooLongResource
     resource "/allowed_methods", AllowedMethodsResource
@@ -400,13 +400,13 @@ defmodule PlugRest.RouterTest do
     resource "/content_negotiation", HypermediaResource
     resource "/accept_any", AcceptAnyResource
     resource "/binary_ctp_resource", BinaryCtpResource
-    resource "/html_levels", CtpParamsResource, %{params: %{"level" => "1"}}
-    resource "/no_ctp_params", CtpParamsResource, %{params: %{}}
-    resource "/all_accept_ext", CtpParamsResource, %{params: :*}
+    resource "/html_levels", CtpParamsResource, state: %{params: %{"level" => "1"}}
+    resource "/no_ctp_params", CtpParamsResource, state: %{params: %{}}
+    resource "/all_accept_ext", CtpParamsResource, state: %{params: :*}
     resource "/languages_resource", LanguagesResource
     resource "/charset_resource", CharsetResource
-    resource "/resource_not_exists", ResourceExists, false
-    resource "/previously_existed", PreviouslyExisted, false
+    resource "/resource_not_exists", ResourceExists, state: false
+    resource "/previously_existed", PreviouslyExisted, state: false
     resource "/moved_permanently", MovedPermanentlyResource
     resource "/moved_temporarily", MovedTemporarilyResource
     resource "/gone", GoneResource
