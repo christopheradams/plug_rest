@@ -370,6 +370,17 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule OtherRouter do
+    use Plug.Router
+
+    plug :match
+    plug :dispatch
+
+    match _ do
+      send_resp(conn, 200, "Other")
+    end
+  end
+
   defmodule RestRouter do
     use PlugRest.Router
 
@@ -416,6 +427,8 @@ defmodule PlugRest.RouterTest do
     match "/match" do
       send_resp(conn, 200, "Matches!")
     end
+
+    forward "/other", to: OtherRouter
   end
 
   test "glob resource dispatch" do
@@ -765,6 +778,13 @@ defmodule PlugRest.RouterTest do
     |> RestRouter.call([])
 
     assert PlugRest.Conn.get_media_type(conn) == {"application", "json", %{}}
+  end
+
+  test "forward" do
+    conn = build_conn(:get, "/other")
+    |> test_status(200)
+
+    assert conn.resp_body == "Other";
   end
 
   defp build_conn(method, path) do
