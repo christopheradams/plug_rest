@@ -370,6 +370,14 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule HostResource do
+    use PlugRest.Resource
+
+    def to_html(conn, state) do
+      {state, conn, state}
+    end
+  end
+
   defmodule OtherRouter do
     use Plug.Router
 
@@ -423,6 +431,9 @@ defmodule PlugRest.RouterTest do
 
     resource "/chunked", ChunkedResource
     resource "/send_file", SendFileResource
+
+    resource "/host", HostResource, host: "host1.", state: "Host 1"
+    resource "/host", HostResource, host: "host2.", state: "Host 2"
 
     match "/match" do
       send_resp(conn, 200, "Matches!")
@@ -760,6 +771,20 @@ defmodule PlugRest.RouterTest do
     assert conn.status == 200
 
     assert conn.resp_body =~ "Hello World"
+  end
+
+  test "host option" do
+    conn1 = conn(:get, "/host")
+    |> Map.put(:host, "host1.example.com")
+    |> RestRouter.call([])
+
+    assert conn1.resp_body == "Host 1"
+
+    conn2 = conn(:get, "/host")
+    |> Map.put(:host, "host2.example.com")
+    |> RestRouter.call([])
+
+    assert conn2.resp_body == "Host 2"
   end
 
   test "save media type from request" do

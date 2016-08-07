@@ -22,6 +22,10 @@ defmodule PlugRest.Router do
 
       resource "/pages/:page", PageResource, state: %{option: true}
 
+  You can restrict the resource to only match requests for a specific host:
+
+      resource "/pages/:page", PageResource, host: "host1.example.com"
+
   Because the router builds on Plug's own Router, you can add additional
   plugs into the pipeline. See the documentation for `Plug.Router` for
   more information.
@@ -97,11 +101,21 @@ defmodule PlugRest.Router do
   Main API to define resource routes.
 
   It accepts an expression representing the path, the name of a module
-  representing the resource, and an optional initial state.
+  representing the resource, and a list of options.
 
   ## Examples
 
-      resource "/pages/:page", PageResource, %{some_option: true}
+      resource "/pages/:page", PageResource, host: "host1.", state: true
+
+  ## Options
+
+  `resource/3` accepts the following options
+
+    * `:host` - the host which the route should match. Defaults to `nil`,
+      meaning no host match, but can be a string like "example.com" or a
+      string ending with ".", like "subdomain." for a subdomain match.
+
+    * `:state` - the initial state of the resource.
 
   """
   @spec resource(String.t, atom(), list()) :: Macro.t
@@ -127,7 +141,7 @@ defmodule PlugRest.Router do
       |> Enum.filter(fn({var, _macro}) -> String.at(var, 0) !== "_" end)
 
     quote do
-      match unquote(path) do
+      match unquote(path), host: unquote(options[:host]) do
 
         params =
           Enum.reduce(
