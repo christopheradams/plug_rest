@@ -431,25 +431,6 @@ defmodule PlugRest.RouterTest do
     forward "/other", to: OtherRouter
   end
 
-  test "glob resource dispatch" do
-    conn = build_conn(:get, "/glob/value")
-    |> test_status(200)
-
-    assert conn.resp_body == "Plug REST";
-  end
-
-  test "glob values resource dispatch" do
-    conn = build_conn(:get, "/glob_params/value")
-    |> test_status(200)
-
-    assert conn.resp_body == "bar: value";
-
-    conn = build_conn(:get, "/glob_params/item/extra")
-    |> test_status(200)
-
-    assert conn.resp_body == "bar: item, extra";
-  end
-
   test "basic DSL is available" do
     conn = conn(:get, "/")
 
@@ -742,6 +723,25 @@ defmodule PlugRest.RouterTest do
 
     test_status(conn, 200)
     assert conn.resp_body == "1234 : 987"
+  end
+
+  test "glob resource dispatch" do
+    conn = build_conn(:get, "/glob/value")
+    |> test_status(200)
+
+    assert conn.resp_body == "Plug REST";
+  end
+
+  test "glob values resource dispatch" do
+    conn = build_conn(:get, "/glob_params/value")
+    |> test_status(200)
+
+    assert conn.resp_body == "bar: value";
+
+    conn = build_conn(:get, "/glob_params/item/extra")
+    |> test_status(200)
+
+    assert conn.resp_body == "bar: item, extra";
   end
 
   test "chunked body" do
