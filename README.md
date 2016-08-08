@@ -124,7 +124,7 @@ def allowed_methods(conn, state) do
 end
 ```
 
-The [docs](https://hexdocs.pm/plug_rest/0.5.1/PlugRest.Resource.html)
+The [docs](https://hexdocs.pm/plug_rest/PlugRest.Resource.html)
 for `PlugRest.Resource` list all of the supported REST callbacks and
 their default values.
 
