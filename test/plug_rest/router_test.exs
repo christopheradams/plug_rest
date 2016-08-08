@@ -482,7 +482,8 @@ defmodule PlugRest.RouterTest do
   end
 
   test "unallowed method returns 405" do
-    build_conn(:delete, "/allowed_methods") |> test_status(405)
+    conn = build_conn(:delete, "/allowed_methods") |> test_status(405)
+    test_header(conn, "allow", "HEAD, GET, POST, OPTIONS")
   end
 
   test "malformed request returns 400" do
