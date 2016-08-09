@@ -130,144 +130,116 @@ defmodule PlugRest.Resource do
 
   @callback init(conn, state) :: {:ok, conn, state}
                                | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [init: 2]
 
   ## REST handler callbacks
 
   @callback allowed_methods(conn, state) :: {[binary()], conn, state}
                                           | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [allowed_methods: 2]
 
   @callback allow_missing_post(conn, state) :: {boolean(), conn, state}
                                              | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [allow_missing_post: 2]
 
   @callback charsets_provided(conn, state) :: {[binary()], conn, state}
                                             | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [charsets_provided: 2]
 
   @callback content_types_accepted(conn, state) :: {[media_type], conn, state}
                                                  | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [content_types_accepted: 2]
 
   @callback content_types_provided(conn, state) :: {[content_type_p], conn, state}
                                                  | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [content_types_provided: 2]
 
   @callback delete_completed(conn, state) :: {boolean(), conn, state}
                                            | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [delete_completed: 2]
 
   @callback delete_resource(conn, state) :: {boolean(), conn, state}
                                           | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [delete_resource: 2]
 
   @callback expires(conn, state) :: {:calendar.datetime() | binary() | nil, conn, state}
                                   | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [expires: 2]
 
   @callback forbidden(conn, state) :: {boolean(), conn, state}
                                     | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [forbidden: 2]
 
   @callback generate_etag(conn, state) :: {binary() | {:weak | :strong, binary()}, conn, state}
                                         | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [generate_etag: 2]
 
   @callback is_authorized(conn, state) :: {true | {false, binary()}, conn, state}
                                         | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [is_authorized: 2]
 
   @callback is_conflict(conn, state) :: {boolean(), conn, state}
                                       | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [is_conflict: 2]
 
   @callback known_methods(conn, state) :: {[binary()], conn, state}
                                         | {:stop, conn, state}
-            when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [known_methods: 2]
 
   @callback languages_provided(conn, state) :: {[binary()], conn, state}
                                              | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [languages_provided: 2]
 
   @callback last_modified(conn, state) :: {:calendar.datetime(), conn, state}
                                         | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [last_modified: 2]
 
   @callback malformed_request(conn, state) :: {boolean(), conn, state}
                                             | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [malformed_request: 2]
 
   @callback moved_permanently(conn, state) :: {{true, binary()} | false, conn, state}
                                             | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [moved_permanently: 2]
 
   @callback moved_temporarily(conn, state) :: {{true, binary()} | false, conn, state}
                                             | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [moved_temporarily: 2]
 
   @callback multiple_choices(conn, state) :: {boolean(), conn, state}
                                            | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [multiple_choices: 2]
 
   @callback options(conn, state) :: {:ok, conn, state}
                                   | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [options: 2]
 
   @callback previously_existed(conn, state) :: {boolean(), conn, state}
                                              | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [previously_existed: 2]
 
   @callback resource_exists(conn, state) :: {boolean(), conn, state}
                                           | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [resource_exists: 2]
 
   @callback service_available(conn, state) :: {boolean(), conn, state}
                                             | {:stop, conn, state}
-            when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [service_available: 2]
 
   @callback uri_too_long(conn, state) :: {boolean(), conn, state}
                                        | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [uri_too_long: 2]
 
   @callback valid_content_headers(conn, state) :: {boolean(), conn, state}
                                                 | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [valid_content_headers: 2]
 
   @callback valid_entity_length(conn, state) :: {boolean(), conn, state}
                                               | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [valid_entity_length: 2]
 
   @callback variances(conn, state) :: {[binary()], conn, state}
                                     | {:stop, conn, state}
-          when conn: %Plug.Conn{}, state: any()
   @optional_callbacks [variances: 2]
 
 
