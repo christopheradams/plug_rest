@@ -1,5 +1,10 @@
 ## Changelog
 
+## v0.6.1
+
+* Bug fixes
+  * Simplify resource behaviour callback typespecs
+
 ## v0.6.0
 
 * Enhancements
