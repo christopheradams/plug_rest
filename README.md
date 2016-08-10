@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/christopheradams/plug_rest.svg?branch=master)](https://travis-ci.org/christopheradams/plug_rest)
 [![Hex Version](https://img.shields.io/hexpm/v/plug_rest.svg)](https://hex.pm/packages/plug_rest)
 
-A port of Cowboy's cowboy_rest module to Plug.
+An Elixir port of Cowboy's REST sub-protocol for Plug applications.
 
 PlugRest supplements `Plug.Router` with an additional `resource`
 macro, which matches a URL path with a resource handler module

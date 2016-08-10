@@ -43,7 +43,7 @@ defmodule PlugRest.Mixfile do
 
   defp description do
     """
-    An Elixir port of Cowboy's REST behaviour for Plug applications
+    REST behaviour and Plug router for hypermedia web applications
     """
   end
 
