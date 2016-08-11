@@ -5,6 +5,7 @@
 * Enhancements
   * Add `known_methods` option to the Router which sets the default
     known methods for resources
+  * Add Mix task to generate a resource module
 
 * Backwards incompatible changes
   * Routers must call `match` and `dispatch` manually, so that the
