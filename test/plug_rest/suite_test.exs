@@ -506,7 +506,7 @@ defmodule PlugRest.SuiteTest do
     |> test_status(415)
   end
 
-  test "" do
+  test "rest post charset" do
     conn(:post, "/post_charset", "12345")
     |> put_req_header("content-type", "text/plain;charset=UTF-8")
     |> RestRouter.call([])
