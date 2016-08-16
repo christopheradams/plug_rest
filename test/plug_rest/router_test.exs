@@ -120,6 +120,46 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule PostNewResource do
+    use PlugRest.Resource
+
+    def allowed_methods(conn, state) do
+      {["GET", "OPTIONS", "HEAD", "POST"], conn, state}
+    end
+
+    def resource_exists(conn, state) do
+      {false, conn, state}
+    end
+
+    def content_types_accepted(conn, state) do
+      {[{"mixed/multipart", :from_multipart}], conn, state}
+    end
+
+    def from_multipart(conn, state) do
+      {{true, "/post_new/1234"}, conn, state}
+    end
+  end
+
+  defmodule PutNewResource do
+    use PlugRest.Resource
+
+    def allowed_methods(conn, state) do
+      {["GET", "OPTIONS", "HEAD", "PUT"], conn, state}
+    end
+
+    def resource_exists(conn, state) do
+      {false, conn, state}
+    end
+
+    def content_types_accepted(conn, state) do
+      {[{"mixed/multipart", :from_multipart}], conn, state}
+    end
+
+    def from_multipart(conn, state) do
+      {true, conn, state}
+    end
+  end
+
   defmodule JsonResource do
     use PlugRest.Resource
 
@@ -404,6 +444,8 @@ defmodule PlugRest.RouterTest do
     resource "/invalid_entity_length", InvalidEntityLengthResource
     resource "/conflict", ConflictResource
     resource "/delete", DeleteResource
+    resource "/post_new", PostNewResource
+    resource "/put_new/:id", PutNewResource
     resource "/json_resource", JsonResource
     resource "/content_negotiation", HypermediaResource
     resource "/accept_any", AcceptAnyResource
@@ -516,6 +558,20 @@ defmodule PlugRest.RouterTest do
 
   test "delete not completed" do
     build_conn(:delete, "/delete?completed=false") |> test_status(202)
+  end
+
+  test "post new resource" do
+    conn(:post, "/post_new", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> RestRouter.call([])
+    |> test_status(201)
+  end
+
+  test "put new resource" do
+    conn(:put, "/put_new/1234", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> RestRouter.call([])
+    |> test_status(201)
   end
 
   test "options sends allowed methods" do
