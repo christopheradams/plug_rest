@@ -99,7 +99,7 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule DeleteResource do
-    use PlugRest.Router
+    use PlugRest.Resource
 
     def allowed_methods(conn, state) do
       {["DELETE"], conn, state}
