@@ -1152,11 +1152,10 @@ defmodule PlugRest.Resource do
         {{true, res_url}, conn2, handler_state2} when var_method === "POST" ->
           state2 = %{state | handler_state: handler_state2}
           conn3 = put_resp_header(conn2, "location", res_url)
-          case :if do
-            :if when exists ->
-              respond(conn3, state2, 303)
-            :if when true ->
-              respond(conn3, state2, 201)
+          if exists do
+            respond(conn3, state2, 303)
+          else
+            respond(conn3, state2, 201)
           end
       end
     catch
