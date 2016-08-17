@@ -1,5 +1,11 @@
 ## Changelog
 
+## v0.7.0-dev
+
+* Enhancements
+  * Allow a `init/1` callback in each Resource that receives and
+    returns a list of Plug options.
+
 ## v0.6.2
 
 * Bug fixes

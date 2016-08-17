@@ -105,10 +105,17 @@ defmodule PlugRest.Resource do
 
       import Plug.Conn
       import PlugRest.Conn, only: [read_path_params: 1]
+
+      def init(options) do
+        options
+      end
+
+      defoverridable [init: 1]
     end
   end
 
   @type conn :: Plug.Conn.t
+  @type opts :: Plug.opts
   @type state :: PlugRest.State.t
 
   @type etag :: PlugRest.State.etag
@@ -125,6 +132,11 @@ defmodule PlugRest.Resource do
 
   @default_media_type {"text", "html", %{}}
   @default_content_handler {@default_media_type, :to_html}
+
+  ## Plug callbacks
+
+  @callback init(opts) :: opts
+  @optional_callbacks [init: 1]
 
   ## Common handler callbacks
 

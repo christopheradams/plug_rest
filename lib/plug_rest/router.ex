@@ -126,8 +126,6 @@ defmodule PlugRest.Router do
   ## Compiles the resource into a match macro from Plug.Router
   @spec add_resource(String.t, atom(), list()) :: Macro.t
   defp add_resource(path, handler, options) do
-    handler_state = Keyword.get(options, :state)
-
     {vars, _match} = Plug.Router.Utils.build_path_match(path)
 
     # Transform the list of path variables into a data structure that will
@@ -153,7 +151,17 @@ defmodule PlugRest.Router do
         # Save dynamic path segments into private connection storage
         conn2 = var!(conn) |> PlugRest.Conn.put_path_params(params)
 
-        PlugRest.Resource.upgrade(conn2, unquote(handler), unquote(handler_state))
+        options =
+          case function_exported?(unquote(handler), :init, 1) do
+            true ->
+              apply(unquote(handler), :init, [unquote(options)])
+            false ->
+              unquote(options)
+          end
+
+        handler_state = Keyword.get(options, :state)
+
+        PlugRest.Resource.upgrade(conn2, unquote(handler), handler_state)
       end
     end
   end
