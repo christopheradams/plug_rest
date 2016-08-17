@@ -161,6 +161,8 @@ defmodule PlugRest.RouterTest do
   end
 
   defmodule RespBodyResource do
+    use PlugRest.Resource
+
     def allowed_methods(conn, state) do
       {["GET", "POST", "PUT", "DELETE"], conn, state}
     end
