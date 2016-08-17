@@ -160,6 +160,42 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule RespBodyResource do
+    def allowed_methods(conn, state) do
+      {["GET", "POST", "PUT", "DELETE"], conn, state}
+    end
+
+    def resource_exists(conn, %{exists: false} = state) do
+      {false, conn, state}
+    end
+
+    def resource_exists(conn, state) do
+      {true, conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"To HTML", conn, state}
+    end
+
+    def content_types_accepted(conn, state) do
+      {[{"mixed/multipart", :from_multipart}], conn, state}
+    end
+
+    def from_multipart(conn, state) do
+      conn2 = %{conn | resp_body: "#{conn.method} from multipart"}
+      {true, conn2, state}
+    end
+
+    def delete_resource(conn, state) do
+      {true, conn, state}
+    end
+
+    def delete_completed(conn, state) do
+      conn2 = %{conn | resp_body: "#{conn.method} resource"}
+      {true, conn2, state}
+    end
+  end
+
   defmodule JsonResource do
     use PlugRest.Resource
 
@@ -446,6 +482,8 @@ defmodule PlugRest.RouterTest do
     resource "/delete", DeleteResource
     resource "/post_new", PostNewResource
     resource "/put_new/:id", PutNewResource
+    resource "/resp_body", RespBodyResource
+    resource "/resp_body_new", RespBodyResource, state: %{exists: false}
     resource "/json_resource", JsonResource
     resource "/content_negotiation", HypermediaResource
     resource "/accept_any", AcceptAnyResource
@@ -572,6 +610,41 @@ defmodule PlugRest.RouterTest do
     |> put_req_header("content-type", "mixed/multipart")
     |> RestRouter.call([])
     |> test_status(201)
+  end
+
+  test "response body with put" do
+    conn = conn(:put, "/resp_body", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> RestRouter.call([])
+    |> test_status(200)
+
+    assert conn.resp_body == "PUT from multipart"
+  end
+
+  test "response body with post" do
+    conn = conn(:post, "/resp_body", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> RestRouter.call([])
+    |> test_status(200)
+
+    assert conn.resp_body == "POST from multipart"
+  end
+
+  test "response body with post to non-existing resource" do
+    conn = conn(:post, "/resp_body_new", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> RestRouter.call([])
+    |> test_status(200)
+
+    assert conn.resp_body == "POST from multipart"
+  end
+
+  test "response body with delete" do
+    conn = conn(:delete, "/resp_body")
+    |> RestRouter.call([])
+    |> test_status(200)
+
+    assert conn.resp_body == "DELETE resource"
   end
 
   test "options sends allowed methods" do

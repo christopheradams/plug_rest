@@ -1,5 +1,10 @@
 ## Changelog
 
+## v0.6.2
+
+* Bug fixes
+  * Fix bug where setting conn.resp_body directly had no effect on output
+
 ## v0.6.1
 
 * Bug fixes

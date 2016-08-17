@@ -325,6 +325,9 @@ Differences between PlugRest and cowboy_rest:
 * The content callbacks (like `to_html`) return `{body, conn, state}`
   where the body is one of `binary()`, `{:chunked, Enum.t}`, or
   `{:file, binary()}`.
+* Other callbacks that need to set the body on PUT, POST, or DELETE,
+  can set the value of `conn.resp_body` directly before returning
+  it. The body can only be a `binary()`.
 * The content types provided and accepted callbacks can describe each
   media type with a String like `"text/html"`; or a tuple in the form
   `{type, subtype, params}`, where params can be `%{}` (no params

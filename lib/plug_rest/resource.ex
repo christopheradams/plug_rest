@@ -1413,6 +1413,12 @@ defmodule PlugRest.Resource do
     conn |> put_status(status_code) |> terminate(state)
   end
 
+  defp terminate(%{resp_body: resp_body} = conn, state) when is_nil(resp_body) == false do
+    state2 = %{state | resp_body: resp_body}
+    conn2 = %{conn | resp_body: nil}
+    terminate(conn2, state2)
+  end
+
   defp terminate(conn, %{resp_body: nil} = state) do
     state2 = %{state | resp_body: ""}
     terminate(conn, state2)
