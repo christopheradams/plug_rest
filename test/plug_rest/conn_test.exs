@@ -4,20 +4,6 @@ defmodule PlugRest.ConnTest do
 
   import PlugRest.Conn
 
-  test "path params" do
-    path_params = %{"id" => "1234"}
-    conn = conn(:get, "/test")
-    |> put_path_params(path_params)
-
-    assert read_path_params(conn) == path_params
-  end
-
-  test "read non-existent path params" do
-    conn = conn(:get, "/test")
-
-    assert read_path_params(conn) == %{}
-  end
-
   test "media type" do
     media_type = {"text", "html", %{}}
     conn = conn(:get, "/test")

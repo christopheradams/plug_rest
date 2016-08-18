@@ -18,34 +18,8 @@ defmodule PlugRest.Conn do
   @typep header       :: String.t
   @typep header_value :: {String.t, map()}
 
-  @path_params_key :plug_rest_path_params
   @media_type_key :plug_rest_media_type
 
-  @doc """
-  Reads the dynamic segment values from a rest resource path
-
-  """
-  @spec read_path_params(conn, Keyword.t) :: %{binary => binary}
-  def read_path_params(conn, opts \\ [])
-
-  def read_path_params(%Plug.Conn{private: %{@path_params_key => params}},
-                      _opts) do
-    params
-  end
-
-  def read_path_params(_conn, _opts) do
-    %{}
-  end
-
-
-  @doc """
-  Sets the dynamic path segment values for a connection
-
-  """
-  @spec put_path_params(conn, %{binary => binary}) :: conn
-  def put_path_params(conn, params) do
-    put_private(conn, @path_params_key, params)
-  end
 
   @doc """
   Returns the requested media type

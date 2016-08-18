@@ -7,6 +7,9 @@
     Resource can act as a Plug module.
   * Make dynamic path parameters available in `conn.params`
 
+* Backwards incompatible changes
+  * Remove `read_path_params/1` (use `conn.params` instead)
+
 ## v0.6.2
 
 * Bug fixes

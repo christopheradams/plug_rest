@@ -103,7 +103,6 @@ defmodule PlugRest.Resource do
       @behaviour PlugRest.Resource
 
       import Plug.Conn
-      import PlugRest.Conn, only: [read_path_params: 1]
 
       def init(options) do
         options
@@ -111,7 +110,6 @@ defmodule PlugRest.Resource do
 
       def call(conn, options) do
         handler_state = Keyword.get(options, :state)
-        conn = conn |> PlugRest.Conn.put_path_params(conn.params)
         PlugRest.Resource.upgrade(conn, __MODULE__, handler_state)
       end
 
