@@ -110,7 +110,12 @@ defmodule PlugRest.Resource do
         options
       end
 
-      defoverridable [init: 1]
+      def call(conn, options) do
+        handler_state = Keyword.get(options, :state)
+        PlugRest.Resource.upgrade(conn, __MODULE__, handler_state)
+      end
+
+      defoverridable [init: 1, call: 2]
     end
   end
 

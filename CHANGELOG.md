@@ -3,8 +3,8 @@
 ## v0.7.0-dev
 
 * Enhancements
-  * Allow a `init/1` callback in each Resource that receives and
-    returns a list of Plug options.
+  * Export overridable `init/1` and `call/2` callbacks so that each
+    Resource can act as a Plug module.
 
 ## v0.6.2
 
