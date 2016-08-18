@@ -233,11 +233,10 @@ Router paths can have segments that match URLs dynamically:
   resource "/users/:id", MyApp.UserResource
 ```
 
-The path parameters can be accessed in your resource with `read_path_params/1`:
+The path parameters can be accessed in your resource in `conn.params`:
 
 ```elixir
-    def to_html(conn, state) do
-      params = read_path_params(conn)
+    def to_html(%{params: params} = conn, state) do
       user_id = params["id"]
       {"Hello #{user_id}", conn, state}
     end

@@ -18,8 +18,7 @@ defmodule PlugRest.Resource do
 
         use PlugRest.Resource
 
-        def init(conn, _state) do
-          params = read_path_params(conn)
+        def init(%{params: params} = conn, _state) do
           username = params["username"]
           state = %{username: username}
           {:ok, conn, state}
@@ -112,6 +111,7 @@ defmodule PlugRest.Resource do
 
       def call(conn, options) do
         handler_state = Keyword.get(options, :state)
+        conn = conn |> PlugRest.Conn.put_path_params(conn.params)
         PlugRest.Resource.upgrade(conn, __MODULE__, handler_state)
       end
 

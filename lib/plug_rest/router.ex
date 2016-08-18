@@ -46,7 +46,7 @@ defmodule PlugRest.Router do
   The value of the dynamic path segment can be read inside the
   `HelloResource` module:
 
-      %{"name" => name} = read_path_params(conn)
+      %{"name" => name} = conn.params
 
   Routes allow globbing, which will match the end of the route. The glob
   can be discarded:
@@ -59,13 +59,11 @@ defmodule PlugRest.Router do
       # matches all routes starting with /hello and saves the rest
       resource "/hello/*rest", HelloResource
 
-  If we make a request to "/hello/value" then `read_path_params/1` will
-  return:
+  If we make a request to "/hello/value" then `conn.params` will include:
 
       %{"rest" => ["value"]}
 
-  If we make a request to "/hello/value/extra" then `read_path_params/1`
-  will return:
+  A request to "/hello/value/extra" will populate `conn.params` with:
 
       %{"rest" => ["value", "extra"]}
   """
@@ -140,16 +138,24 @@ defmodule PlugRest.Router do
 
     quote do
       match unquote(path), host: unquote(options[:host]) do
+       conn = var!(conn)
 
-        params =
+       conn_params =
+         case conn.params do
+           %Plug.Conn.Unfetched{} -> %{}
+           p -> p
+         end
+
+        path_params =
           Enum.reduce(
             unquote(binding),
             %{},
             fn({k,v}, p) -> Map.put(p, k, v) end
           )
 
-        # Save dynamic path segments into private connection storage
-        conn = var!(conn) |> PlugRest.Conn.put_path_params(params)
+        # Save dynamic path segments into conn.params
+        params = Map.merge(conn_params, path_params)
+        conn = %{conn | params: params}
 
         options =
           case function_exported?(unquote(handler), :init, 1) do

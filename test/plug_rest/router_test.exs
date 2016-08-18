@@ -408,8 +408,7 @@ defmodule PlugRest.RouterTest do
   defmodule UserCommentResource do
     use PlugRest.Resource
 
-    def to_html(conn, state) do
-      params = read_path_params(conn)
+    def to_html(%{params: params} = conn, state) do
       user_id = params["user_id"]
       comment_id = params["comment_id"]
 
@@ -420,8 +419,7 @@ defmodule PlugRest.RouterTest do
   defmodule GlobResource do
     use PlugRest.Resource
 
-    def to_html(conn, state) do
-      params = read_path_params(conn)
+    def to_html(%{params: params} = conn, state) do
       bar = Enum.join(params["bar"], ", ")
 
       {"bar: #{bar}", conn, state}

@@ -5,6 +5,7 @@
 * Enhancements
   * Export overridable `init/1` and `call/2` callbacks so that each
     Resource can act as a Plug module.
+  * Make dynamic path parameters available in `conn.params`
 
 ## v0.6.2
 
