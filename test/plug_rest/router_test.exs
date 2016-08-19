@@ -184,7 +184,7 @@ defmodule PlugRest.RouterTest do
     end
 
     def from_multipart(conn, state) do
-      conn2 = %{conn | resp_body: "#{conn.method} from multipart"}
+      conn2 = conn |> put_rest_body("#{conn.method} from multipart")
       {true, conn2, state}
     end
 
@@ -193,7 +193,7 @@ defmodule PlugRest.RouterTest do
     end
 
     def delete_completed(conn, state) do
-      conn2 = %{conn | resp_body: "#{conn.method} resource"}
+      conn2 = conn |> put_rest_body("#{conn.method} resource")
       {true, conn2, state}
     end
   end

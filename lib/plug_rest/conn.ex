@@ -18,8 +18,33 @@ defmodule PlugRest.Conn do
   @typep header       :: String.t
   @typep header_value :: {String.t, map()}
 
+  @rest_body_key :plug_rest_body
   @media_type_key :plug_rest_media_type
 
+  @doc """
+  Manually sets the REST response body in the connection
+
+  """
+  @spec put_rest_body(conn, binary()) :: conn
+  def put_rest_body(conn, resp_body) do
+    put_private(conn, @rest_body_key, resp_body)
+  end
+
+  @doc """
+  Returns the REST response body if it has been set
+
+  """
+  @spec get_rest_body(conn, Keyword.t) :: binary()
+  def get_rest_body(conn, opts \\ [default: nil])
+
+  def get_rest_body(%Plug.Conn{private: %{@rest_body_key => resp_body}},
+                      _opts) do
+    resp_body
+  end
+
+  def get_rest_body(_conn, opts) do
+    opts[:default]
+  end
 
   @doc """
   Returns the requested media type

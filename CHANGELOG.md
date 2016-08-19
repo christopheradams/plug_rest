@@ -6,6 +6,8 @@
   * Export overridable `init/1` and `call/2` callbacks so that each
     Resource can act as a Plug module.
   * Make dynamic path parameters available in `conn.params`
+  * Handler callbacks can manually set the response body with
+    `put_rest_body/2`
 
 * Bug fixes
   * Terminate correctly when a resource callback wants to `:stop`

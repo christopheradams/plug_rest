@@ -103,6 +103,7 @@ defmodule PlugRest.Resource do
       @behaviour PlugRest.Resource
 
       import Plug.Conn
+      import PlugRest.Conn, only: [put_rest_body: 2]
 
       def init(options) do
         options
@@ -1197,7 +1198,7 @@ defmodule PlugRest.Resource do
 
   @spec has_resp_body(conn, state) :: conn
   defp has_resp_body(conn, state) do
-    case conn.resp_body do
+    case get_rest_body(conn) do
       nil ->
         respond(conn, state, 204)
       _ ->
@@ -1447,12 +1448,6 @@ defmodule PlugRest.Resource do
     conn |> send_resp(204, "")
   end
 
-  defp terminate(%{resp_body: resp_body} = conn, state) when is_nil(resp_body) == false do
-    state2 = %{state | resp_body: resp_body}
-    conn2 = %{conn | resp_body: nil}
-    terminate(conn2, state2)
-  end
-
   defp terminate(conn, %{resp_body: nil} = state) do
     state2 = %{state | resp_body: ""}
     terminate(conn, state2)
@@ -1468,7 +1463,8 @@ defmodule PlugRest.Resource do
   end
 
   defp terminate(conn, state) do
-    conn |> send_resp(conn.status, state.resp_body)
+    resp_body = get_rest_body(conn, default: state.resp_body)
+    conn |> send_resp(conn.status, resp_body)
   end
 
   defp error_terminate(conn, _state, _class, _reason, _callback) do

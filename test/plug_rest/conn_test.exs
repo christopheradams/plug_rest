@@ -4,6 +4,26 @@ defmodule PlugRest.ConnTest do
 
   import PlugRest.Conn
 
+  test "REST body" do
+    resp_body = "Body"
+    conn = conn(:get, "/test")
+    |> put_rest_body(resp_body)
+
+    assert get_rest_body(conn) == resp_body
+  end
+
+  test "get unset REST body" do
+    conn = conn(:get, "/test")
+
+    assert get_rest_body(conn) == nil
+  end
+
+  test "get unset REST body with default" do
+    conn = conn(:get, "/test")
+
+    assert get_rest_body(conn, default: "Default") == "Default"
+  end
+
   test "media type" do
     media_type = {"text", "html", %{}}
     conn = conn(:get, "/test")
