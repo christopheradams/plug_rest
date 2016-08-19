@@ -454,6 +454,25 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule StopResource do
+    use PlugRest.Resource
+
+    def service_available(conn, :send = state) do
+      conn2 = conn |> send_resp(200, "Sent")
+      {:stop, conn2, state}
+    end
+
+    def service_available(conn, :resp = state) do
+      conn2 = conn |> resp(200, "Resp")
+      {:stop, conn2, state}
+    end
+
+    def service_available(conn, state) do
+      {:stop, conn, state}
+    end
+
+  end
+
   defmodule OtherRouter do
     use Plug.Router
 
@@ -514,6 +533,10 @@ defmodule PlugRest.RouterTest do
 
     resource "/host", HostResource, host: "host1.", state: "Host 1"
     resource "/host", HostResource, host: "host2.", state: "Host 2"
+
+    resource "/stop", StopResource
+    resource "/resp", StopResource, state: :resp
+    resource "/send_resp", StopResource, state: :send
 
     match "/match" do
       send_resp(conn, 200, "Matches!")
@@ -933,6 +956,27 @@ defmodule PlugRest.RouterTest do
     |> RestRouter.call([])
 
     assert PlugRest.Conn.get_media_type(conn) == {"application", "json", %{}}
+  end
+
+  test "stop a callback with no set response" do
+    conn = build_conn(:get, "/stop")
+    |> test_status(204)
+
+    assert conn.resp_body == ""
+  end
+
+  test "stop a callback with a response" do
+    conn = build_conn(:get, "/resp")
+    |> test_status(200)
+
+    assert conn.resp_body == "Resp"
+  end
+
+  test "stop a callback with a send response" do
+    conn = build_conn(:get, "/send_resp")
+    |> test_status(200)
+
+    assert conn.resp_body == "Sent"
   end
 
   test "forward" do

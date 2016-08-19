@@ -7,6 +7,9 @@
     Resource can act as a Plug module.
   * Make dynamic path parameters available in `conn.params`
 
+* Bug fixes
+  * Terminate correctly when a resource callback wants to `:stop`
+
 * Backwards incompatible changes
   * Remove `read_path_params/1` (use `conn.params` instead)
 

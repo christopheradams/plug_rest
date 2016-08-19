@@ -1428,6 +1428,25 @@ defmodule PlugRest.Resource do
     conn |> put_status(status_code) |> terminate(state)
   end
 
+  # Do nothing if the resource has already sent a response
+  defp terminate(%{state: :sent} = conn, _state) do
+    conn
+  end
+
+  defp terminate(%{state: :chunked} = conn, _state) do
+    conn
+  end
+
+  # Send the response if it has already been set
+  defp terminate(%{state: :set} = conn, _state) do
+    conn |> send_resp()
+  end
+
+  # If the resource has stopped without a status, send 204 No Content
+  defp terminate(%{status: nil} = conn, _state) do
+    conn |> send_resp(204, "")
+  end
+
   defp terminate(%{resp_body: resp_body} = conn, state) when is_nil(resp_body) == false do
     state2 = %{state | resp_body: resp_body}
     conn2 = %{conn | resp_body: nil}
