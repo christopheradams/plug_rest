@@ -166,7 +166,7 @@ defmodule PlugRest.SuiteTest do
 
 
     def get_text_plain(conn, state) do
-      media_type = PlugRest.Conn.get_media_type(conn)
+      media_type = PlugRest.Resource.get_media_type(conn)
       body = case media_type do
                "" ->
                  "'*'"

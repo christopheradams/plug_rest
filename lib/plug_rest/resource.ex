@@ -103,7 +103,7 @@ defmodule PlugRest.Resource do
       @behaviour PlugRest.Resource
 
       import Plug.Conn
-      import PlugRest.Conn, only: [put_rest_body: 2]
+      import PlugRest.Resource
 
       def init(options) do
         options
@@ -1469,5 +1469,57 @@ defmodule PlugRest.Resource do
 
   defp error_terminate(conn, _state, _class, _reason, _callback) do
     conn |> send_resp(500, "")
+  end
+
+  ## Private connection.
+
+  @doc """
+  Manually sets the REST response body in the connection
+
+  """
+  @spec put_rest_body(conn, binary()) :: conn
+  def put_rest_body(conn, resp_body) do
+    put_private(conn, :plug_rest_body, resp_body)
+  end
+
+  @doc """
+  Returns the REST response body if it has been set
+
+  """
+  @spec get_rest_body(conn, Keyword.t) :: binary()
+  def get_rest_body(conn, opts \\ [default: nil])
+
+  def get_rest_body(%Plug.Conn{private: %{:plug_rest_body => resp_body}},
+                      _opts) do
+    resp_body
+  end
+
+  def get_rest_body(_conn, opts) do
+    opts[:default]
+  end
+
+  @doc """
+  Returns the requested media type
+
+  """
+  @spec get_media_type(conn, Keyword.t) :: media_type | String.t
+  def get_media_type(conn, opts \\ [])
+
+  def get_media_type(%Plug.Conn{private: %{:plug_rest_format => media_type}},
+                      _opts) do
+    media_type
+  end
+
+  def get_media_type(_conn, _opts) do
+    ""
+  end
+
+  @doc """
+  Puts the media type in the connection
+
+  """
+  @spec put_media_type(conn, media_type) :: conn
+  def put_media_type(conn, media_type) do
+    put_private(conn, :plug_rest_format, media_type)
   end
 end

@@ -14,6 +14,7 @@
 
 * Backwards incompatible changes
   * Remove `read_path_params/1` (use `conn.params` instead)
+  * Move private connection accessors from `Conn` to `Resource` module
 
 ## v0.6.2
 

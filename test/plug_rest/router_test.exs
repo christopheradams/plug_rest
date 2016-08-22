@@ -944,18 +944,18 @@ defmodule PlugRest.RouterTest do
     conn = conn(:get, "/")
     |> RestRouter.call([])
 
-    assert PlugRest.Conn.get_media_type(conn) == ""
+    assert PlugRest.Resource.get_media_type(conn) == ""
 
     conn = conn(:get, "/json_resource")
     |> RestRouter.call([])
 
-    assert PlugRest.Conn.get_media_type(conn) == ""
+    assert PlugRest.Resource.get_media_type(conn) == ""
 
     conn = conn(:get, "/json_resource")
     |> put_req_header("accept", "application/json")
     |> RestRouter.call([])
 
-    assert PlugRest.Conn.get_media_type(conn) == {"application", "json", %{}}
+    assert PlugRest.Resource.get_media_type(conn) == {"application", "json", %{}}
   end
 
   test "stop a callback with no set response" do
