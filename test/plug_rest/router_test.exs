@@ -944,12 +944,12 @@ defmodule PlugRest.RouterTest do
     conn = conn(:get, "/")
     |> RestRouter.call([])
 
-    assert PlugRest.Resource.get_media_type(conn) == ""
+    assert PlugRest.Resource.get_media_type(conn) == nil
 
     conn = conn(:get, "/json_resource")
     |> RestRouter.call([])
 
-    assert PlugRest.Resource.get_media_type(conn) == ""
+    assert PlugRest.Resource.get_media_type(conn) == nil
 
     conn = conn(:get, "/json_resource")
     |> put_req_header("accept", "application/json")

@@ -29,7 +29,7 @@ defmodule PlugRest.ResourceTest do
   test "get non-existent media type" do
     conn = conn(:get, "/test")
 
-    assert get_media_type(conn) == ""
+    assert get_media_type(conn) == nil
   end
 end
 

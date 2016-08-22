@@ -1500,9 +1500,9 @@ defmodule PlugRest.Resource do
   Returns the requested media type
 
   """
-  @spec get_media_type(conn) :: media_type | String.t
+  @spec get_media_type(conn) :: media_type | nil
   def get_media_type(conn) do
-    Map.get(conn.private, :plug_rest_format, "")
+    Map.get(conn.private, :plug_rest_format)
   end
 
   @doc """

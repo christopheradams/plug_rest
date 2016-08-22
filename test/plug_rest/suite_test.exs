@@ -168,7 +168,7 @@ defmodule PlugRest.SuiteTest do
     def get_text_plain(conn, state) do
       media_type = PlugRest.Resource.get_media_type(conn)
       body = case media_type do
-               "" ->
+               nil ->
                  "'*'"
                {_, _, %{"level" => level}} ->
                  "level=#{level}"
