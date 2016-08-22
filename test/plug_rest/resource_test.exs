@@ -18,12 +18,6 @@ defmodule PlugRest.ResourceTest do
     assert get_rest_body(conn) == nil
   end
 
-  test "get unset REST body with default" do
-    conn = conn(:get, "/test")
-
-    assert get_rest_body(conn, default: "Default") == "Default"
-  end
-
   test "media type" do
     media_type = {"text", "html", %{}}
     conn = conn(:get, "/test")

@@ -1463,7 +1463,12 @@ defmodule PlugRest.Resource do
   end
 
   defp terminate(conn, state) do
-    resp_body = get_rest_body(conn, default: state.resp_body)
+    resp_body =
+      case get_rest_body(conn) do
+        nil -> state.resp_body
+        body -> body
+      end
+
     conn |> send_resp(conn.status, resp_body)
   end
 
@@ -1486,16 +1491,9 @@ defmodule PlugRest.Resource do
   Returns the REST response body if it has been set
 
   """
-  @spec get_rest_body(conn, Keyword.t) :: binary()
-  def get_rest_body(conn, opts \\ [default: nil])
-
-  def get_rest_body(%Plug.Conn{private: %{:plug_rest_body => resp_body}},
-                      _opts) do
-    resp_body
-  end
-
-  def get_rest_body(_conn, opts) do
-    opts[:default]
+  @spec get_rest_body(conn) :: binary() | nil
+  def get_rest_body(conn) do
+    Map.get(conn.private, :plug_rest_body)
   end
 
   @doc """
