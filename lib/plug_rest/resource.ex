@@ -91,6 +91,19 @@ defmodule PlugRest.Resource do
   * `binary()`, which will be sent with `send_resp/3`
   * `{:chunked, Enum.t}, which will use `send_chunked/2`
   * `{:file, binary()}, which will use `send_file/3`
+
+  You can halt the resource handling from any callback and return a manual
+  response like so:
+
+      response = send_resp(conn, status_code, resp_body)
+      {:stop, response, state}
+
+  The content accepted handlers defined in `content_types_accepted` will be
+  called for POST, PUT, and PATCH requests. By default, the response body will
+  be empty. If desired, you can set the response body like so:
+
+      conn2 = put_rest_body(conn, "#{conn.method} was successful")
+      {true, conn2, state}
   """
 
   import PlugRest.Utils
@@ -1448,6 +1461,7 @@ defmodule PlugRest.Resource do
     conn |> send_resp(204, "")
   end
 
+  # Send a response based on state.resp_body or conn.private.plug_rest_body
   defp terminate(conn, %{resp_body: nil} = state) do
     state2 = %{state | resp_body: ""}
     terminate(conn, state2)
@@ -1463,6 +1477,9 @@ defmodule PlugRest.Resource do
   end
 
   defp terminate(conn, state) do
+    # If the resource has set the response body manually with
+    # `put_rest_body/2`, then use it. Otherwise, use the resource
+    # state.
     resp_body =
       case get_rest_body(conn) do
         nil -> state.resp_body
