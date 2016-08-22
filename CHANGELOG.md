@@ -1,6 +1,6 @@
 ## Changelog
 
-## v0.7.0-dev
+## v0.7.0
 
 * Enhancements
   * Export overridable `init/1` and `call/2` callbacks so that each
