@@ -299,16 +299,15 @@ $ mix test
 
 ## Phoenix
 
-You can use PlugRest in your Phoenix app. Add `:plug_rest` to your
-dependencies, save your REST router at `web/rest_router.ex`, and put
-your resources in `web/resources/`. Then use the `forward` macro in
-your Phoenix `web/router.ex`:
+You can use PlugRest's router and resources in your Phoenix app like
+any other plug by forwarding requests to them:
 
 ```elixir
 forward "/rest", HelloPhoenix.RestRouter
 ```
 
-The resource will be served at `http://localhost:4001/rest/hello`.
+To get the `resource` macro directly in your Phoenix router, use
+[PhoenixRest](https://github.com/christopheradams/phoenix_rest/).
 
 ## Information
 
