@@ -60,7 +60,7 @@ macros which generate routes:
 
 ```elixir
 get "/hello" do
-    send_resp(conn, 200, "world")
+  send_resp(conn, 200, "world")
 end
 ```
 
@@ -154,7 +154,9 @@ Phoenix application. Details below!
 
 If starting a new project, generate a supervisor application:
 
-    $ mix new my_app --sup
+```sh
+$ mix new my_app --sup
+```
 
 Add PlugRest to your project in two steps:
 
@@ -171,8 +173,8 @@ Add PlugRest to your project in two steps:
 2. Add these dependencies to your applications list:
 
     ```elixir
-      def application do
-        [applications: [:cowboy, :plug, :plug_rest]]
+    def application do
+      [applications: [:cowboy, :plug, :plug_rest]]
     end
     ```
 
@@ -230,16 +232,16 @@ code to the client automatically.
 Router paths can have segments that match URLs dynamically:
 
 ```elixir
-  resource "/users/:id", MyApp.UserResource
+resource "/users/:id", MyApp.UserResource
 ```
 
 The path parameters can be accessed in your resource in `conn.params`:
 
 ```elixir
-    def to_html(%{params: params} = conn, state) do
-      user_id = params["id"]
-      {"Hello #{user_id}", conn, state}
-    end
+def to_html(%{params: params} = conn, state) do
+  user_id = params["id"]
+  {"Hello #{user_id}", conn, state}
+end
 ```
 
 ### Application
@@ -248,17 +250,19 @@ Finally, add the Router to your supervision tree by editing
 `lib/my_app.ex`:
 
 ```elixir
-    # Define workers and child supervisors to be supervised
-    children = [
-      Plug.Adapters.Cowboy.child_spec(:http, MyApp.Router, [], [port: 4001])
-    ]
+# Define workers and child supervisors to be supervised
+children = [
+  Plug.Adapters.Cowboy.child_spec(:http, MyApp.Router, [], [port: 4001])
+]
 ```
 
 ### Running
 
 Compile your application and then run it:
 
-    $ iex -S mix
+```sh
+$ iex -S mix
+```
 
 Your server will be running and the resource will be available at
 `http://localhost:4001/hello`.
@@ -289,7 +293,9 @@ end
 
 Run the test with:
 
-    $ mix test
+```sh
+$ mix test
+```
 
 ## Phoenix
 
@@ -299,7 +305,7 @@ your resources in `web/resources/`. Then use the `forward` macro in
 your Phoenix `web/router.ex`:
 
 ```elixir
-  forward "/rest", HelloPhoenix.RestRouter
+forward "/rest", HelloPhoenix.RestRouter
 ```
 
 The resource will be served at `http://localhost:4001/rest/hello`.
