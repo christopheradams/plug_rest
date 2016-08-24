@@ -1,4 +1,4 @@
-## Changelog
+# Changelog
 
 ## v0.7.0
 
