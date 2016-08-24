@@ -986,8 +986,15 @@ defmodule PlugRest.RouterTest do
     assert conn.resp_body == "Other";
   end
 
+  ## Utility functions
+
   defp build_conn(method, path) do
-    conn(method, path) |> RestRouter.call([])
+    build_conn(method, path, RestRouter)
+  end
+
+  defp build_conn(method, path, router) do
+    conn = conn(method, path)
+    apply(router, :call, [conn, []])
   end
 
   defp test_status(conn, status) do
