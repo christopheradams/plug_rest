@@ -25,8 +25,16 @@ defmodule PlugRest.RouterTest do
   defmodule KnownMethodsResource do
     use PlugRest.Resource
 
+    def allowed_methods(conn, state) do
+      {["GET", "POST", "MOVE"], conn, state}
+    end
+
     def known_methods(conn, state) do
-      {["GET", "POST"], conn, state}
+      {["GET", "POST", "TRACE", "MOVE"], conn, state}
+    end
+
+    def to_html(conn, state) do
+      {conn.method, conn, state}
     end
   end
 
@@ -578,6 +586,14 @@ defmodule PlugRest.RouterTest do
 
   test "unknown method returns 501" do
     build_conn(:delete, "/known_methods") |> test_status(501)
+  end
+
+  test "custom known and unallowed method" do
+    build_conn(:trace, "/known_methods") |> test_status(405)
+  end
+
+  test "custom known and allowed method" do
+    build_conn(:move, "/known_methods") |> test_status(200)
   end
 
   test "uri too long returns 414" do
