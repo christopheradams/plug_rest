@@ -2,6 +2,10 @@
 
 ## v0.8.0-dev
 
+* Enhancements
+  * Add `known_methods` option to the Router which sets the default
+    known methods for resources
+
 * Backwards incompatible changes
   * `PlugRest.Resource.upgrade/3` takes a list of options instead of
     just handler state

@@ -281,8 +281,10 @@ defmodule PlugRest.Resource do
   def upgrade(conn, handler, options) do
     method = conn.method
     handler_state = Keyword.get(options, :state)
-    state = %PlugRest.State{method: method, handler: handler,
-                            handler_state: handler_state}
+    known_methods = Keyword.get(options, :known_methods)
+
+    state = %PlugRest.State{method: method, known_methods: known_methods,
+                            handler: handler, handler_state: handler_state}
 
     case Code.ensure_loaded?(handler) do
       true ->
@@ -298,8 +300,13 @@ defmodule PlugRest.Resource do
   end
 
   @spec known_methods(conn, state) :: conn
-  defp known_methods(conn, %{method: var_method} = state) do
+  defp known_methods(conn, %{method: var_method, known_methods: known_methods} = state) do
     case call(conn, state, :known_methods) do
+      :no_call when is_list(known_methods) ->
+        case Enum.member?(known_methods, var_method) do
+          true -> next(conn, state, &uri_too_long/2)
+          false -> next(conn, state, 501)
+        end
       :no_call when var_method === "HEAD" or var_method === "GET"
       or var_method === "POST" or var_method === "PUT"
       or var_method === "PATCH" or var_method === "DELETE"
@@ -310,7 +317,7 @@ defmodule PlugRest.Resource do
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
       {list, conn2, handler_state} ->
-        state2 = %{state | handler_state: handler_state}
+        state2 = %{state | handler_state: handler_state, known_methods: list}
         case Enum.member?(list, var_method) do
           true ->
             next(conn2, state2, &uri_too_long/2)

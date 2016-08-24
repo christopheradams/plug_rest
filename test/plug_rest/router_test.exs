@@ -1002,6 +1002,27 @@ defmodule PlugRest.RouterTest do
     assert conn.resp_body == "Other";
   end
 
+  ## Known methods option
+
+  defmodule KnownMethodsRouter do
+    use PlugRest.Router, known_methods: ["GET", "POST", "DELETE", "MOVE"]
+
+    resource "/known_methods", KnownMethodsResource
+    resource "/allowed_methods", AllowedMethodsResource
+  end
+
+  test "known methods option" do
+    build_conn(:trace, "/allowed_methods", KnownMethodsRouter) |> test_status(501)
+    build_conn(:move, "/allowed_methods", KnownMethodsRouter) |> test_status(405)
+  end
+
+  test "resource overrides known methods option" do
+    build_conn(:get, "/known_methods", KnownMethodsRouter) |> test_status(200)
+    build_conn(:delete, "/known_methods", KnownMethodsRouter) |> test_status(501)
+    build_conn(:trace, "/known_methods", KnownMethodsRouter) |> test_status(405)
+    build_conn(:move, "/known_methods", KnownMethodsRouter) |> test_status(200)
+  end
+
   ## Utility functions
 
   defp build_conn(method, path) do

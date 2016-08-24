@@ -66,15 +66,29 @@ defmodule PlugRest.Router do
   A request to "/hello/value/extra" will populate `conn.params` with:
 
       %{"rest" => ["value", "extra"]}
+
+  # Options
+
+  The router accepts a list of options:
+
+    * `:known_methods` - custom list of HTTP methods known by your
+      server, for example: `["GET", "HEAD", "OPTIONS", "TRACE"]`
+
+  This option will override the default list of methods that each
+  Resource knows about (GET, HEAD, POST, PUT, PATCH, DELETE, and
+  OPTIONS). If a Resource implements the `known_methods` callback,
+  that list always takes precedence over the default list.
   """
 
 
   @doc false
-  defmacro __using__(_) do
+  defmacro __using__(options) do
     quote location: :keep do
       use Plug.Router
       import PlugRest.Router
       @before_compile PlugRest.Router
+
+      @known_methods Keyword.get(unquote(options), :known_methods)
 
       plug :match
       plug :dispatch
@@ -164,6 +178,8 @@ defmodule PlugRest.Router do
             false ->
               unquote(options)
           end
+
+        options = Keyword.put_new(options, :known_methods, @known_methods)
 
         case function_exported?(unquote(handler), :call, 1) do
           true ->
