@@ -1,7 +1,5 @@
 defmodule PlugRest.Utils do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   @doc """
   Converts media type representation to a String

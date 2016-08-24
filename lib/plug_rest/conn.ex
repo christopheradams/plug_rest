@@ -1,9 +1,5 @@
 defmodule PlugRest.Conn do
-  @moduledoc """
-  Helper functions for parsing Plug connection request headers
-  and accessing url path parameters
-
-  """
+  @moduledoc false
 
   import Plug.Conn
   import Plug.Conn.Utils
