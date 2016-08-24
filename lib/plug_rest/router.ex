@@ -11,7 +11,7 @@ defmodule PlugRest.Router do
         resource "/pages/:page", PageResource
       end
 
-  The `resource/2` macro accepts a request of format `"/pages/VALUE"` and
+  The `resource/3` macro accepts a request of format `"/pages/VALUE"` and
   dispatches it to the `PageResource` module, which must adopt the
   `PlugRest.Resource` behaviour by implementing one or more of the callbacks
   which describe the resource.
