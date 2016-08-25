@@ -495,6 +495,9 @@ defmodule PlugRest.RouterTest do
   defmodule RestRouter do
     use PlugRest.Router
 
+    plug :match
+    plug :dispatch
+
     resource "/", IndexResource
     resource "/service_unavailable", ServiceAvailableResource, state: false
     resource "/known_methods", KnownMethodsResource
@@ -1002,10 +1005,46 @@ defmodule PlugRest.RouterTest do
     assert conn.resp_body == "Other";
   end
 
+  ## Plugs test
+
+  defmodule RequestIdResource do
+    use PlugRest.Resource
+
+    def to_html(conn, state) do
+      request_id = Plug.Conn.get_resp_header(conn, "x-request-id")
+      {request_id, conn, state}
+    end
+  end
+
+  defmodule PlugsRouter do
+    use PlugRest.Router
+
+    plug Plug.RequestId
+
+    plug :match
+    plug :dispatch
+
+    resource "/request_id", RequestIdResource
+  end
+
+  test "plugs in router" do
+    request_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    conn = conn(:get, "/request_id")
+    |> put_req_header("x-request-id", request_id)
+    |> PlugsRouter.call([])
+
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert conn.resp_body == request_id
+  end
+
   ## Known methods option
 
   defmodule KnownMethodsRouter do
     use PlugRest.Router, known_methods: ["GET", "POST", "DELETE", "MOVE"]
+
+    plug :match
+    plug :dispatch
 
     resource "/known_methods", KnownMethodsResource
     resource "/allowed_methods", AllowedMethodsResource

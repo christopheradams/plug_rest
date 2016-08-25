@@ -339,6 +339,9 @@ defmodule PlugRest.SuiteTest do
   defmodule RestRouter do
     use PlugRest.Router
 
+    plug :match
+    plug :dispatch
+
     resource "/param_all", :rest_param_all
     resource "/bad_accept", :rest_simple_resource
     resource "/bad_content_type", :rest_patch_resource

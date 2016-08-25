@@ -8,6 +8,9 @@ defmodule PlugRest.Router do
       defmodule MyApp.Router do
         use PlugRest.Router
 
+        plug :match
+        plug :dispatch
+
         resource "/pages/:page", PageResource
       end
 
@@ -74,9 +77,6 @@ defmodule PlugRest.Router do
       @before_compile PlugRest.Router
 
       @known_methods Keyword.get(unquote(options), :known_methods)
-
-      plug :match
-      plug :dispatch
     end
   end
 

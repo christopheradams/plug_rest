@@ -7,6 +7,8 @@
     known methods for resources
 
 * Backwards incompatible changes
+  * Routers must call `match` and `dispatch` manually, so that the
+    plug pipeline can work as expected
   * `PlugRest.Resource.upgrade/3` takes a list of options instead of
     just handler state
 
