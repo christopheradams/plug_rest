@@ -123,8 +123,7 @@ defmodule PlugRest.Resource do
       end
 
       def call(conn, options) do
-        handler_state = Keyword.get(options, :state)
-        PlugRest.Resource.upgrade(conn, __MODULE__, handler_state)
+        PlugRest.Resource.upgrade(conn, __MODULE__, options)
       end
 
       defoverridable [init: 1, call: 2]
@@ -276,11 +275,12 @@ defmodule PlugRest.Resource do
   Executes the REST state machine with a connection and resource
 
   Accepts a Plug.Conn struct, a PlugRest.Resource handler module, and an
-  initial resource state, and executes the REST state machine.
+  options list, and executes the REST state machine.
   """
-  @spec upgrade(conn, handler, any()) :: conn
-  def upgrade(conn, handler, handler_state) do
+  @spec upgrade(conn, handler, Keyword.t) :: conn
+  def upgrade(conn, handler, options) do
     method = conn.method
+    handler_state = Keyword.get(options, :state)
     state = %PlugRest.State{method: method, handler: handler,
                             handler_state: handler_state}
 

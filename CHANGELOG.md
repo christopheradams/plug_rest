@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.8.0-dev
+
+* Backwards incompatible changes
+  * `PlugRest.Resource.upgrade/3` takes a list of options instead of
+    just handler state
+
 ## v0.7.0
 
 * Enhancements

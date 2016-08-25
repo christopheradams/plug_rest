@@ -165,14 +165,11 @@ defmodule PlugRest.Router do
               unquote(options)
           end
 
-        handler_state = Keyword.get(options, :state)
-
         case function_exported?(unquote(handler), :call, 1) do
           true ->
             apply(unquote(handler), :call, [conn, options])
           false ->
-            handler_state = Keyword.get(options, :state)
-            PlugRest.Resource.upgrade(conn, unquote(handler), handler_state)
+            PlugRest.Resource.upgrade(conn, unquote(handler), options)
         end
       end
     end
