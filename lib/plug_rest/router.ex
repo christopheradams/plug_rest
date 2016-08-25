@@ -16,21 +16,6 @@ defmodule PlugRest.Router do
   `PlugRest.Resource` behaviour by implementing one or more of the callbacks
   which describe the resource.
 
-  ## Options
-
-  The macro accepts an optional initial state for the resource. For example:
-
-      resource "/pages/:page", PageResource, state: %{option: true}
-
-  You can restrict the resource to only match requests for a specific host:
-
-      resource "/pages/:page", PageResource, host: "host1.example.com"
-
-  Because the router builds on Plug's own Router, you can add additional
-  plugs into the pipeline. See the documentation for `Plug.Router` for
-  more information.
-
-
   ## Routes
 
       resource "/hello", HelloResource
@@ -129,6 +114,13 @@ defmodule PlugRest.Router do
 
     * `:state` - the initial state of the resource.
 
+  The macro accepts an optional initial state for the resource. For example:
+
+      resource "/pages/:page", PageResource, state: %{option: true}
+
+  You can restrict the resource to only match requests for a specific host:
+
+      resource "/pages/:page", PageResource, host: "host1.example.com"
   """
   @spec resource(String.t, atom(), list()) :: Macro.t
   defmacro resource(path, handler, options \\ []) do
