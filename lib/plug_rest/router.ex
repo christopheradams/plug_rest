@@ -138,13 +138,13 @@ defmodule PlugRest.Router do
 
     quote do
       match unquote(path), host: unquote(options[:host]) do
-       conn = var!(conn)
+        conn = var!(conn)
 
-       conn_params =
-         case conn.params do
-           %Plug.Conn.Unfetched{} -> %{}
-           p -> p
-         end
+        conn_params =
+          case conn.params do
+            %Plug.Conn.Unfetched{} -> %{}
+            p -> p
+          end
 
         path_params =
           Enum.reduce(
