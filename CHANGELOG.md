@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.0-dev
+## v0.8.0
 
 * Enhancements
   * Add `known_methods` option to the Router which sets the default

@@ -19,6 +19,14 @@ defmodule PlugRest.Router do
   `PlugRest.Resource` behaviour by implementing one or more of the callbacks
   which describe the resource.
 
+  From `Plug.Router`:
+
+  Notice the router contains a plug pipeline and by default it requires
+  two plugs: `match` and `dispatch`. `match` is responsible for
+  finding a matching route which is then forwarded to `dispatch`.
+  This means users can easily hook into the router mechanism and add
+  behaviour before match, before dispatch or after both.
+
   ## Routes
 
       resource "/hello", HelloResource

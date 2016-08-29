@@ -27,6 +27,9 @@ Define a router to match a path with a resource handler:
 defmodule MyRouter do
   use PlugRest.Router
 
+  plug :match
+  plug :dispatch
+
   resource "/hello", HelloResource
 end
 ```
@@ -166,7 +169,7 @@ Add PlugRest to your project in two steps:
     def deps do
       [{:cowboy, "~> 1.0.0"},
        {:plug, "~> 1.0"},
-       {:plug_rest, "~> 0.7.0"}]
+       {:plug_rest, "~> 0.8.0"}]
     end
     ```
 
@@ -209,6 +212,9 @@ Create a file at `lib/my_app/router.ex` to hold the Router:
 defmodule MyApp.Router do
   use PlugRest.Router
 
+  plug :match
+  plug :dispatch
+
   resource "/hello", MyApp.HelloResource
 
   match "/match" do
@@ -219,6 +225,9 @@ end
 
 The PlugRest Router adds a `resource` macro which accepts a URL path
 and a Module that will handle all the callbacks on the Resource.
+
+The router contains a plug pipeline and requires two plugs: `match`
+and `dispatch`. You can add custom plugs into this pipeline.
 
 You can also use the `match` macros from `Plug.Router`.
 This provides an escape hatch to bypass the REST mechanism for a
@@ -266,6 +275,15 @@ $ iex -S mix
 
 Your server will be running and the resource will be available at
 `http://localhost:4001/hello`.
+
+### Tasks
+
+You can generate a new PlugRest resource (with all of the callbacks
+implemented) by using a Mix task:
+
+```sh
+$ mix plug_rest.gen.resource UserResource
+```
 
 ### Testing
 
