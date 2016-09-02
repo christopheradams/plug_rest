@@ -427,18 +427,15 @@ defmodule PlugRest.Resource do
     case call(conn, state, :content_types_provided) do
       :no_call ->
         state2 = %{state | content_types_p: [@default_content_handler]}
-        try do
-          case parse_media_range_header(conn, "accept") do
-            [] ->
-              conn
-              |> put_resp_content_type(print_media_type(@default_media_type))
-              |> languages_provided(%{state2 | content_type_a: @default_content_handler})
-            accept ->
-              choose_media_type(conn, state2, prioritize_accept(accept))
-          end
-        catch
-          _, _ ->
+        case parse_media_range_header(conn, "accept") do
+          [] ->
+            conn
+            |> put_resp_content_type(print_media_type(@default_media_type))
+            |> languages_provided(%{state2 | content_type_a: @default_content_handler})
+          :error ->
             respond(conn, state2, 400)
+          accept ->
+            choose_media_type(conn, state2, prioritize_accept(accept))
         end
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
@@ -447,19 +444,16 @@ defmodule PlugRest.Resource do
       {c_tp, conn2, handler_state} ->
         c_tp2 = for(p <- c_tp, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state, content_types_p: c_tp2}
-        try do
-          case parse_media_range_header(conn2, "accept") do
-            [] ->
-              {p_mt, _fun} = head_ctp = hd(c_tp2)
-              conn2
-              |> put_resp_content_type(print_media_type(p_mt))
-              |> languages_provided(%{state2 | content_type_a: head_ctp})
-            accept ->
-              choose_media_type(conn2, state2, prioritize_accept(accept))
-          end
-        catch
-          _, _ ->
+        case parse_media_range_header(conn2, "accept") do
+          [] ->
+            {p_mt, _fun} = head_ctp = hd(c_tp2)
+            conn2
+            |> put_resp_content_type(print_media_type(p_mt))
+            |> languages_provided(%{state2 | content_type_a: head_ctp})
+          :error ->
             respond(conn2, state2, 400)
+          accept ->
+            choose_media_type(conn2, state2, prioritize_accept(accept))
         end
     end
   end

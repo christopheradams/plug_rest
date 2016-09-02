@@ -45,9 +45,19 @@ defmodule PlugRest.ConnTest do
   end
 
   test "parse malformed accept header" do
-    assert_raise FunctionClauseError, fn ->
-      parse_accept_header(["1"])
-    end
+    accept = "1"
+
+    assert parse_accept_header([accept]) == :error
+  end
+
+  test "parse malformed accept header as media range" do
+    accept = "1"
+
+    media_range = conn(:get, "/")
+    |> put_req_header("accept", accept)
+    |> parse_media_range_header("accept")
+
+    assert media_range == :error
   end
 
   test "parse language accept header" do
