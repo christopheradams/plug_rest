@@ -290,7 +290,8 @@ defmodule PlugRest.Resource do
       true ->
         expect(conn, state, :init, :ok, &service_available/2, &service_available/2)
       false ->
-        respond(conn, state, 500)
+        raise PlugRest.ResourceError, status: :internal_server_error,
+          message: "Module #{inspect handler} is not available"
     end
   end
 

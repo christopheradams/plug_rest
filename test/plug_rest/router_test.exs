@@ -588,8 +588,11 @@ defmodule PlugRest.RouterTest do
     assert conn.resp_body == ""
   end
 
-  test "resource module that does not exist returns 500" do
-    build_conn(:get, "/does_not_exist") |> test_status(500)
+  test "resource module that does not exist" do
+    message = "Module DoesNotExistModule is not available"
+    assert_raise PlugRest.ResourceError, message, fn ->
+      build_conn(:get, "/does_not_exist") |> test_status(500)
+    end
   end
 
   test "callbacks can raise errors" do
