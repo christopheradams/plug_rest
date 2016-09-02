@@ -44,6 +44,12 @@ defmodule PlugRest.ConnTest do
     assert actual_media_types == expected_media_types
   end
 
+  test "parse malformed accept header" do
+    assert_raise FunctionClauseError, fn ->
+      parse_accept_header(["1"])
+    end
+  end
+
   test "parse language accept header" do
     accept = "da, en-gb;q=0.8, en;q=0.7"
 
