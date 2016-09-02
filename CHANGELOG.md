@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.9.0-dev
+
+* Backwards incompatible changes
+  * The resource `init/2` callback will only terminate when `:stop` is
+    returned. All other value will continue REST execution.
+
 ## v0.8.0
 
 * Enhancements

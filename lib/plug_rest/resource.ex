@@ -288,7 +288,7 @@ defmodule PlugRest.Resource do
 
     case Code.ensure_loaded?(handler) do
       true ->
-        expect(conn, state, :init, :ok, &service_available/2, 500)
+        expect(conn, state, :init, :ok, &service_available/2, &service_available/2)
       false ->
         respond(conn, state, 500)
     end
