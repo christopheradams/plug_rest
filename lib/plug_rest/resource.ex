@@ -1414,15 +1414,10 @@ defmodule PlugRest.Resource do
     end
   end
 
-  defp call(conn, %{handler: handler, handler_state: handler_state} = state, callback) do
+  defp call(conn, %{handler: handler, handler_state: handler_state}= _state, callback) do
     case function_exported?(handler, callback, 2) do
       true ->
-        try do
-          apply(handler, callback, [conn, handler_state])
-        catch
-          class, reason ->
-            error_terminate(conn, state, class, reason, callback)
-        end
+        apply(handler, callback, [conn, handler_state])
       false ->
         :no_call
     end

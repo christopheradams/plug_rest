@@ -10,6 +10,14 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule ErrorResource do
+    use PlugRest.Resource
+
+    def service_available(_conn, _state) do
+      raise "oops"
+    end
+  end
+
   defmodule ServiceAvailableResource do
     use PlugRest.Resource
 
@@ -499,6 +507,7 @@ defmodule PlugRest.RouterTest do
     plug :dispatch
 
     resource "/", IndexResource
+    resource "/raise", ErrorResource
     resource "/service_unavailable", ServiceAvailableResource, state: false
     resource "/known_methods", KnownMethodsResource
     resource "/uri_too_long", UriTooLongResource
@@ -581,6 +590,12 @@ defmodule PlugRest.RouterTest do
 
   test "resource module that does not exist returns 500" do
     build_conn(:get, "/does_not_exist") |> test_status(500)
+  end
+
+  test "callbacks can raise errors" do
+    assert_raise RuntimeError, fn ->
+      build_conn(:get, "/raise") |> test_status(500)
+     end
   end
 
   test "service unavailable returns 503" do

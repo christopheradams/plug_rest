@@ -2,6 +2,10 @@
 
 ## v0.9.0-dev
 
+* Enhancements
+  * Don't catch exceptions raised by resource callbacks. This allows
+  `Plug.Debugger` to render the errors if it's enabled.
+
 * Backwards incompatible changes
   * The resource `init/2` callback will only terminate when `:stop` is
     returned. All other value will continue REST execution.
