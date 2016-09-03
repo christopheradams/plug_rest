@@ -589,8 +589,8 @@ defmodule PlugRest.RouterTest do
   end
 
   test "resource module that does not exist" do
-    message = "Module DoesNotExistModule is not available"
-    assert_raise PlugRest.ResourceError, message, fn ->
+    message = ~r/module DoesNotExistModule is not available/
+    assert_raise UndefinedFunctionError, message, fn ->
       build_conn(:get, "/does_not_exist") |> test_status(500)
     end
   end

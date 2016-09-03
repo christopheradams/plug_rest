@@ -290,8 +290,7 @@ defmodule PlugRest.Resource do
       true ->
         expect(conn, state, :init, :ok, &service_available/2, &service_available/2)
       false ->
-        raise PlugRest.ResourceError, status: :internal_server_error,
-          message: "Module #{inspect handler} is not available"
+        raise UndefinedFunctionError, module: handler, function: :init, arity: 1
     end
   end
 
