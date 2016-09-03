@@ -540,11 +540,15 @@ defmodule PlugRest.SuiteTest do
     |> test_status(200)
     |> test_header("etag", "\"etag-header-value\"")
 
-    build_conn(:get, "/resetags?type=binary-strong-unquoted")
-    |> test_status(500)
+    assert_raise ArgumentError, "argument error", fn ->
+      build_conn(:get, "/resetags?type=binary-strong-unquoted")
+      |> test_status(500)
+    end
 
-    build_conn(:get, "/resetags?type=binary-weak-unquoted")
-    |> test_status(500)
+    assert_raise ArgumentError, "argument error", fn ->
+     build_conn(:get, "/resetags?type=binary-weak-unquoted")
+     |> test_status(500)
+    end
   end
 
   test "rest resource if none match" do

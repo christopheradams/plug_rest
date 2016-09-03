@@ -803,21 +803,16 @@ defmodule PlugRest.Resource do
 
   @spec if_match(conn, state, etags_list) :: conn
   defp if_match(conn, state, etags_list) do
-    try do
-      case generate_etag(conn, state) do
-        {{:weak, _}, conn2, state2} ->
-          precondition_failed(conn2, state2)
-        {etag, conn2, state2} ->
-          case :lists.member(etag, etags_list) do
-            true ->
-              if_none_match_exists(conn2, state2)
-            false ->
-              precondition_failed(conn2, state2)
-          end
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :generate_etag)
+    case generate_etag(conn, state) do
+      {{:weak, _}, conn2, state2} ->
+        precondition_failed(conn2, state2)
+      {etag, conn2, state2} ->
+        case :lists.member(etag, etags_list) do
+          true ->
+            if_none_match_exists(conn2, state2)
+          false ->
+            precondition_failed(conn2, state2)
+        end
     end
   end
 
@@ -873,24 +868,19 @@ defmodule PlugRest.Resource do
 
   @spec if_none_match(conn, state, etags_list) :: conn
   defp if_none_match(conn, state, etags_list) do
-    try do
-      case generate_etag(conn, state) do
-        {etag, conn2, state2} ->
-          case etag do
-            nil ->
-              precondition_failed(conn2, state2)
-            ^etag ->
-              case is_weak_match(etag, etags_list) do
-                true ->
-                  precondition_is_head_get(conn2, state2)
-                false ->
-                  method(conn2, state2)
-              end
-          end
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :generate_etag)
+    case generate_etag(conn, state) do
+      {etag, conn2, state2} ->
+        case etag do
+          nil ->
+            precondition_failed(conn2, state2)
+          ^etag ->
+            case is_weak_match(etag, etags_list) do
+              true ->
+                precondition_is_head_get(conn2, state2)
+              false ->
+                method(conn2, state2)
+            end
+        end
     end
   end
 
@@ -944,21 +934,16 @@ defmodule PlugRest.Resource do
 
 
   defp if_modified_since(conn, state, if_modified_since) do
-    try do
-      case last_modified(conn, state) do
-        {nil, conn2, state2} ->
-          method(conn2, state2)
-        {last_modified, conn2, state2} ->
-          case last_modified > if_modified_since do
-            true ->
-              method(conn2, state2)
-            false ->
-              not_modified(conn2, state2)
-          end
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :last_modified)
+    case last_modified(conn, state) do
+      {nil, conn2, state2} ->
+        method(conn2, state2)
+      {last_modified, conn2, state2} ->
+        case last_modified > if_modified_since do
+          true ->
+            method(conn2, state2)
+          false ->
+            not_modified(conn2, state2)
+        end
     end
   end
 
@@ -966,22 +951,12 @@ defmodule PlugRest.Resource do
   @spec not_modified(conn, state) :: conn
   defp not_modified(conn, state) do
     conn2 = delete_resp_header(conn, "content-type")
-    try do
-      case set_resp_etag(conn2, state) do
-        {conn3, state2} ->
-          try do
-            case set_resp_expires(conn3, state2) do
-            {req4, state3} ->
-              respond(req4, state3, 304)
-            end
-          catch
-            class, reason ->
-              error_terminate(conn, state2, class, reason, :expires)
-          end
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :generate_etag)
+    case set_resp_etag(conn2, state) do
+      {conn3, state2} ->
+        case set_resp_expires(conn3, state2) do
+        {req4, state3} ->
+          respond(req4, state3, 304)
+        end
     end
   end
 
@@ -1200,49 +1175,34 @@ defmodule PlugRest.Resource do
 
   @spec set_resp_body_etag(conn, state) :: conn
   defp set_resp_body_etag(conn, state) do
-    try do
-      case set_resp_etag(conn, state) do
-        {conn2, state2} ->
-          set_resp_body_last_modified(conn2, state2)
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :generate_etag)
+    case set_resp_etag(conn, state) do
+      {conn2, state2} ->
+        set_resp_body_last_modified(conn2, state2)
     end
   end
 
 
   @spec set_resp_body_last_modified(conn, state) :: conn
   defp set_resp_body_last_modified(conn, state) do
-    try do
-      case last_modified(conn, state) do
-        {last_modified, conn2, state2} ->
-          case last_modified do
-            ^last_modified when is_nil(last_modified) ->
-              set_resp_body_expires(conn2, state2)
-            ^last_modified ->
-              last_modified_bin = :cowboy_clock.rfc1123(last_modified)
-              conn3 = put_resp_header(conn2, "last-modified", last_modified_bin)
-              set_resp_body_expires(conn3, state2)
-          end
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :last_modified)
+    case last_modified(conn, state) do
+      {last_modified, conn2, state2} ->
+        case last_modified do
+          ^last_modified when is_nil(last_modified) ->
+            set_resp_body_expires(conn2, state2)
+          ^last_modified ->
+            last_modified_bin = :cowboy_clock.rfc1123(last_modified)
+            conn3 = put_resp_header(conn2, "last-modified", last_modified_bin)
+            set_resp_body_expires(conn3, state2)
+        end
     end
   end
 
 
   @spec set_resp_body_expires(conn, state) :: conn
   defp set_resp_body_expires(conn, state) do
-    try do
-      case set_resp_expires(conn, state) do
-        {conn2, state2} ->
-          set_resp_body(conn2, state2)
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :expires)
+    case set_resp_expires(conn, state) do
+      {conn2, state2} ->
+        set_resp_body(conn2, state2)
     end
   end
 
