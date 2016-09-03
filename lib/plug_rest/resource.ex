@@ -1276,8 +1276,14 @@ defmodule PlugRest.Resource do
       :no_call ->
         {nil, conn, %{state | etag: :no_call}}
       {etag, conn2, handler_state} when is_binary(etag) ->
-        {etag2} = List.to_tuple(:cowboy_http.entity_tag_match(etag))
-        {etag2, conn2, %{state | handler_state: handler_state, etag: etag2}}
+        case :cowboy_http.entity_tag_match(etag) do
+          {:error, :badarg} ->
+            raise PlugRest.ResourceError, status: :internal_server_error,
+              message: "Invalid ETag #{inspect etag} (#{inspect state.handler})"
+          tag_match ->
+            {etag2} = List.to_tuple(tag_match)
+            {etag2, conn2, %{state | handler_state: handler_state, etag: etag2}}
+        end
       {etag, conn2, handler_state} ->
         {etag, conn2, %{state | handler_state: handler_state, etag: etag}}
     end
