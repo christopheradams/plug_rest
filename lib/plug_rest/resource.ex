@@ -432,10 +432,10 @@ defmodule PlugRest.Resource do
             conn
             |> put_resp_content_type(print_media_type(@default_media_type))
             |> languages_provided(%{state2 | content_type_a: @default_content_handler})
-          :error ->
-            respond(conn, state2, 400)
           {:ok, accept} ->
             choose_media_type(conn, state2, prioritize_accept(accept))
+          :error ->
+            respond(conn, state2, 400)
         end
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
@@ -450,10 +450,10 @@ defmodule PlugRest.Resource do
             conn2
             |> put_resp_content_type(print_media_type(p_mt))
             |> languages_provided(%{state2 | content_type_a: head_ctp})
-          :error ->
-            respond(conn2, state2, 400)
           {:ok, accept} ->
             choose_media_type(conn2, state2, prioritize_accept(accept))
+          :error ->
+            respond(conn2, state2, 400)
         end
     end
   end
