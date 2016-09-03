@@ -37,8 +37,21 @@ defmodule PlugRest.Conn do
     case get_req_header(conn, header) do
       [] ->
         []
-      [date] ->
-        date |> String.to_char_list |> :httpd_util.convert_request_date
+      [date_header] ->
+        try do
+          date =
+            date_header
+            |> String.to_char_list
+            |> :httpd_util.convert_request_date
+
+          case date do
+            :bad_date -> []
+            date -> date
+          end
+        catch
+          :error, :function_clause ->
+            []
+        end
     end
   end
 

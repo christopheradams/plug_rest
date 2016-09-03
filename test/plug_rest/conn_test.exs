@@ -164,5 +164,14 @@ defmodule PlugRest.ConnTest do
 
     assert actual_headers == expected_headers
   end
+
+  test "parse bad date header" do
+    if_unmodified_since = "bad"
+
+    conn = conn(:get, "/")
+    |> put_req_header("if-unmodified-since", if_unmodified_since)
+
+    assert parse_date_header(conn, "if-unmodified-since") == []
+  end
 end
 

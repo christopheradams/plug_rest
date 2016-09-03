@@ -841,35 +841,25 @@ defmodule PlugRest.Resource do
 
   @spec if_unmodified_since_exists(conn, state) :: conn
   defp if_unmodified_since_exists(conn, state) do
-    try do
-      case parse_date_header(conn, "if-unmodified-since") do
-        [] ->
-          if_none_match_exists(conn, state)
-        if_unmodified_since ->
-          if_unmodified_since(conn, state, if_unmodified_since)
-      end
-    catch
-      _, _ ->
+    case parse_date_header(conn, "if-unmodified-since") do
+      [] ->
         if_none_match_exists(conn, state)
+      if_unmodified_since ->
+        if_unmodified_since(conn, state, if_unmodified_since)
     end
   end
 
 
   @spec if_unmodified_since(conn, state, :calendar.time) :: conn
   defp if_unmodified_since(conn, state, if_unmodified_since) do
-    try do
-      case last_modified(conn, state) do
-        {last_modified, conn2, state2} ->
-          case last_modified > if_unmodified_since do
-            true ->
-              precondition_failed(conn2, state2)
-            false ->
-              if_none_match_exists(conn2, state2)
-          end
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :last_modified)
+    case last_modified(conn, state) do
+      {last_modified, conn2, state2} ->
+        case last_modified > if_unmodified_since do
+          true ->
+            precondition_failed(conn2, state2)
+          false ->
+            if_none_match_exists(conn2, state2)
+        end
     end
   end
 
@@ -938,16 +928,11 @@ defmodule PlugRest.Resource do
 
   @spec if_modified_since_exists(conn, state) :: conn
   defp if_modified_since_exists(conn, state) do
-    try do
-      case parse_date_header(conn, "if-modified-since") do
-        [] ->
-          method(conn, state)
-        if_modified_since ->
-          if_modified_since_now(conn, state, if_modified_since)
-      end
-    catch
-      _, _ ->
+    case parse_date_header(conn, "if-modified-since") do
+      [] ->
         method(conn, state)
+      if_modified_since ->
+        if_modified_since_now(conn, state, if_modified_since)
     end
   end
 
