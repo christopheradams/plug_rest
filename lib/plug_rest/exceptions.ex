@@ -6,14 +6,13 @@ defmodule PlugRest.ResourceError do
   in `Plug.Conn.Status`, and an optional error message.
   """
 
-  defexception [:message, :plug_status]
+  defexception [:message, plug_status: 500]
 
-  def exception([status: status]) do
-    exception([status: status, message: status])
-  end
-
-  def exception([status: status, message: message]) do
+  def exception(args) when is_list(args) do
+    status = Keyword.get(args, :status, :internal_server_error)
+    message = Keyword.get(args, :message, status)
     code = Plug.Conn.Status.code(status)
+
     %PlugRest.ResourceError{message: message, plug_status: code}
   end
 end
