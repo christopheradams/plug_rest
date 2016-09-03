@@ -88,7 +88,7 @@ defmodule PlugRest.Conn do
       [{{"text", "html", %{}}, 1.0, %{}}]
   """
 
-  @spec parse_media_range_header(conn, header) :: [priority_type] | :error
+  @spec parse_media_range_header(conn, header) :: {:ok, [priority_type]} | :error
   def parse_media_range_header(conn, header) do
     maybe_media_types =
       get_req_header(conn, header)
@@ -108,7 +108,7 @@ defmodule PlugRest.Conn do
       :error ->
         :error
       :ok ->
-        format_media_types(media_types)
+        {:ok, format_media_types(media_types)}
     end
   end
 
