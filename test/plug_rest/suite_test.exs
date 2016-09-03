@@ -465,15 +465,19 @@ defmodule PlugRest.SuiteTest do
   end
 
   test "rest missing get callbacks" do
-    build_conn(:get, "/missing_get_callbacks")
-    |> test_status(500)
+    assert_raise CaseClauseError, ~r/no case clause matching/, fn ->
+      build_conn(:get, "/missing_get_callbacks")
+      |> test_status(500)
+    end
   end
 
   test "rest missing put callbacks" do
-    conn(:put, "/missing_put_callbacks")
-    |> put_req_header("content-type", "application/json")
-    |> RestRouter.call([])
-    |> test_status(500)
+    assert_raise CaseClauseError, ~r/no case clause matching/, fn ->
+      conn(:put, "/missing_put_callbacks")
+      |> put_req_header("content-type", "application/json")
+      |> RestRouter.call([])
+      |> test_status(500)
+    end
   end
 
   test "rest nodelete" do

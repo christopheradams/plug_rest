@@ -1118,31 +1118,26 @@ defmodule PlugRest.Resource do
 
   @spec process_content_type(conn, state, atom()) :: conn
   defp process_content_type(conn, %{method: var_method, exists: exists} = state, fun) do
-    try do
-      case call(conn, state, fun) do
-        {:stop, conn2, handler_state2} ->
-          terminate(conn2, %{state | handler_state: handler_state2})
-        {true, conn2, handler_state2} when exists ->
-          state2 = %{state | handler_state: handler_state2}
-          next(conn2, state2, &has_resp_body/2)
-        {true, conn2, handler_state2} ->
-          state2 = %{state | handler_state: handler_state2}
-          next(conn2, state2, &maybe_created/2)
-        {false, conn2, handler_state2} ->
-          state2 = %{state | handler_state: handler_state2}
-          respond(conn2, state2, 400)
-        {{true, res_url}, conn2, handler_state2} when var_method === "POST" ->
-          state2 = %{state | handler_state: handler_state2}
-          conn3 = put_resp_header(conn2, "location", res_url)
-          if exists do
-            respond(conn3, state2, 303)
-          else
-            respond(conn3, state2, 201)
-          end
-      end
-    catch
-      class, reason = {:case_clause, :no_call} ->
-        error_terminate(conn, state, class, reason, fun)
+    case call(conn, state, fun) do
+      {:stop, conn2, handler_state2} ->
+        terminate(conn2, %{state | handler_state: handler_state2})
+      {true, conn2, handler_state2} when exists ->
+        state2 = %{state | handler_state: handler_state2}
+        next(conn2, state2, &has_resp_body/2)
+      {true, conn2, handler_state2} ->
+        state2 = %{state | handler_state: handler_state2}
+        next(conn2, state2, &maybe_created/2)
+      {false, conn2, handler_state2} ->
+        state2 = %{state | handler_state: handler_state2}
+        respond(conn2, state2, 400)
+      {{true, res_url}, conn2, handler_state2} when var_method === "POST" ->
+        state2 = %{state | handler_state: handler_state2}
+        conn3 = put_resp_header(conn2, "location", res_url)
+        if exists do
+          respond(conn3, state2, 303)
+        else
+          respond(conn3, state2, 201)
+        end
     end
   end
 
@@ -1209,17 +1204,12 @@ defmodule PlugRest.Resource do
 
   @spec set_resp_body(conn, state) :: conn
   defp set_resp_body(conn, %{content_type_a: {_, callback}} = state) do
-    try do
-      case call(conn, state, callback) do
-        {:stop, conn2, handler_state2} ->
-          terminate(conn2, %{state | handler_state: handler_state2})
-        {body, conn2, handler_state2} ->
-          state2 = %{state | handler_state: handler_state2, resp_body: body}
-          multiple_choices(conn2, state2)
-      end
-    catch
-      class, reason = {:case_clause, :no_call} ->
-        error_terminate(conn, state, class, reason, callback)
+    case call(conn, state, callback) do
+      {:stop, conn2, handler_state2} ->
+        terminate(conn2, %{state | handler_state: handler_state2})
+      {body, conn2, handler_state2} ->
+        state2 = %{state | handler_state: handler_state2, resp_body: body}
+        multiple_choices(conn2, state2)
     end
   end
 
@@ -1420,10 +1410,6 @@ defmodule PlugRest.Resource do
       end
 
     conn |> send_resp(conn.status, resp_body)
-  end
-
-  defp error_terminate(conn, _state, _class, _reason, _callback) do
-    conn |> send_resp(500, "")
   end
 
   ## Private connection.
