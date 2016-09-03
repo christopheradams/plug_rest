@@ -790,6 +790,12 @@ defmodule PlugRest.RouterTest do
     |> test_status(204)
   end
 
+  test "post no content type" do
+    conn(:post, "/accept_any", "text")
+    |> RestRouter.call([])
+    |> test_status(415)
+  end
+
   test "non-matching accept-extension in accept header" do
     conn(:get, "/html_levels")
     |> put_req_header("accept", "text/html;level=2")

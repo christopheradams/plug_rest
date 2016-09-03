@@ -1116,15 +1116,12 @@ defmodule PlugRest.Resource do
       {c_ta, conn2, handler_state} ->
         c_ta2 = for(p <- c_ta, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state}
-        try do
           case parse_media_type_header(conn2, "content-type") do
+            :error ->
+              respond(conn2, state2, 415)
             content_type ->
               choose_content_type(conn2, state2, content_type, c_ta2)
           end
-        catch
-          _, _ ->
-            respond(conn2, state2, 415)
-        end
     end
   end
 

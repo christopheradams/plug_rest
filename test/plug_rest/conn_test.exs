@@ -16,6 +16,16 @@ defmodule PlugRest.ConnTest do
     assert actual_header == expected_header
   end
 
+  test "parse bad content type header" do
+    content_type = "application"
+
+    parsed = conn(:post, "/")
+    |> put_req_header("content-type", content_type)
+    |> parse_media_type_header("content-type")
+
+    assert parsed == :error
+  end
+
   test "parsing charset in content-type should return lower case" do
     content_type = "text/plain;charset=UTF-8"
 

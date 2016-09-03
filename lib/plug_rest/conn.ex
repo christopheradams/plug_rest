@@ -68,25 +68,34 @@ defmodule PlugRest.Conn do
 
   """
 
-  @spec parse_media_type_header(conn, String.t) :: media_type
+  @spec parse_media_type_header(conn, String.t) :: media_type | :error
   def parse_media_type_header(conn, header) do
-    [content_type] = get_req_header(conn, header)
-    {:ok, type, subtype, maybe_params_map} = content_type(content_type)
 
-    # Work around a type error in Plug, which thinks that params are
-    # [{"binary", "binary"}], and not %{"binary" => "binary"}
-    # TODO: deprecate when plug is upgraded to 1.2
-    params = Map.new(maybe_params_map)
+    case get_req_header(conn, header) do
+      [] ->
+        :error
+      [content_type] ->
+        case content_type(content_type) do
+          {:ok, type, subtype, maybe_params_map} ->
 
-    ## Ensure that any value of charset is lowercase
-    params2 = case Map.get(params, "charset") do
-                nil ->
-                  params
-                charset ->
-                  Map.put(params, "charset", String.downcase(charset))
+          # Work around a type error in Plug, which thinks that params are
+          # [{"binary", "binary"}], and not %{"binary" => "binary"}
+          # TODO: deprecate when plug is upgraded to 1.2
+          params = Map.new(maybe_params_map)
+
+          ## Ensure that any value of charset is lowercase
+          params2 = case Map.get(params, "charset") do
+                      nil ->
+                        params
+                      charset ->
+                        Map.put(params, "charset", String.downcase(charset))
+          end
+
+            {type, subtype, params2}
+          :error ->
+            :error
+        end
     end
-
-    {type, subtype, params2}
   end
 
   @doc """
