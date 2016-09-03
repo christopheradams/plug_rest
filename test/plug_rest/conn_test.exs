@@ -44,12 +44,6 @@ defmodule PlugRest.ConnTest do
     assert actual_media_types == expected_media_types
   end
 
-  test "parse malformed accept header" do
-    accept = "1"
-
-    assert parse_accept_header([accept]) == :error
-  end
-
   test "parse malformed accept header as media range" do
     accept = "1"
 

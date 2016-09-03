@@ -171,36 +171,6 @@ defmodule PlugRest.Conn do
     |> Enum.map(&Plug.Conn.Utils.media_type/1)
   end
 
-  @spec parse_accept_header([]) :: []
-  def parse_accept_header([]) do
-    []
-  end
-
-  @spec parse_accept_header([String.t, ...]) :: [media_type] | :error
-  def parse_accept_header([accept]) when is_binary(accept) do
-
-    maybe_media_types =
-      accept
-      |> Plug.Conn.Utils.list
-      |> Enum.map(fn "*"->"*/*"; e -> e end)
-      |> Enum.map(&Plug.Conn.Utils.media_type/1)
-
-    {media_types, status} =
-      Enum.map_reduce(maybe_media_types, :ok, fn(mt, status) ->
-        case mt do
-          :error ->
-            {{}, :error}
-          {:ok, t, s, p} ->
-            {{t, s, p}, status}
-        end
-      end)
-
-    case status do
-      :ok -> media_types
-      :error -> :error
-    end
-  end
-
   @spec format_media_types([media_type]) :: [priority_type]
   defp format_media_types(media_types) do
     media_types
