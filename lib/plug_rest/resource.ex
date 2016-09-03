@@ -758,20 +758,15 @@ defmodule PlugRest.Resource do
       [_ | _] ->
         ["accept-charset" | variances2]
     end
-    try do
-      case variances(conn, state, variances3) do
-        {variances4, conn2, state2} ->
-          case for(v <- variances4, into: [], do: [", ", v]) do
-                [] ->
-                  resource_exists(conn2, state2)
-                [[", ", h] | variances5] ->
-                  conn3 = put_resp_header(conn2, "vary", List.to_string([h | variances5]))
-                  resource_exists(conn3, state2)
-            end
-      end
-    catch
-      class, reason ->
-        error_terminate(conn, state, class, reason, :variances)
+    case variances(conn, state, variances3) do
+      {variances4, conn2, state2} ->
+        case for(v <- variances4, into: [], do: [", ", v]) do
+              [] ->
+                resource_exists(conn2, state2)
+              [[", ", h] | variances5] ->
+                conn3 = put_resp_header(conn2, "vary", List.to_string([h | variances5]))
+                resource_exists(conn3, state2)
+          end
     end
   end
 
