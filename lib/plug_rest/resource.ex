@@ -1138,6 +1138,9 @@ defmodule PlugRest.Resource do
         else
           respond(conn3, state2, 201)
         end
+      :no_call ->
+        raise UndefinedFunctionError, module: state.handler, function: fun,
+          arity: 2
     end
   end
 
@@ -1210,6 +1213,9 @@ defmodule PlugRest.Resource do
       {body, conn2, handler_state2} ->
         state2 = %{state | handler_state: handler_state2, resp_body: body}
         multiple_choices(conn2, state2)
+      :no_call ->
+        raise UndefinedFunctionError, module: state.handler, function: callback,
+          arity: 2
     end
   end
 
