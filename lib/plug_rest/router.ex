@@ -1,4 +1,24 @@
 defmodule PlugRest.Router do
+  defmodule NoRouteError do
+    @moduledoc """
+    Exception raised when no route is found.
+    """
+
+    defexception [plug_status: 404, message: "404 Not Found", conn: nil, router: nil]
+
+    def exception(args) when is_list(args) do
+      # Use `keyfind` to work around type error when using Keyword on args
+      {:conn, conn} = List.keyfind(args, :conn, 0)
+      {:router, router} = List.keyfind(args, :router, 0)
+
+      status = PlugRest.Conn.Status.status(404)
+      message = "#{status} for #{conn.method} #{conn.request_path} " <>
+                "(#{inspect router})"
+
+      %NoRouteError{message: message, conn: conn, router: router}
+    end
+  end
+
   @moduledoc ~S"""
   A DSL to supplement Plug Router with a resource-oriented routing algorithm.
 
@@ -94,7 +114,7 @@ defmodule PlugRest.Router do
     quote do
       import Plug.Router, only: [match: 2]
       match _ do
-        send_resp(var!(conn), 404, "")
+        raise NoRouteError, conn: var!(conn), router: __MODULE__
       end
     end
   end

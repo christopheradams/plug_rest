@@ -9,6 +9,7 @@
 * Backwards incompatible changes
   * The resource `init/2` callback will only terminate when `:stop` is
     returned. All other value will continue REST execution.
+  * If the router can't find a match it will raise a `NoRouteError`.
 
 ## v0.8.0
 

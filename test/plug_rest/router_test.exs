@@ -581,11 +581,13 @@ defmodule PlugRest.RouterTest do
     assert conn.resp_body == "Matches!"
   end
 
-  test "match any can catch unknown route" do
-    conn = build_conn(:get, "/unknown")
-    |> test_status(404)
+  test "raise NoRouteError when no routes match" do
+    exception =
+    assert_raise PlugRest.Router.NoRouteError, ~r/Not Found/, fn->
+      build_conn(:get, "/unknown")
+    end
 
-    assert conn.resp_body == ""
+    assert Plug.Exception.status(exception) == 404
   end
 
   test "resource module that does not exist" do
