@@ -465,19 +465,21 @@ defmodule PlugRest.SuiteTest do
   end
 
   test "rest missing get callbacks" do
-    assert_raise UndefinedFunctionError, ~r/get_text_plain\/2/, fn ->
-      build_conn(:get, "/missing_get_callbacks")
-      |> test_status(500)
-    end
+    exception =
+      assert_raise UndefinedFunctionError, ~r/get_text_plain\/2/, fn ->
+        build_conn(:get, "/missing_get_callbacks")
+      end
+    assert Plug.Exception.status(exception) == 500
   end
 
   test "rest missing put callbacks" do
-    assert_raise UndefinedFunctionError, ~r/put_application_json\/2/, fn ->
-      conn(:put, "/missing_put_callbacks")
-      |> put_req_header("content-type", "application/json")
-      |> RestRouter.call([])
-      |> test_status(500)
-    end
+    exception =
+      assert_raise UndefinedFunctionError, ~r/put_application_json\/2/, fn ->
+        conn(:put, "/missing_put_callbacks")
+        |> put_req_header("content-type", "application/json")
+        |> RestRouter.call([])
+      end
+    assert Plug.Exception.status(exception) == 500
   end
 
   test "rest nodelete" do
@@ -544,15 +546,17 @@ defmodule PlugRest.SuiteTest do
     |> test_status(200)
     |> test_header("etag", "\"etag-header-value\"")
 
-    assert_raise PlugRest.ResourceError, ~r/Invalid ETag/, fn ->
-      build_conn(:get, "/resetags?type=binary-strong-unquoted")
-      |> test_status(500)
-    end
+    exception =
+      assert_raise PlugRest.ResourceError, ~r/Invalid ETag/, fn ->
+        build_conn(:get, "/resetags?type=binary-strong-unquoted")
+      end
+    assert Plug.Exception.status(exception) == 500
 
-    assert_raise PlugRest.ResourceError, ~r/Invalid ETag/, fn ->
-     build_conn(:get, "/resetags?type=binary-weak-unquoted")
-     |> test_status(500)
-    end
+    exception =
+      assert_raise PlugRest.ResourceError, ~r/Invalid ETag/, fn ->
+        build_conn(:get, "/resetags?type=binary-weak-unquoted")
+      end
+    assert Plug.Exception.status(exception) == 500
   end
 
   test "rest resource if none match" do

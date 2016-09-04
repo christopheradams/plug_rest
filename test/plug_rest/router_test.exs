@@ -590,15 +590,18 @@ defmodule PlugRest.RouterTest do
 
   test "resource module that does not exist" do
     message = ~r/module DoesNotExistModule is not available/
-    assert_raise UndefinedFunctionError, message, fn ->
-      build_conn(:get, "/does_not_exist") |> test_status(500)
-    end
+    exception =
+      assert_raise UndefinedFunctionError, message, fn ->
+        build_conn(:get, "/does_not_exist")
+      end
+    assert Plug.Exception.status(exception) == 500
   end
 
   test "callbacks can raise errors" do
-    assert_raise RuntimeError, fn ->
-      build_conn(:get, "/raise") |> test_status(500)
+    exception = assert_raise RuntimeError, fn ->
+      build_conn(:get, "/raise")
      end
+    assert Plug.Exception.status(exception) == 500
   end
 
   test "service unavailable returns 503" do
