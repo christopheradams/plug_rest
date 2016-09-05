@@ -583,39 +583,51 @@ defmodule PlugRest.RouterTest do
 
   test "raise NoRouteError when no routes match" do
     exception =
-    assert_raise PlugRest.Router.NoRouteError, ~r/Not Found/, fn->
-      build_conn(:get, "/unknown")
-    end
-
+      assert_raise(PlugRest.Router.NoRouteError, ~r/Not Found/, fn ->
+        build_conn(:get, "/unknown")
+      end)
     assert Plug.Exception.status(exception) == 404
   end
 
   test "resource module that does not exist" do
     message = ~r/module DoesNotExistModule is not available/
     exception =
-      assert_raise UndefinedFunctionError, message, fn ->
+      assert_raise(UndefinedFunctionError, message, fn ->
         build_conn(:get, "/does_not_exist")
-      end
+      end)
     assert Plug.Exception.status(exception) == 500
   end
 
   test "callbacks can raise errors" do
-    exception = assert_raise RuntimeError, fn ->
-      build_conn(:get, "/raise")
-     end
+    exception =
+      assert_raise(RuntimeError, fn ->
+        build_conn(:get, "/raise")
+      end)
     assert Plug.Exception.status(exception) == 500
   end
 
-  test "service unavailable returns 503" do
-    build_conn(:get, "/service_unavailable") |> test_status(503)
+  test "service unavailable" do
+    exception =
+      assert_raise(PlugRest.ServerError, ~r/Service Unavailable/, fn ->
+        build_conn(:get, "/service_unavailable")
+      end)
+    assert Plug.Exception.status(exception) == 503
   end
 
-  test "unknown method returns 501" do
-    build_conn(:delete, "/known_methods") |> test_status(501)
+  test "method not implemented" do
+    exception =
+      assert_raise(PlugRest.ServerError, ~r/Not Implemented/, fn ->
+        build_conn(:delete, "/known_methods")
+      end)
+    assert Plug.Exception.status(exception) == 501
   end
 
   test "custom known and unallowed method" do
-    build_conn(:trace, "/known_methods") |> test_status(405)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Method Not Allowed/, fn ->
+        build_conn(:trace, "/known_methods")
+      end)
+    assert Plug.Exception.status(exception) == 405
   end
 
   test "custom known and allowed method" do
@@ -623,36 +635,68 @@ defmodule PlugRest.RouterTest do
   end
 
   test "uri too long returns 414" do
-    build_conn(:get, "/uri_too_long") |> test_status(414)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Request-URI Too Long/, fn ->
+        build_conn(:get, "/uri_too_long")
+      end)
+    assert Plug.Exception.status(exception) == 414
   end
 
   test "unallowed method returns 405" do
-    conn = build_conn(:delete, "/allowed_methods") |> test_status(405)
-    test_header(conn, "allow", "HEAD, GET, POST, OPTIONS")
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Method Not Allowed/, fn ->
+        build_conn(:delete, "/allowed_methods")
+      end)
+    assert Plug.Exception.status(exception) == 405
+    test_header(exception.conn, "allow", "HEAD, GET, POST, OPTIONS")
   end
 
   test "malformed request returns 400" do
-    build_conn(:get, "/malformed_request") |> test_status(400)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Bad Request/, fn ->
+        build_conn(:get, "/malformed_request")
+      end)
+    assert Plug.Exception.status(exception) == 400
   end
 
   test "unauthorized request returns 401" do
-    build_conn(:get, "/unauthorized") |> test_status(401)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Unauthorized/, fn ->
+        build_conn(:get, "/unauthorized")
+      end)
+    assert Plug.Exception.status(exception) == 401
   end
 
   test "forbidden request returns 403" do
-    build_conn(:get, "/forbidden") |> test_status(403)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Forbidden/, fn ->
+        build_conn(:get, "/forbidden")
+      end)
+    assert Plug.Exception.status(exception) == 403
   end
 
   test "invalid content headers returns 501" do
-    build_conn(:get, "/invalid_content_headers") |> test_status(501)
+    exception =
+      assert_raise(PlugRest.ServerError, ~r/Not Implemented/, fn ->
+        build_conn(:get, "/invalid_content_headers")
+      end)
+    assert Plug.Exception.status(exception) == 501
   end
 
   test "invalid entity length returns 413" do
-    build_conn(:get, "/invalid_entity_length") |> test_status(413)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Request Entity Too Large/, fn ->
+        build_conn(:get, "/invalid_entity_length")
+      end)
+    assert Plug.Exception.status(exception) == 413
   end
 
   test "put when conflict" do
-    build_conn(:put, "/conflict") |> test_status(409)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Conflict/, fn ->
+        build_conn(:put, "/conflict")
+      end)
+    assert Plug.Exception.status(exception) == 409
   end
 
   test "delete resource" do
@@ -777,10 +821,13 @@ defmodule PlugRest.RouterTest do
   end
 
   test "content negotiation fails" do
-    conn(:get, "/content_negotiation")
-    |> put_req_header("accept", ",text/plain")
-    |> RestRouter.call([])
-    |> test_status(406)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Not Acceptable/, fn ->
+        conn(:get, "/content_negotiation")
+        |> put_req_header("accept", ",text/plain")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 406
   end
 
   test "accept any content type" do
@@ -796,16 +843,21 @@ defmodule PlugRest.RouterTest do
   end
 
   test "post no content type" do
-    conn(:post, "/accept_any", "text")
-    |> RestRouter.call([])
-    |> test_status(415)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Unsupported Media Type/, fn ->
+        conn(:post, "/accept_any", "text") |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 415
   end
 
   test "non-matching accept-extension in accept header" do
-    conn(:get, "/html_levels")
-    |> put_req_header("accept", "text/html;level=2")
-    |> RestRouter.call([])
-    |> test_status(406)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Not Acceptable/, fn ->
+        conn(:get, "/html_levels")
+        |> put_req_header("accept", "text/html;level=2")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 406
   end
 
   test "no accept extension allowed in content types provided" do
@@ -816,10 +868,13 @@ defmodule PlugRest.RouterTest do
   end
 
   test "test no accept extension allowed, with extension" do
-    conn(:get, "/no_ctp_params")
-    |> put_req_header("accept", "text/html;level=2")
-    |> RestRouter.call([])
-    |> test_status(406)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Not Acceptable/, fn ->
+        conn(:get, "/no_ctp_params")
+        |> put_req_header("accept", "text/html;level=2")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 406
   end
 
   test "language negotiation" do
@@ -850,10 +905,13 @@ defmodule PlugRest.RouterTest do
   end
 
   test "post unaccepted returns 415" do
-    conn(:post, "/allowed_methods", "{}")
-    |> put_req_header("content-type", "application/json")
-    |> RestRouter.call([])
-    |> test_status(415)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Unsupported Media Type/, fn ->
+        conn(:post, "/allowed_methods", "{}")
+        |> put_req_header("content-type", "application/json")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 415
   end
 
   test "post accepted content type with new location" do
@@ -872,11 +930,19 @@ defmodule PlugRest.RouterTest do
   end
 
   test "resource not exists returns 404" do
-    build_conn(:get, "/resource_not_exists") |> test_status(404)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Not Found/, fn ->
+        build_conn(:get, "/resource_not_exists")
+    end)
+    assert Plug.Exception.status(exception) == 404
   end
 
   test "resource not exists, previously existed returns 404" do
-    build_conn(:get, "/previously_existed") |> test_status(404)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Not Found/, fn ->
+        build_conn(:get, "/previously_existed")
+    end)
+    assert Plug.Exception.status(exception) == 404
   end
 
   test "moved permanently returns new location" do
@@ -890,14 +956,21 @@ defmodule PlugRest.RouterTest do
   end
 
   test "gone returns 410" do
-    build_conn(:get, "/gone") |> test_status(410)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Gone/, fn ->
+        build_conn(:get, "/gone")
+      end)
+    assert Plug.Exception.status(exception) == 410
   end
 
   test "if match precondition fails" do
-    conn(:get, "/")
-    |> put_req_header("if-match", "\"xyzzy\"")
-    |> RestRouter.call([])
-    |> test_status(412)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Precondition Failed/, fn ->
+        conn(:get, "/")
+        |> put_req_header("if-match", "\"xyzzy\"")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 412
   end
 
   test "last modified" do
@@ -1080,14 +1153,34 @@ defmodule PlugRest.RouterTest do
   end
 
   test "known methods option" do
-    build_conn(:trace, "/allowed_methods", KnownMethodsRouter) |> test_status(501)
-    build_conn(:move, "/allowed_methods", KnownMethodsRouter) |> test_status(405)
+    exception =
+      assert_raise(PlugRest.ServerError, ~r/Not Implemented/, fn ->
+        build_conn(:trace, "/allowed_methods", KnownMethodsRouter)
+      end)
+    assert Plug.Exception.status(exception) == 501
+
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Method Not Allowed/, fn ->
+        build_conn(:move, "/allowed_methods", KnownMethodsRouter)
+      end)
+    assert Plug.Exception.status(exception) == 405
   end
 
   test "resource overrides known methods option" do
     build_conn(:get, "/known_methods", KnownMethodsRouter) |> test_status(200)
-    build_conn(:delete, "/known_methods", KnownMethodsRouter) |> test_status(501)
-    build_conn(:trace, "/known_methods", KnownMethodsRouter) |> test_status(405)
+
+    exception =
+      assert_raise(PlugRest.ServerError, ~r/Not Implemented/, fn ->
+        build_conn(:delete, "/known_methods", KnownMethodsRouter)
+      end)
+    assert Plug.Exception.status(exception) == 501
+
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Method Not Allowed/, fn ->
+        build_conn(:trace, "/known_methods", KnownMethodsRouter)
+      end)
+    assert Plug.Exception.status(exception) == 405
+
     build_conn(:move, "/known_methods", KnownMethodsRouter) |> test_status(200)
   end
 

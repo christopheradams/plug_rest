@@ -1278,7 +1278,7 @@ defmodule PlugRest.Resource do
       {etag, conn2, handler_state} when is_binary(etag) ->
         case :cowboy_http.entity_tag_match(etag) do
           {:error, :badarg} ->
-            raise PlugRest.ResourceError, status: :internal_server_error,
+            raise PlugRest.RuntimeError,
               message: "Invalid ETag #{inspect etag} (#{inspect state.handler})"
           tag_match ->
             {etag2} = List.to_tuple(tag_match)
@@ -1373,8 +1373,19 @@ defmodule PlugRest.Resource do
     respond(conn, state, status_code)
   end
 
-  defp respond(conn, state, status_code) do
-    conn |> put_status(status_code) |> terminate(state)
+
+  defp respond(conn, state, code) when is_integer(code) and code < 400 do
+    conn |> put_status(code) |> terminate(state)
+  end
+
+  defp respond(conn, state, code) when is_integer(code) and code >= 400 and code < 500 do
+    raise PlugRest.RequestError, plug_status: code, conn: conn,
+      handler: state.handler
+  end
+
+  defp respond(conn, state, code) when is_integer(code) and code >= 500 do
+    raise PlugRest.ServerError, plug_status: code, conn: conn,
+      handler: state.handler
   end
 
   # Do nothing if the resource has already sent a response

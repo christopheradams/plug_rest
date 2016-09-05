@@ -419,17 +419,23 @@ defmodule PlugRest.SuiteTest do
   end
 
   test "rest bad accept" do
-    conn(:get, "/bad_accept")
-    |> put_req_header("accept", "1")
-    |> RestRouter.call([])
-    |> test_status(400)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Bad Request/, fn ->
+        conn(:get, "/bad_accept")
+        |> put_req_header("accept", "1")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 400
   end
 
   test "rest bad content type" do
-    conn(:patch, "/bad_content_type", "Whatever")
-    |> put_req_header("content-type", "text/plain, text/html")
-    |> RestRouter.call([])
-    |> test_status(415)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Unsupported Media Type/, fn ->
+        conn(:patch, "/bad_content_type", "Whatever")
+        |> put_req_header("content-type", "text/plain, text/html")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 415
   end
 
   test "rest expires" do
@@ -451,10 +457,13 @@ defmodule PlugRest.SuiteTest do
   end
 
   test "rest forbidden post" do
-    conn(:post, "/forbidden_post", "Hello world!")
-    |> put_req_header("content-type", "text/plain")
-    |> RestRouter.call([])
-    |> test_status(403)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Forbidden/, fn ->
+        conn(:post, "/forbidden_post", "Hello world!")
+        |> put_req_header("content-type", "text/plain")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 403
   end
 
   test "rest simple post" do
@@ -483,8 +492,11 @@ defmodule PlugRest.SuiteTest do
   end
 
   test "rest nodelete" do
-    build_conn(:delete, "/nodelete")
-    |> test_status(500)
+    exception =
+      assert_raise(PlugRest.ServerError, ~r/Internal Server Error/, fn ->
+        build_conn(:delete, "/nodelete")
+      end)
+    assert Plug.Exception.status(exception) == 500
   end
 
   test "rest options default" do
@@ -499,20 +511,26 @@ defmodule PlugRest.SuiteTest do
     |> RestRouter.call([])
     |> test_status(204)
 
-    conn(:patch, "/patch", "false")
-    |> put_req_header("content-type", "text/plain")
-    |> RestRouter.call([])
-    |> test_status(400)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Bad Request/, fn ->
+        conn(:patch, "/patch", "false")
+        |> put_req_header("content-type", "text/plain")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 400
 
     conn(:patch, "/patch", "stop")
     |> put_req_header("content-type", "text/plain")
     |> RestRouter.call([])
     |> test_status(400)
 
-    conn(:patch, "/patch", "bad_content_type")
-    |> put_req_header("content-type", "application/json")
-    |> RestRouter.call([])
-    |> test_status(415)
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Unsupported Media Type/, fn ->
+        conn(:patch, "/patch", "bad_content_type")
+        |> put_req_header("content-type", "application/json")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 415
   end
 
   test "rest post charset" do
@@ -547,13 +565,13 @@ defmodule PlugRest.SuiteTest do
     |> test_header("etag", "\"etag-header-value\"")
 
     exception =
-      assert_raise PlugRest.ResourceError, ~r/Invalid ETag/, fn ->
+      assert_raise PlugRest.RuntimeError, ~r/Invalid ETag/, fn ->
         build_conn(:get, "/resetags?type=binary-strong-unquoted")
       end
     assert Plug.Exception.status(exception) == 500
 
     exception =
-      assert_raise PlugRest.ResourceError, ~r/Invalid ETag/, fn ->
+      assert_raise PlugRest.RuntimeError, ~r/Invalid ETag/, fn ->
         build_conn(:get, "/resetags?type=binary-weak-unquoted")
       end
     assert Plug.Exception.status(exception) == 500

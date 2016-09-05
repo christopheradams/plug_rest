@@ -27,6 +27,7 @@ defmodule PlugRest.Router do
 
       defmodule MyApp.Router do
         use PlugRest.Router
+        use Plug.ErrorHandler
 
         plug :match
         plug :dispatch
