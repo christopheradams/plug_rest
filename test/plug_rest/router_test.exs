@@ -830,6 +830,16 @@ defmodule PlugRest.RouterTest do
     assert Plug.Exception.status(exception) == 406
   end
 
+  test "rest bad accept with default CTP" do
+    exception =
+      assert_raise(PlugRest.RequestError, ~r/Bad Request/, fn ->
+        conn(:get, "/")
+        |> put_req_header("accept", "1")
+        |> RestRouter.call([])
+      end)
+    assert Plug.Exception.status(exception) == 400
+  end
+
   test "accept any content type" do
     conn(:post, "/accept_any", "text")
     |> put_req_header("content-type", "text/plain")
