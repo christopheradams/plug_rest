@@ -547,13 +547,13 @@ defmodule PlugRest.SuiteTest do
     |> test_header("etag", "\"etag-header-value\"")
 
     exception =
-      assert_raise PlugRest.ResourceError, ~r/Invalid ETag/, fn ->
+      assert_raise PlugRest.RuntimeError, ~r/Invalid ETag/, fn ->
         build_conn(:get, "/resetags?type=binary-strong-unquoted")
       end
     assert Plug.Exception.status(exception) == 500
 
     exception =
-      assert_raise PlugRest.ResourceError, ~r/Invalid ETag/, fn ->
+      assert_raise PlugRest.RuntimeError, ~r/Invalid ETag/, fn ->
         build_conn(:get, "/resetags?type=binary-weak-unquoted")
       end
     assert Plug.Exception.status(exception) == 500
