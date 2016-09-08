@@ -1,14 +1,14 @@
 # Changelog
 
-## v0.9.0-dev
+## v0.9.0
 
 * Enhancements
-  * Don't catch exceptions raised by resource callbacks. This allows
-  `Plug.Debugger` to render the errors if it's enabled.
+  * `Plug.Debugger` will show errors if it's used
 
 * Backwards incompatible changes
   * The resource `init/2` callback will only terminate when `:stop` is
     returned. All other value will continue REST execution.
+  * Exceptions raised inside a `PlugRest.Resource` will not be caught
 
 ## v0.8.0
 

@@ -149,7 +149,7 @@ Add PlugRest to your project in two steps:
     def deps do
       [{:cowboy, "~> 1.0.0"},
        {:plug, "~> 1.0"},
-       {:plug_rest, "~> 0.8.0"}]
+       {:plug_rest, "~> 0.9.0"}]
     end
     ```
 
@@ -191,6 +191,7 @@ Create a file at `lib/my_app/router.ex` to hold the Router:
 ```elixir
 defmodule MyApp.Router do
   use PlugRest.Router
+  use Plug.ErrorHandler
 
   plug :match
   plug :dispatch
@@ -429,6 +430,7 @@ forward "/rest", HelloPhoenix.RestRouter
 To get the `resource` macro directly in your Phoenix router, use
 [PhoenixRest](https://github.com/christopheradams/phoenix_rest/).
 
+
 ## Information
 
 The Cowboy documentation has more details on the REST protocol:
@@ -442,8 +444,7 @@ Differences between PlugRest and cowboy_rest:
 
 * Each callback accepts a Plug `conn` struct instead of a Cowboy `Req`
   record.
-* The `init/2` callback is not required. However, if it does exist, it
-  should return `{:ok, conn, state}`.
+* The `init/2` callback is not required.
 * The default values of `expires/2`, `generate_etag/2`, and
   `last_modified/2` are `nil` instead of `:undefined`
 * The content callbacks (like `to_html`) return `{body, conn, state}`
@@ -457,7 +458,9 @@ Differences between PlugRest and cowboy_rest:
   `{type, subtype, params}`, where params can be `%{}` (no params
   acceptable), `:*` (all params acceptable), or a map of acceptable
   params `%{"level" => "1"}`.
-
+* Exceptions raised by a resource are not caught, but instead allowed
+  to bubble up to Plug's Debugger or ErrorHandler if they are
+  available.
 
 ### Upgrading
 
@@ -465,6 +468,7 @@ PlugRest is still in an initial development phase. Expect breaking
 changes at least in each minor version.
 
 See the [CHANGELOG](CHANGELOG.md) for more information.
+
 
 ## License
 
