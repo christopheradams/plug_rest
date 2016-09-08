@@ -78,13 +78,13 @@ defmodule PlugRest.Conn do
         case content_type(content_type) do
           {:ok, type, subtype, params} ->
 
-          ## Ensure that any value of charset is lowercase
-          params2 = case Map.get(params, "charset") do
-                      nil ->
-                        params
-                      charset ->
-                        Map.put(params, "charset", String.downcase(charset))
-          end
+            ## Ensure that any value of charset is lowercase
+            params2 = case Map.get(params, "charset") do
+                        nil ->
+                          params
+                        charset ->
+                          Map.put(params, "charset", String.downcase(charset))
+                      end
 
             {type, subtype, params2}
           :error ->
