@@ -265,6 +265,95 @@ implemented) by using a Mix task:
 $ mix plug_rest.gen.resource UserResource
 ```
 
+
+## Usage
+
+### Callbacks
+
+The `PlugRest.Resource` module defines dozens of callbacks that offer
+a declarative strategy for defining a resource's behavior. Implement
+your desired callbacks and let this library *do the REST*, including
+returning the appropriate response headers and status code.
+
+Each callback takes two arguments:
+
+* `conn` - a `%Plug.Conn{}` struct; use this to fetch details about
+  the request (see the Plug docs for more info)
+* `state` - the state of the Resource; use this to store any data that
+  should be availble to subsequent callbacks
+
+Each callback must return a three-element tuple of the form `{value,
+conn, state}`. All callbacks are optional, and will be given default
+values if you do not define them. Some of the most common and useful
+callbacks are shown below with their defaults:
+
+      allowed_methods        : ["GET", "HEAD", "OPTIONS"]
+      content_types_accepted : none
+      content_types_provided : [{{"text/html"}, :to_html}]
+      forbidden              : false
+      is_authorized          : true
+      last_modified          : nil
+      malformed_request      : false
+      moved_permanently      : false
+      moved_temporarily      : false
+      resource_exists        : true
+
+The [docs](https://hexdocs.pm/plug_rest/PlugRest.Resource.html)
+for `PlugRest.Resource` list all of the supported REST callbacks and
+their default values.
+
+### Content Negotiation
+
+#### Content Types Provided
+
+You can return representations of your resource in different formats
+by implementing the `content_types_provided` callback, which pairs
+each content-type with a handler function:
+
+```elixir
+def content_types_provided(conn, state) do
+  {[{"text/html", :to_html},
+    {"application/json", :to_json}], conn, state}
+end
+
+def to_html(conn, state) do
+  {"<h1>Hello</h1>", conn, state}
+end
+
+def to_json(conn, state) do
+  {"{\"title\": \"Hello\"}", conn, state}
+end
+```
+
+#### Content Types Accepted
+
+Similarly, you can accept different media types from clients by
+implementing the `content_types_accepted` callback:
+
+```elixir
+def content_types_accepted(conn, state) do
+  {[{"mixed/multipart", :from_multipart},
+    {"application/json", :from_json}], conn, state}
+    end
+
+def from_multipart(conn, state) do
+  # fetch or read the request body params, update the database, etc.
+  {true, conn, state}
+end
+
+def from_json(conn, state) do
+  {true, conn, state}
+end
+```
+
+The content handler functions you implement can return either `true`,
+`{true, URL}` (for redirects), or `false` (for errors). Don't forget
+to add "POST", "PUT", and/or "PATCH" to your resources's list of
+`allowed_methods`.
+
+Consult the `Plug.Conn` and `Plug.Parsers` docs for information on
+parsing and reading the request body params.
+
 ### Testing
 
 Use `Plug.Test` to help verify your resources's responses to separate
@@ -294,6 +383,39 @@ Run the test with:
 ```sh
 $ mix test
 ```
+
+### Debugging
+
+To help debug your app during development, add `Plug.Debugger` to the
+top of the router, before `use Plug.ErrorHandler`:
+
+```elixir
+defmodule MyApp.Router do
+  use PlugRest.Router
+
+  if Mix.env == :dev do
+    use Plug.Debugger, otp_app: :my_app
+  end
+
+  use Plug.ErrorHandler
+
+  # ...
+end
+```
+
+### Error Handling
+
+By adding `use Plug.ErrorHandler` to your router, you will ensure it
+returns correct HTTP status codes when plugs raise exceptions. To set
+a custom error response, add the `handle_errors/2` callback to your
+router:
+
+```elixir
+defp handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
+  send_resp(conn, conn.status, "Something went wrong")
+end
+```
+
 
 ## Phoenix
 
