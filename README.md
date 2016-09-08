@@ -46,6 +46,7 @@ defmodule HelloResource do
 end
 ```
 
+
 ## Why PlugRest?
 
 > The key abstraction of information in REST is a resource. <br/>
@@ -56,52 +57,44 @@ most web apps we write in Elixir, by letting us specify a pipeline of
 composable modules that transform HTTP requests and responses to
 define our application's behavior.
 
-### Plug Router
+### Plug and Phoenix
 
-Out of the box, the original Plug Router gives us a DSL in the form of
-macros which generate routes:
+If we want to route our incoming requests, we can use either Plug
+Router or Phoenix. Plug Router matches an HTTP verb with a path, and
+executes a block of code that operates on the connection and sends a
+response:
 
 ```elixir
-get "/hello" do
-  send_resp(conn, 200, "world")
-end
+get "/hello", do: send_resp(conn, 200, "world")
 ```
 
-The router is a plug which can match on an HTTP verb and a URL path,
-and dispatches the request to a function body operating on the
-connection.
-
-### Phoenix Router
-
-A Phoenix router works similarly: it generates routes that match verbs
-and paths, which dispatch to a controller "action".
+Similarly, Phoenix's router matches a verb with a path, and dispatches
+to another plug (normally, a Controller):
 
 ```elixir
 get "/hello", HelloController, :show
 ```
 
-Phoenix has a few extra features that help us craft an API, such as
-the `resources` macro that generates eight different verb and path
-pairs, and an `accepts` plug that assists with content negotiation.
-
 ### The Problem
 
-Plug and Phoenix ask us for a single function in which to formulate a
-semantically correct HTTP response, including explicitly returning an
-appropriate status code if something goes wrong (or right).
+Neither Plug Router nor Phoenix fully capture the concept of a
+"resource" as it is known in REST and HTTP semantics.
 
-For example, if a resource does not exist, we have to implement a `404
-Not Found` response in every single action pertaining to that resource.
+For example, clients should be able to query the resource using
+`OPTIONS` to find out what methods are allowed. In Phoenix, we would
+have to define an `options` route for every single path, and send the
+correct response manually.
 
-Some types of responses are nearly closed off. For example, what happens
-when we `POST` a request to the above routes? Plug Router crashes and
-sends a `500 Internal Server Error`. Phoenix shrugs and says `404 Not
-Found`. The correct reply, of course, is `405 Method Not Allowed`
-along with a list of supported methods in the header.
+If a client accesses a resource using a method that is not allowed,
+the web application should let it know about the error and list which
+methods are allowed. However, since Phoenix considers a route to be a
+verb plus a path, the Router will fail to find a match and reply `404
+Not Found`.
 
-In the final analysis, Plug and Phoenix help us route requests, but
-it's not enough for a well-behaved API. In order words, the **rest**
-is up to us. :smirk:
+If we want better API behavior, we have to look up and explicitly
+return the appropriate status codes if something goes wrong (or
+right), and we have to do it for every single Controller action. This
+is both fragile and error-prone.
 
 ### The Solution
 
@@ -110,26 +103,13 @@ and route, we prefer to describe our resources in a declarative way,
 and let PlugRest encapsulate all of the decisions, while providing
 sane defaults when the resource's behavior is undefined.
 
-Let's see how PlugRest handles the above scenario. First we tell the
-router about our resource:
+PlugRest knows how to respond to `OPTIONS` requests automatically, out
+of the box, for every resource. It uses the same information to handle
+unsupported HTTP methods by sending a `405 Method Not Allowed` error
+along with the list of correct methods in the header.
 
-```elixir
-resource "/hello", HelloResource
-```
-
-And that's it! By default our resource supports `HEAD`, `GET`, and
-`OPTIONS` methods. If we want to support `POST`, we implement an
-`allowed_methods/2` function in our resource:
-
-```elixir
-def allowed_methods(conn, state) do
-  {["HEAD", "GET", "OPTIONS", "POST"], conn, state}
-end
-```
-
-The [docs](https://hexdocs.pm/plug_rest/PlugRest.Resource.html)
-for `PlugRest.Resource` list all of the supported REST callbacks and
-their default values.
+PlugRest can deal with many other potential resource statuses, and get
+it right every single time.
 
 ### Is it RESTful?
 
