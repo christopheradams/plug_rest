@@ -76,12 +76,7 @@ defmodule PlugRest.Conn do
         :error
       [content_type] ->
         case content_type(content_type) do
-          {:ok, type, subtype, maybe_params_map} ->
-
-          # Work around a type error in Plug, which thinks that params are
-          # [{"binary", "binary"}], and not %{"binary" => "binary"}
-          # TODO: deprecate when plug is upgraded to 1.2
-          params = Map.new(maybe_params_map)
+          {:ok, type, subtype, params} ->
 
           ## Ensure that any value of charset is lowercase
           params2 = case Map.get(params, "charset") do
