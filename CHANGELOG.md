@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.9.1
+
+* Bug fixes
+  * Fix current time function fallback
+
 ## v0.9.0
 
 * Enhancements
