@@ -400,7 +400,7 @@ defmodule PlugRest.RouterTest do
     use PlugRest.Resource
 
     def last_modified(conn, state) do
-      modified = {{2016, 7, 17}, {11, 49, 29}}
+      modified = {{2012, 9, 21}, {22, 36, 14}}
       {modified, conn, state}
     end
 
@@ -900,14 +900,14 @@ defmodule PlugRest.RouterTest do
 
   test "last modified" do
     conn(:get, "/last_modified")
-    |> put_req_header("if-modified-since", "Sun, 17 Jul 2016 12:51:31 GMT")
+    |> put_req_header("if-modified-since", "Fri, 21 Sep 2012 22:36:14 GMT")
     |> RestRouter.call([])
     |> test_status(304)
   end
 
   test "last unmodified" do
     conn(:get, "/last_modified")
-    |> put_req_header("if-unmodified-since", "Sun, 17 Jul 2016 12:51:31 GMT")
+    |> put_req_header("if-unmodified-since", "Fri, 21 Sep 2012 22:36:14 GMT")
     |> put_req_header("if-none-match", "*")
     |> RestRouter.call([])
     |> test_status(304)

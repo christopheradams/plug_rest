@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.10.0-dev
+
+* Backwards incompatible changes
+  * Drop current time config for testing environment
+
 ## v0.9.1
 
 * Bug fixes

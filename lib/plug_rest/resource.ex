@@ -923,12 +923,7 @@ defmodule PlugRest.Resource do
 
   @spec if_modified_since_now(conn, state, :calendar.time) :: conn
   defp if_modified_since_now(conn, state, if_modified_since) do
-    universaltime =
-      case Application.get_env(:plug_rest, :current_time_fun) do
-        nil -> :erlang.universaltime
-        fun -> fun.()
-      end
-    case if_modified_since > universaltime do
+    case if_modified_since > :erlang.universaltime do
       true ->
         method(conn, state)
       false ->

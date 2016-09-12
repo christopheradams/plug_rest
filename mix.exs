@@ -1,7 +1,7 @@
 defmodule PlugRest.Mixfile do
   use Mix.Project
 
-  @version "0.9.1"
+  @version "0.10.0-dev"
 
   def project do
     [app: :plug_rest,
