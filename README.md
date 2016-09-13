@@ -7,9 +7,12 @@
 
 An Elixir port of Cowboy's REST sub-protocol for Plug applications.
 
-PlugRest supplements `Plug.Router` with an additional `resource`
-macro, which matches a URL path with a resource handler module
-implementing REST semantics via a series of optional callbacks.
+PlugRest has two main components:
+
+* `PlugRest.Router` - supplements Plug's router with a `resource` macro,
+  which matches a URL path with a Plug module for all HTTP methods
+* `PlugRest.Resource` - defines a behaviour for Plug modules to
+  represent web resources declaratively using multiple callbacks
 
 PlugRest is perfect for creating well-behaved and semantically correct
 hypermedia web applications.
@@ -149,7 +152,7 @@ Add PlugRest to your project in two steps:
     def deps do
       [{:cowboy, "~> 1.0.0"},
        {:plug, "~> 1.0"},
-       {:plug_rest, "~> 0.9.0"}]
+       {:plug_rest, "~> 0.10.0"}]
     end
     ```
 
@@ -179,7 +182,7 @@ defmodule MyApp.HelloResource do
   end
 
   def to_html(conn, state) do
-    {"Hello world", conn, state}
+    {"Hello #{state}", conn, state}
   end
 end
 ```
@@ -196,7 +199,7 @@ defmodule MyApp.Router do
   plug :match
   plug :dispatch
 
-  resource "/hello", MyApp.HelloResource
+  resource "/hello", MyApp.HelloResource, "World"
 
   match "/match" do
     send_resp(conn, 200, "Match")
@@ -204,8 +207,10 @@ defmodule MyApp.Router do
 end
 ```
 
-The PlugRest Router adds a `resource` macro which accepts a URL path
-and a Module that will handle all the callbacks on the Resource.
+The PlugRest Router adds a `resource` macro which accepts a URL path,
+a Plug module, and its options. If the module is a `PlugRest.Resource`,
+it will begin executing the REST callbacks, passing in any initial
+`state` given to it.
 
 The router contains a plug pipeline and requires two plugs: `match`
 and `dispatch`. You can add custom plugs into this pipeline.

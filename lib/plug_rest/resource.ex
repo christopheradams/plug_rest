@@ -15,12 +15,9 @@ defmodule PlugRest.Resource do
   returns a "text/html" representation of the resource.
 
       defmodule MyApp.UserResource do
-
         use PlugRest.Resource
 
-        def init(%{params: params} = conn, _state) do
-          username = params["username"]
-          state = %{username: username}
+        def init(conn, state) do
           {:ok, conn, state}
         end
 
@@ -28,9 +25,10 @@ defmodule PlugRest.Resource do
           {["GET"], conn, state}
         end
 
-        def resource_exists(conn, %{username: username} = state)
+        def resource_exists(%{params: params} = conn, _state)
+          username = params["username"]
           # Look up user
-          state2 = %{state | name: "John Doe"}
+          state = %{name: "John Doe", username: username}
           {true, conn, state2}
         end
 
@@ -287,13 +285,12 @@ defmodule PlugRest.Resource do
   @doc """
   Executes the REST state machine with a connection and resource
 
-  Accepts a Plug.Conn struct, a PlugRest.Resource handler module, and an
-  options list, and executes the REST state machine.
+  Accepts a Plug.Conn struct, a PlugRest.Resource handler, and the
+  initial state of the handler, and executes the REST state machine.
   """
-  @spec upgrade(conn, handler, Keyword.t) :: conn
-  def upgrade(conn, handler, options) do
+  @spec upgrade(conn, handler, any()) :: conn
+  def upgrade(conn, handler, handler_state) do
     method = conn.method
-    handler_state = Keyword.get(options, :state)
     known_methods = Application.get_env(:plug_rest, :known_methods)
 
     state = %PlugRest.State{method: method, known_methods: known_methods,

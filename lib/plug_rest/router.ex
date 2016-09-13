@@ -14,10 +14,11 @@ defmodule PlugRest.Router do
         resource "/pages/:page", PageResource
       end
 
-  The `resource/3` macro accepts a request of format `"/pages/VALUE"` and
-  dispatches it to the `PageResource` module, which must adopt the
-  `PlugRest.Resource` behaviour by implementing one or more of the callbacks
-  which describe the resource.
+  The `resource/4` macro accepts a request of format `"/pages/VALUE"`
+  and dispatches it to `PageResource`, which must be a Plug module.
+
+  See `PlugRest.Resource` for information on how to write a Plug module that
+  implements REST semantics.
 
   From `Plug.Router`:
 
@@ -91,39 +92,39 @@ defmodule PlugRest.Router do
   @doc """
   Main API to define resource routes.
 
-  It accepts an expression representing the path, the name of a module
-  representing the resource, and a list of options.
+  It accepts an expression representing the path, a Plug module, the
+  options for the plug, and options for the macro.
 
   ## Examples
 
-      resource "/pages/:page", PageResource, host: "host1.", state: true
+      resource "/path", PlugModule, plug_options, macro_options
 
   ## Options
 
-  `resource/3` accepts the following options
+  `resource/4` accepts the following options:
 
     * `:host` - the host which the route should match. Defaults to `nil`,
       meaning no host match, but can be a string like "example.com" or a
       string ending with ".", like "subdomain." for a subdomain match.
 
-    * `:state` - the initial state of the resource.
+  The macro accepts options that it will pass to the Plug:
 
-  The macro accepts an optional initial state for the resource. For example:
+      resource "/pages/:page", PageResource, [p: 1]
 
-      resource "/pages/:page", PageResource, state: %{option: true}
+  You can restrict the resource to only match requests for a specific
+  host. If the plug doesn't take any options, pass an empty list as
+  the third argument to the macro:
 
-  You can restrict the resource to only match requests for a specific host:
-
-      resource "/pages/:page", PageResource, host: "host1.example.com"
+      resource "/pages/:page", PageResource, [], host: "host1.example.com"
   """
-  @spec resource(String.t, atom(), list()) :: Macro.t
-  defmacro resource(path, handler, options \\ []) do
-    add_resource(path, handler, options)
+  @spec resource(String.t, atom(), any(), list()) :: Macro.t
+  defmacro resource(path, plug, plug_opts \\ [], options \\ []) do
+    add_resource(path, plug, plug_opts, options)
   end
 
   ## Compiles the resource into a match macro from Plug.Router
-  @spec add_resource(String.t, atom(), list()) :: Macro.t
-  defp add_resource(path, handler, options) do
+  @spec add_resource(String.t, atom(), any(), list()) :: Macro.t
+  defp add_resource(path, plug, plug_opts, options) do
     {vars, _match} = Plug.Router.Utils.build_path_match(path)
 
     # Transform the list of path variables into a data structure that will
@@ -158,18 +159,18 @@ defmodule PlugRest.Router do
         conn = %{conn | params: params}
 
         options =
-          case function_exported?(unquote(handler), :init, 1) do
+          case function_exported?(unquote(plug), :init, 1) do
             true ->
-              apply(unquote(handler), :init, [unquote(options)])
+              apply(unquote(plug), :init, [unquote(plug_opts)])
             false ->
-              unquote(options)
+              unquote(plug_opts)
           end
 
-        case function_exported?(unquote(handler), :call, 2) do
+        case function_exported?(unquote(plug), :call, 2) do
           true ->
-            apply(unquote(handler), :call, [conn, options])
+            apply(unquote(plug), :call, [conn, options])
           false ->
-            PlugRest.Resource.upgrade(conn, unquote(handler), options)
+            PlugRest.Resource.upgrade(conn, unquote(plug), options)
         end
       end
     end

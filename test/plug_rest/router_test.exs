@@ -489,6 +489,16 @@ defmodule PlugRest.RouterTest do
 
   end
 
+  defmodule OtherPlug do
+    def init(options) do
+      options
+    end
+
+    def call(conn, options) do
+      send_resp(conn, 200, options)
+    end
+  end
+
   defmodule OtherRouter do
     use Plug.Router
 
@@ -508,7 +518,7 @@ defmodule PlugRest.RouterTest do
 
     resource "/", IndexResource
     resource "/raise", ErrorResource
-    resource "/service_unavailable", ServiceAvailableResource, state: false
+    resource "/service_unavailable", ServiceAvailableResource, false
     resource "/known_methods", KnownMethodsResource
     resource "/uri_too_long", UriTooLongResource
     resource "/allowed_methods", AllowedMethodsResource
@@ -522,18 +532,18 @@ defmodule PlugRest.RouterTest do
     resource "/post_new", PostNewResource
     resource "/put_new/:id", PutNewResource
     resource "/resp_body", RespBodyResource
-    resource "/resp_body_new", RespBodyResource, state: %{exists: false}
+    resource "/resp_body_new", RespBodyResource, %{exists: false}
     resource "/json_resource", JsonResource
     resource "/content_negotiation", HypermediaResource
     resource "/accept_any", AcceptAnyResource
     resource "/binary_ctp_resource", BinaryCtpResource
-    resource "/html_levels", CtpParamsResource, state: %{params: %{"level" => "1"}}
-    resource "/no_ctp_params", CtpParamsResource, state: %{params: %{}}
-    resource "/all_accept_ext", CtpParamsResource, state: %{params: :*}
+    resource "/html_levels", CtpParamsResource, %{params: %{"level" => "1"}}
+    resource "/no_ctp_params", CtpParamsResource, %{params: %{}}
+    resource "/all_accept_ext", CtpParamsResource, %{params: :*}
     resource "/languages_resource", LanguagesResource
     resource "/charset_resource", CharsetResource
-    resource "/resource_not_exists", ResourceExists, state: false
-    resource "/previously_existed", PreviouslyExisted, state: false
+    resource "/resource_not_exists", ResourceExists, false
+    resource "/previously_existed", PreviouslyExisted, false
     resource "/moved_permanently", MovedPermanentlyResource
     resource "/moved_temporarily", MovedTemporarilyResource
     resource "/gone", GoneResource
@@ -551,18 +561,28 @@ defmodule PlugRest.RouterTest do
     resource "/chunked", ChunkedResource
     resource "/send_file", SendFileResource
 
-    resource "/host", HostResource, host: "host1.", state: "Host 1"
-    resource "/host", HostResource, host: "host2.", state: "Host 2"
+    resource "/host", HostResource, "Host 1", host: "host1."
+    resource "/host", HostResource, "Host 2", host: "host2."
 
     resource "/stop", StopResource
-    resource "/resp", StopResource, state: :resp
-    resource "/send_resp", StopResource, state: :send
+    resource "/resp", StopResource, :resp
+    resource "/send_resp", StopResource, :send
+
+    resource "/plug", OtherPlug, "Hello world"
 
     match "/match" do
       send_resp(conn, 200, "Matches!")
     end
 
     forward "/other", to: OtherRouter
+  end
+
+  test "resource works with any plug" do
+    conn = conn(:get, "/plug")
+    conn = RestRouter.call(conn, [])
+
+    test_status(conn, 200)
+    assert conn.resp_body == "Hello world"
   end
 
   test "basic DSL is available" do

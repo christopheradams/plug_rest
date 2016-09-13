@@ -346,8 +346,8 @@ defmodule PlugRest.SuiteTest do
     resource "/bad_accept", :rest_simple_resource
     resource "/bad_content_type", :rest_patch_resource
     resource "/simple", :rest_simple_resource
-    resource "/forbidden_post", :rest_forbidden_resource, state: [true]
-    resource "/simple_post", :rest_forbidden_resource, state: [false]
+    resource "/forbidden_post", :rest_forbidden_resource, [true]
+    resource "/simple_post", :rest_forbidden_resource, [false]
     resource "/missing_get_callbacks", :rest_missing_callbacks
     resource "/missing_put_callbacks", :rest_missing_callbacks
     resource "/nodelete", :rest_nodelete_resource

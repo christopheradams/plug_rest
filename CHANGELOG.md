@@ -2,7 +2,13 @@
 
 ## v0.10.0-dev
 
+* Enhancements
+  * The `resource` macro will work with any Plug module
+
 * Backwards incompatible changes
+  * The `resource` macro splits the `options` into options for the
+    Plug, and options for the macro. Change `state: true, host:
+    "host."` to `true, host: "host."`
   * `known_methods` defaults can be changed in the application config,
     and are no longer an option for the Router or Resource plugs
 
