@@ -165,7 +165,7 @@ defmodule PlugRest.Router do
               unquote(options)
           end
 
-        case function_exported?(unquote(handler), :call, 1) do
+        case function_exported?(unquote(handler), :call, 2) do
           true ->
             apply(unquote(handler), :call, [conn, options])
           false ->
