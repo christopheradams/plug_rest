@@ -104,6 +104,19 @@ defmodule PlugRest.Resource do
 
       conn2 = put_rest_body(conn, "#{conn.method} was successful")
       {true, conn2, state}
+
+  ## Configuration
+
+  You can change some defaults by configuring the `:plug_rest` app in
+  your `config.exs` file.
+
+  To change the default `known_methods` for all Resources:
+
+      config :plug_rest,
+        known_methods: ["GET", "HEAD", "OPTIONS", "TRACE"]
+
+  If a Resource implements the `known_methods` callback, that list
+  always takes precedence over the default list.
   """
 
   import PlugRest.Utils
@@ -281,7 +294,7 @@ defmodule PlugRest.Resource do
   def upgrade(conn, handler, options) do
     method = conn.method
     handler_state = Keyword.get(options, :state)
-    known_methods = Keyword.get(options, :known_methods)
+    known_methods = Application.get_env(:plug_rest, :known_methods)
 
     state = %PlugRest.State{method: method, known_methods: known_methods,
                             handler: handler, handler_state: handler_state}

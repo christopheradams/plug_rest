@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.10.0-dev
+
+* Backwards incompatible changes
+  * `known_methods` defaults can be changed in the application config,
+    and are no longer an option for the Router or Resource plugs
+
 ## v0.9.1
 
 * Bug fixes

@@ -1068,7 +1068,7 @@ defmodule PlugRest.RouterTest do
   ## Known methods option
 
   defmodule KnownMethodsRouter do
-    use PlugRest.Router, known_methods: ["GET", "POST", "DELETE", "MOVE"]
+    use PlugRest.Router
 
     plug :match
     plug :dispatch
@@ -1078,15 +1078,19 @@ defmodule PlugRest.RouterTest do
   end
 
   test "known methods option" do
+    Application.put_env(:plug_rest, :known_methods, ["GET", "POST", "DELETE", "MOVE"])
     build_conn(:trace, "/allowed_methods", KnownMethodsRouter) |> test_status(501)
     build_conn(:move, "/allowed_methods", KnownMethodsRouter) |> test_status(405)
+    Application.put_env(:plug_rest, :known_methods, nil)
   end
 
-  test "resource overrides known methods option" do
+  test "resource overrides known methods config" do
+    Application.put_env(:plug_rest, :known_methods, ["GET", "POST", "DELETE", "MOVE"])
     build_conn(:get, "/known_methods", KnownMethodsRouter) |> test_status(200)
     build_conn(:delete, "/known_methods", KnownMethodsRouter) |> test_status(501)
     build_conn(:trace, "/known_methods", KnownMethodsRouter) |> test_status(405)
     build_conn(:move, "/known_methods", KnownMethodsRouter) |> test_status(200)
+    Application.put_env(:plug_rest, :known_methods, nil)
   end
 
   ## Utility functions
