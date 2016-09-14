@@ -5,6 +5,7 @@
 * Enhancements
   * The `resource` macro will work with any Plug module
   * Plug.Builder can be used inside Resources
+  * Add `:private` option to resource macro
 
 * Backwards incompatible changes
   * The `resource` macro splits the `options` into options for the

@@ -486,6 +486,15 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule PrivateAssignsResource do
+    use PlugRest.Resource
+
+
+    def to_html(conn, :private = state) do
+      {conn.private.test, conn, state}
+    end
+  end
+
   defmodule StopResource do
     use PlugRest.Resource
 
@@ -580,6 +589,8 @@ defmodule PlugRest.RouterTest do
 
     resource "/host", HostResource, "Host 1", host: "host1."
     resource "/host", HostResource, "Host 2", host: "host2."
+
+    resource "/private", PrivateAssignsResource, :private, private: %{test: "private"}
 
     resource "/stop", StopResource
     resource "/resp", StopResource, :resp
@@ -1027,6 +1038,13 @@ defmodule PlugRest.RouterTest do
     |> RestRouter.call([])
 
     assert conn2.resp_body == "Host 2"
+  end
+
+  test "private option" do
+    conn = conn(:get, "/private")
+    |> RestRouter.call([])
+
+    assert conn.resp_body == "private"
   end
 
   test "save media type from request" do

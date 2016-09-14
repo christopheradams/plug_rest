@@ -106,6 +106,7 @@ defmodule PlugRest.Router do
     * `:host` - the host which the route should match. Defaults to `nil`,
       meaning no host match, but can be a string like "example.com" or a
       string ending with ".", like "subdomain." for a subdomain match.
+    * `:private` - a map of private data to merge into the connection
 
   The macro accepts options that it will pass to the Plug:
 
@@ -137,8 +138,11 @@ defmodule PlugRest.Router do
       |> Enum.map(fn(var) -> {Atom.to_string(var), Macro.var(var, nil)} end)
       |> Enum.filter(fn({var, _macro}) -> String.at(var, 0) !== "_" end)
 
+    host = options[:host]
+    private = options[:private]
+
     quote do
-      match unquote(path), host: unquote(options[:host]) do
+      match unquote(path), host: unquote(host), private: unquote(private) do
         conn = var!(conn)
 
         conn_params =
