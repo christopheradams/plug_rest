@@ -160,11 +160,6 @@ defmodule PlugRest.Resource do
   @default_media_type {"text", "html", %{}}
   @default_content_handler {@default_media_type, :to_html}
 
-  ## Plug callbacks
-
-  @callback init(opts) :: opts
-  @optional_callbacks [init: 1]
-
   ## Common handler callbacks
 
   @callback init(conn, state) :: {:ok, conn, state}
