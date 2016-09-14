@@ -107,6 +107,7 @@ defmodule PlugRest.Router do
       meaning no host match, but can be a string like "example.com" or a
       string ending with ".", like "subdomain." for a subdomain match.
     * `:private` - a map of private data to merge into the connection
+    * `:assigns` - a map of data to merge into the connection
 
   The macro accepts options that it will pass to the Plug:
 
@@ -161,6 +162,12 @@ defmodule PlugRest.Router do
         # Save dynamic path segments into conn.params
         params = Map.merge(conn_params, path_params)
         conn = %{conn | params: params}
+
+        # Merge assigns
+        options = unquote(options)
+        assigns = conn.assigns
+          |> Map.merge(Keyword.get(options, :assigns, %{}))
+        conn = %{conn | assigns: assigns}
 
         plug = unquote(plug)
         plug_opts = unquote(plug_opts)
