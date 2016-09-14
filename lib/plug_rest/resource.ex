@@ -193,126 +193,420 @@ defmodule PlugRest.Resource do
 
   ## Common handler callbacks
 
+  @doc """
+  Sets up the connection and handler state before other REST callbacks
+
+  ## Examples
+
+        def init(conn, state) do
+          {:ok, conn, state}
+        end
+  """
   @callback init(conn, state) :: {:ok, conn, state}
                                | {:stop, conn, state}
   @optional_callbacks [init: 2]
 
   ## REST handler callbacks
 
+  @doc """
+  Returns the list of allowed methods
+
+  ## Examples
+
+      def allowed_methods(conn, state) do
+        {["GET,", "HEAD", "OPTIONS"], conn, state}
+      end
+  """
   @callback allowed_methods(conn, state) :: {[binary()], conn, state}
                                           | {:stop, conn, state}
   @optional_callbacks [allowed_methods: 2]
 
+  @doc """
+  Returns whether POST is allowed when the resource doesn't exist
+
+  ## Examples
+
+      def allow_missing_post(conn, state) do
+        {true, conn, state}
+      end
+  """
   @callback allow_missing_post(conn, state) :: {boolean(), conn, state}
                                              | {:stop, conn, state}
   @optional_callbacks [allow_missing_post: 2]
 
+  @doc """
+  Returns the list of charsets the resource provides
+
+  ## Examples
+
+      def charsets_provided(conn, state) do
+        {["utf-8"], conn, state}
+      end
+  """
   @callback charsets_provided(conn, state) :: {[binary()], conn, state}
                                             | {:stop, conn, state}
   @optional_callbacks [charsets_provided: 2]
 
+  @doc """
+  Returns the list of content-types the resource accepts
+
+  The list must be ordered in order of preference.
+
+  Each content-type can be given either as a binary string or as a tuple containing the type, subtype and parameters.
+
+  ## Examples
+
+      def content_types_accepted(conn, state) do
+        {[{"application/json", :from_json}], conn, state}
+      end
+
+      # post accepted
+      def from_json(conn, :success = state) do
+        conn = put_rest_body(conn, "{\\"status\\": \\"ok\\"}")
+        {true, conn, state}
+      end
+
+      # post create and redirect
+      def from_json(conn, :redirect = state) do
+        {{true, "new_url/1234"}, conn, state}
+      end
+
+      # post error
+      def from_json(conn, :error = state) do
+        {false, conn, state}
+      end
+  """
   @callback content_types_accepted(conn, state) :: {[media_type], conn, state}
                                                  | {:stop, conn, state}
   @optional_callbacks [content_types_accepted: 2]
 
+  @doc """
+  Returns the list of content-types the resource provides
+
+  ## Examples
+
+      def content_types_provided(conn, state) do
+        {[{"application/json", :to_json}], conn, state}
+      end
+
+      def to_json(conn, state) do
+        {"{}", conn, state}
+      end
+  """
   @callback content_types_provided(conn, state) :: {[content_type_p], conn, state}
                                                  | {:stop, conn, state}
   @optional_callbacks [content_types_provided: 2]
 
+  @doc """
+  Returns whether the delete action has been completed
+
+  ## Examples
+
+      def delete_completed(conn, state) do
+        {true, conn, state}
+      end
+  """
   @callback delete_completed(conn, state) :: {boolean(), conn, state}
                                            | {:stop, conn, state}
   @optional_callbacks [delete_completed: 2]
 
+  @doc """
+  Deletes the resource
+
+  ## Examples
+
+      def delete_resource(conn, state) do
+        {true, conn, state}
+      end
+  """
   @callback delete_resource(conn, state) :: {boolean(), conn, state}
                                           | {:stop, conn, state}
   @optional_callbacks [delete_resource: 2]
 
+  @doc """
+  Returns the date of expiration of the resource
+
+  ## Examples
+
+      def expires(conn, state) do
+        {{{2012, 9, 21}, {22, 36, 14}}, conn, state}
+      end
+  """
   @callback expires(conn, state) :: {:calendar.datetime() | binary() | nil, conn, state}
                                   | {:stop, conn, state}
   @optional_callbacks [expires: 2]
 
+  @doc """
+  Returns whether access to the resource is forbidden
+
+  ## Examples
+
+      def forbidden(conn, state) do
+        {false, conn, state}
+      end
+  """
   @callback forbidden(conn, state) :: {boolean(), conn, state}
                                     | {:stop, conn, state}
   @optional_callbacks [forbidden: 2]
 
+  @doc """
+  Returns the entity tag of the resource
+
+  ## Examples
+
+      # ETag: W/"etag-header-value"
+      def generate_etag(conn, state) do
+        {{:weak, "etag-header-value"}, conn, state}
+      end
+
+      # ETag: "etag-header-value"
+      def generate_etag(conn, state) do
+        {{:strong, "etag-header-value"}, conn, state}
+      end
+
+      # ETag: "etag-header-value"
+      def generate_etag(conn, state) do
+        {"\\"etag-header-value\\""}, conn, state}
+      end
+  """
   @callback generate_etag(conn, state) :: {binary() | {:weak | :strong, binary()}, conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [generate_etag: 2]
 
+  @doc """
+  Returns whether the user is authorized to perform the action
+
+  ## Examples
+
+      def is_authorized(conn, state) do
+        {true, conn, state}
+      end
+  """
   @callback is_authorized(conn, state) :: {true | {false, binary()}, conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [is_authorized: 2]
 
+  @doc """
+  Returns whether the put action results in a conflict
+
+  ## Examples
+
+      def is_conflict(conn, state) do
+        {false, conn, state}
+      end
+  """
   @callback is_conflict(conn, state) :: {boolean(), conn, state}
                                       | {:stop, conn, state}
   @optional_callbacks [is_conflict: 2]
 
+  @doc """
+  Returns the list of known methods
+
+  ## Examples
+
+      def known_methods(conn, state) do
+        {["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+         conn, state}
+      end
+  """
   @callback known_methods(conn, state) :: {[binary()], conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [known_methods: 2]
 
+  @doc """
+  Returns the list of languages the resource provides
+
+  ## Examples
+
+      def languages_provided(conn, state) do
+        {["en"], conn, state}
+      end
+  """
   @callback languages_provided(conn, state) :: {[binary()], conn, state}
                                              | {:stop, conn, state}
   @optional_callbacks [languages_provided: 2]
 
+  @doc """
+  Returns the date of last modification of the resource
+
+  ## Examples
+
+      def last_modified(conn, state) do
+        {{{2012, 9, 21}, {22, 36, 14}}, conn, state}
+      end
+  """
   @callback last_modified(conn, state) :: {:calendar.datetime(), conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [last_modified: 2]
 
+  @doc """
+  Returns whether the request is malformed
+
+  ## Examples
+
+      def malformed_request(conn, state) do
+        {false, conn, state}
+      end
+  """
   @callback malformed_request(conn, state) :: {boolean(), conn, state}
                                             | {:stop, conn, state}
   @optional_callbacks [malformed_request: 2]
 
+  @doc """
+  Returns whether the resource was permanently moved
+
+  ## Examples
+
+      def moved_permanently(conn, state) do
+        {false, conn, state}
+      end
+  """
   @callback moved_permanently(conn, state) :: {{true, binary()} | false, conn, state}
                                             | {:stop, conn, state}
   @optional_callbacks [moved_permanently: 2]
 
+  @doc """
+  Returns whether the resource was temporarily moved
+
+  ## Examples
+
+      def moved_temporarily(conn, state) do
+        {false, conn, state}
+      end
+  """
   @callback moved_temporarily(conn, state) :: {{true, binary()} | false, conn, state}
                                             | {:stop, conn, state}
   @optional_callbacks [moved_temporarily: 2]
 
+  @doc """
+  Returns whether there are multiple representations of the resource
+
+  ## Examples
+
+      def multiple_choices(conn, state) do
+        {false, conn, state}
+      end
+  """
   @callback multiple_choices(conn, state) :: {boolean(), conn, state}
                                            | {:stop, conn, state}
   @optional_callbacks [multiple_choices: 2]
 
+  @doc """
+  Handles a request for information
+
+  The response should inform the client the communication options available for this resource.
+
+  By default, Cowboy will send a 200 OK response with the allow header set.
+
+  ## Examples
+
+      def options(conn, state) do
+        {:ok, conn, state}
+      end
+  """
   @callback options(conn, state) :: {:ok, conn, state}
                                   | {:stop, conn, state}
   @optional_callbacks [options: 2]
 
+  @doc """
+  Returns whether the resource existed previously
+
+  ## Examples
+
+      def previously_existed(conn, state) do
+        {false, conn, state}
+      end
+  """
   @callback previously_existed(conn, state) :: {boolean(), conn, state}
                                              | {:stop, conn, state}
   @optional_callbacks [previously_existed: 2]
 
+  @doc """
+  Returns whether the resource exists
+
+  ## Examples
+
+      def resource_exists(conn, state) do
+        {true, conn, state}
+      end
+  """
   @callback resource_exists(conn, state) :: {boolean(), conn, state}
                                           | {:stop, conn, state}
   @optional_callbacks [resource_exists: 2]
 
+  @doc """
+  Returns whether the service is available
+
+  ## Examples
+
+      def service_available(conn, state) do
+        {true, conn, state}
+      end
+  """
   @callback service_available(conn, state) :: {boolean(), conn, state}
                                             | {:stop, conn, state}
   @optional_callbacks [service_available: 2]
 
+  @doc """
+  Returns whether the requested URI is too long
+
+  ## Examples
+
+      def uri_too_long(conn, state) do
+        {false, conn, state}
+      end
+  """
   @callback uri_too_long(conn, state) :: {boolean(), conn, state}
                                        | {:stop, conn, state}
   @optional_callbacks [uri_too_long: 2]
 
+  @doc """
+  Returns whether the content-* headers are valid
+
+  ## Examples
+
+      def valid_content_headers(conn, state) do
+        {true, conn, state}
+      end
+  """
   @callback valid_content_headers(conn, state) :: {boolean(), conn, state}
                                                 | {:stop, conn, state}
   @optional_callbacks [valid_content_headers: 2]
 
+  @doc """
+  Returns whether the request body length is within acceptable boundaries
+
+  ## Examples
+
+      def valid_entity_length(conn, state) do
+        {true, conn, state}
+      end
+  """
   @callback valid_entity_length(conn, state) :: {boolean(), conn, state}
                                               | {:stop, conn, state}
   @optional_callbacks [valid_entity_length: 2]
 
+  @doc """
+  Return the list of headers that affect the representation of the resource
+
+  ## Examples
+
+      # vary: accept-language
+      def variances(conn, state) do
+        {["accept-language"], conn, state}
+      end
+  """
   @callback variances(conn, state) :: {[binary()], conn, state}
                                     | {:stop, conn, state}
   @optional_callbacks [variances: 2]
-
 
   @doc """
   Executes the REST state machine with a connection and resource
 
   Accepts a Plug.Conn struct, a PlugRest.Resource handler, and the
   initial state of the handler, and executes the REST state machine.
+
+  ## Examples
   """
   @spec upgrade(conn, handler, any()) :: conn
   def upgrade(conn, handler, handler_state) do
