@@ -296,12 +296,7 @@ defmodule PlugRest.Resource do
     state = %PlugRest.State{method: method, known_methods: known_methods,
                             handler: handler, handler_state: handler_state}
 
-    case Code.ensure_loaded?(handler) do
-      true ->
-        expect(conn, state, :init, :ok, &service_available/2, &service_available/2)
-      false ->
-        raise UndefinedFunctionError, module: handler, function: :init, arity: 1
-    end
+    expect(conn, state, :init, :ok, &service_available/2, &service_available/2)
   end
 
   @spec service_available(conn, state) :: conn

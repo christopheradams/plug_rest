@@ -158,20 +158,10 @@ defmodule PlugRest.Router do
         params = Map.merge(conn_params, path_params)
         conn = %{conn | params: params}
 
-        options =
-          case function_exported?(unquote(plug), :init, 1) do
-            true ->
-              apply(unquote(plug), :init, [unquote(plug_opts)])
-            false ->
-              unquote(plug_opts)
-          end
+        plug = unquote(plug)
+        plug_opts = unquote(plug_opts)
 
-        case function_exported?(unquote(plug), :call, 2) do
-          true ->
-            apply(unquote(plug), :call, [conn, options])
-          false ->
-            PlugRest.Resource.upgrade(conn, unquote(plug), options)
-        end
+        plug.call(conn, plug.init(plug_opts))
       end
     end
   end

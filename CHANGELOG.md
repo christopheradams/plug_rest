@@ -11,6 +11,7 @@
     "host."` to `true, host: "host."`
   * `known_methods` defaults can be changed in the application config,
     and are no longer an option for the Router or Resource plugs
+  * Require all resource handlers to be Plugs
 
 ## v0.9.1
 

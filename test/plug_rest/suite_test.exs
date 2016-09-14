@@ -3,6 +3,7 @@ defmodule PlugRest.SuiteTest do
   use Plug.Test
 
   defmodule :rest_empty_resource do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -10,6 +11,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_expires_binary do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -33,6 +35,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_expires do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -61,6 +64,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_forbidden_resource do
+    use PlugRest.Resource
 
     def init(conn, [var_forbidden]) do
       {:ok, conn, var_forbidden}
@@ -103,6 +107,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_missing_callbacks do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -126,6 +131,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_nodelete_resource do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -149,6 +155,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_param_all do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -191,6 +198,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_patch_resource do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -236,6 +244,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_post_charset_resource do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -259,6 +268,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_postonly_resource do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -282,6 +292,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_resource_etags do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
@@ -319,6 +330,7 @@ defmodule PlugRest.SuiteTest do
   end
 
   defmodule :rest_simple_resource do
+    use PlugRest.Resource
 
     def init(conn, opts) do
       {:ok, conn, opts}
