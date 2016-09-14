@@ -10,6 +10,22 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule PipelineResource do
+    use PlugRest.Resource
+    use Plug.Builder
+
+    plug :hello
+    plug :rest
+
+    def to_html(conn, state) do
+      {conn.private.message, conn, state}
+    end
+
+    def hello(conn, _opts) do
+      put_private(conn, :message, "Hello")
+    end
+  end
+
   defmodule ErrorResource do
     use PlugRest.Resource
 
@@ -518,6 +534,7 @@ defmodule PlugRest.RouterTest do
 
     resource "/", IndexResource
     resource "/raise", ErrorResource
+    resource "/pipeline", PipelineResource
     resource "/service_unavailable", ServiceAvailableResource, false
     resource "/known_methods", KnownMethodsResource
     resource "/uri_too_long", UriTooLongResource
@@ -592,6 +609,12 @@ defmodule PlugRest.RouterTest do
 
     test_status(conn, 200)
     assert conn.resp_body == "Plug REST"
+  end
+
+  test "plug pipeline in resource" do
+    conn = conn(:get, "/pipeline")
+    conn = RestRouter.call(conn, [])
+    assert conn.resp_body == "Hello"
   end
 
   test "match can match known route" do

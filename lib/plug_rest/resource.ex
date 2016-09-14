@@ -115,6 +115,33 @@ defmodule PlugRest.Resource do
 
   If a Resource implements the `known_methods` callback, that list
   always takes precedence over the default list.
+
+  ## Plug Pipeline
+
+  You can create a custom Plug pipeline within your resource using `Plug.Builder`:
+
+      defmodule MessageResource do
+        use PlugRest.Resource
+
+        # Add the Builder to your resource
+        use Plug.Builder
+
+        # Add your custom plugs
+        plug :hello
+
+        # Finally, call the :rest plug to start executing the REST callbacks
+        plug :rest
+
+        # REST Callbacks
+        def to_html(conn, state) do
+          {conn.private.message, conn, state}
+        end
+
+        # Example custom plug function
+        def hello(conn, _opts) do
+          put_private(conn, :message, "Hello")
+        end
+      end
   """
 
   import PlugRest.Utils

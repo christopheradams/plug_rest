@@ -4,6 +4,7 @@
 
 * Enhancements
   * The `resource` macro will work with any Plug module
+  * Plug.Builder can be used inside Resources
 
 * Backwards incompatible changes
   * The `resource` macro splits the `options` into options for the
