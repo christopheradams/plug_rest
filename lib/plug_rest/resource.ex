@@ -134,6 +134,10 @@ defmodule PlugRest.Resource do
       end
 
       def call(conn, options) do
+        rest(conn, options)
+      end
+
+      def rest(conn, options) do
         PlugRest.Resource.upgrade(conn, __MODULE__, options)
       end
 
