@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.10.0-dev
+## v0.10.0
 
 * Enhancements
   * The `resource` macro will work with any Plug module
