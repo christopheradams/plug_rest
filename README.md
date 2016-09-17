@@ -17,12 +17,23 @@ PlugRest has two main components:
 PlugRest is perfect for creating well-behaved and semantically correct
 hypermedia web applications.
 
+If you use Phoenix, be sure to check out
+[PhoenixRest](https://github.com/christopheradams/phoenix_rest/).
+
 [Documentation for PlugRest is available on hexdocs](http://hexdocs.pm/plug_rest/).<br/>
 [Source code is available on Github](https://github.com/christopheradams/plug_rest).<br/>
 [Package is available on hex](https://hex.pm/packages/plug_rest).
 
+### Table of Contents
 
-## Hello World
+* __[Introduction](#introduction)__
+* __[Installation](#installation)__
+* __[Getting Started](#getting-started)__
+* __[Information](#information)__
+
+## Introduction
+
+### Hello World
 
 Define a router to match a path with a resource handler:
 
@@ -49,88 +60,50 @@ defmodule HelloResource do
 end
 ```
 
+## Features
+
+#### Router
+
+  - Route all requests for a path to a plug, for any HTTP method
+
+#### Resource
+
+  - Built-in HEAD and OPTIONS responses, and easy handling of GET,
+    POST, PUT, PATCH, and DELETE requests
+  - Content negotiation for media types, languages, and charsets
+  - Basic access authentication
+  - Observance of etag, expires, last-modified, and vary headers
+  - Multiple choices for redirects, not modified responses, etc.
+  - Correct HTTP status codes for common 400 and 500 level errors
 
 ## Why PlugRest?
 
 > The key abstraction of information in REST is a resource. <br/>
 > —Roy Fielding
 
-[Plug](https://github.com/elixir-lang/plug) forms the foundation of
-most web apps we write in Elixir, by letting us specify a pipeline of
-composable modules that transform HTTP requests and responses to
-define our application's behavior.
+In the REST architectural style, one of the uniform interface
+constraints is the identification of resources. Using
+[Plug](https://github.com/elixir-lang/plug), we can satisfy this
+requirement by routing requests based on a URL path.
 
-### Plug and Phoenix
-
-If we want to route our incoming requests, we can use either Plug
-Router or Phoenix. Plug Router matches an HTTP verb with a path, and
-executes a block of code that operates on the connection and sends a
-response:
-
-```elixir
-get "/hello", do: send_resp(conn, 200, "world")
-```
-
-Similarly, Phoenix's router matches a verb with a path, and dispatches
-to another plug (normally, a Controller):
-
-```elixir
-get "/hello", HelloController, :show
-```
-
-### The Problem
-
-Neither Plug Router nor Phoenix fully capture the concept of a
-"resource" as it is known in REST and HTTP semantics.
-
-For example, clients should be able to query the resource using
-`OPTIONS` to find out what methods are allowed. In Phoenix, we would
-have to define an `options` route for every single path, and send the
-correct response manually.
-
-If a client accesses a resource using a method that is not allowed,
-the web application should let it know about the error and list which
-methods are allowed. However, since Phoenix considers a route to be a
-verb plus a path, the Router will fail to find a match and reply `404
-Not Found`.
-
-If we want better API behavior, we have to look up and explicitly
-return the appropriate status codes if something goes wrong (or
-right), and we have to do it for every single Controller action. This
-is both fragile and error-prone.
-
-### The Solution
-
-Instead of having to redefine HTTP semantics for every web application
-and route, we prefer to describe our resources in a declarative way,
-and let PlugRest encapsulate all of the decisions, while providing
-sane defaults when the resource's behavior is undefined.
-
-PlugRest knows how to respond to `OPTIONS` requests automatically, out
-of the box, for every resource. It uses the same information to handle
-unsupported HTTP methods by sending a `405 Method Not Allowed` error
-along with the list of correct methods in the header.
-
-PlugRest can deal with many other potential resource statuses, and get
-it right every single time.
-
-### Is it RESTful?
+PlugRest goes a step further. Rather than manually defining HTTP
+semantics for each route and dividing a resource's behavior over
+multiple controller actions, PlugRest lets us describe our resources
+in a declarative way (by implementing callbacks), and follows protocol
+for us, including returning the correct status code when something
+goes wrong (or right).
 
 PlugRest can help your Elixir application become a fluent speaker of
-the HTTP protocol. It can assist with content negotiation, and let
-your API reply succinctly about resource status and availability,
-permissions, redirects, etc. However, it will not offer you
-templating, advanced user authentication, web sockets, or database
-connections. It will also not help you choose an appropriate media
-type for your API, whether HTML or [JSON API](http://jsonapi.org/).
+the HTTP protocol. It can assist with content negotiation, cache
+headers, basic authentication, and redirects. However, it is not a
+full-featured framework with views, templates, sessions, or web
+sockets. It also lacks a requisite solution for hypermedia controls,
+which are essential to REST.
 
-PlugRest is definitely not the first or only library to take a
-resource-oriented approach to REST-based frameworks. Basho's
-[Webmachine](https://github.com/webmachine/webmachine) has been a
-stable standby for years, and inspired similar frameworks in many
-other programming languages. PlugRest's most immediate antecedent is
-the `cowboy_rest` module in the Cowboy webserver that currently
-underpins Phoenix and most other Plug-based Elixir apps.
+PlugRest is not the first REST-based framework to take a
+resource-oriented approach. Basho's
+[Webmachine](https://github.com/webmachine/webmachine) has inspired
+many such libraries, including cowboy_rest.
 
 You can use PlugRest in a standalone web app or as part of an existing
 Phoenix application. Details below!
@@ -164,6 +137,8 @@ Add PlugRest to your project in two steps:
     end
     ```
 
+## Getting Started
+
 ### Resources
 
 Create a file at `lib/my_app/hello_resource.ex` to hold your Resource
@@ -174,7 +149,7 @@ defmodule MyApp.HelloResource do
   use PlugRest.Resource
 
   def allowed_methods(conn, state) do
-    {["GET"], conn, state}
+    {["HEAD", "GET", "OPTIONS"], conn, state}
   end
 
   def content_types_provided(conn, state) do
@@ -271,9 +246,6 @@ implemented) by using a Mix task:
 $ mix plug_rest.gen.resource UserResource
 ```
 
-
-## Usage
-
 ### Callbacks
 
 The `PlugRest.Resource` module defines dozens of callbacks that offer
@@ -286,7 +258,7 @@ Each callback takes two arguments:
 * `conn` - a `%Plug.Conn{}` struct; use this to fetch details about
   the request (see the Plug docs for more info)
 * `state` - the state of the Resource; use this to store any data that
-  should be availble to subsequent callbacks
+  should be available to subsequent callbacks
 
 Each callback must return a three-element tuple of the form `{value,
 conn, state}`. All callbacks are optional, and will be given default
@@ -296,7 +268,9 @@ callbacks are shown below with their defaults:
       allowed_methods        : ["GET", "HEAD", "OPTIONS"]
       content_types_accepted : none
       content_types_provided : [{{"text/html"}, :to_html}]
+      expires                : nil
       forbidden              : false
+      generate_etag          : nil
       is_authorized          : true
       last_modified          : nil
       malformed_request      : false
@@ -354,7 +328,7 @@ end
 
 The content handler functions you implement can return either `true`,
 `{true, URL}` (for redirects), or `false` (for errors). Don't forget
-to add "POST", "PUT", and/or "PATCH" to your resources's list of
+to add "POST", "PUT", and/or "PATCH" to your resource's list of
 `allowed_methods`.
 
 Consult the `Plug.Conn` and `Plug.Parsers` docs for information on
@@ -362,7 +336,7 @@ parsing and reading the request body params.
 
 ### Testing
 
-Use `Plug.Test` to help verify your resources's responses to separate
+Use `Plug.Test` to help verify your resource's responses to separate
 requests. Create a file at `test/resources/hello_resource_test.exs` to
 hold your test:
 
@@ -423,7 +397,7 @@ end
 ```
 
 
-## Phoenix
+### Phoenix
 
 You can use PlugRest's router and resources in your Phoenix app like
 any other plug by forwarding requests to them:
