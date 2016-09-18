@@ -87,8 +87,8 @@ defmodule PlugRest.Resource do
   where `body` is one of:
 
   * `binary()`, which will be sent with `send_resp/3`
-  * `{:chunked, Enum.t}, which will use `send_chunked/2`
-  * `{:file, binary()}, which will use `send_file/3`
+  * `{:chunked, Enum.t}`, which will use `send_chunked/2`
+  * `{:file, binary()}`, which will use `send_file/3`
 
   You can halt the resource handling from any callback and return a manual
   response like so:
