@@ -29,7 +29,7 @@ defmodule PlugRest.Resource do
           username = params["username"]
           # Look up user
           state = %{name: "John Doe", username: username}
-          {true, conn, state2}
+          {true, conn, state}
         end
 
         def content_types_provided(conn, state) do
