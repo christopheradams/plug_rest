@@ -2,6 +2,7 @@ defmodule PlugRest.Mixfile do
   use Mix.Project
 
   @version "0.10.0"
+  @source_url "https://github.com/christopheradams/plug_rest"
 
   def project do
     [app: :plug_rest,
@@ -11,8 +12,9 @@ defmodule PlugRest.Mixfile do
      start_permanent: Mix.env == :prod,
      dialyzer: [plt_add_deps: true,
                 plt_apps: [:erts, :kernel, :stdlib, :crypto, :public_key, :inets]],
-     docs: [extras: ["README.md"]],
+     docs: docs(),
      description: description(),
+     source_url: @source_url,
      package: package(),
      deps: deps()]
   end
@@ -32,6 +34,16 @@ defmodule PlugRest.Mixfile do
     """
     REST behaviour and Plug router for hypermedia web applications
     """
+  end
+
+  defp docs() do
+    [
+      source_ref: "v#{@version}",
+      main: "readme",
+      extras: [
+        "README.md": [title: "README"]
+      ]
+    ]
   end
 
   defp package do
