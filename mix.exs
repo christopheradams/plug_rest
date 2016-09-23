@@ -1,6 +1,10 @@
 defmodule PlugRest.Mixfile do
   use Mix.Project
 
+  @project_description """
+  REST behaviour and Plug router for hypermedia web applications
+  """
+
   @version "0.10.0"
   @source_url "https://github.com/christopheradams/plug_rest"
 
@@ -13,7 +17,7 @@ defmodule PlugRest.Mixfile do
      dialyzer: [plt_add_deps: true,
                 plt_apps: [:erts, :kernel, :stdlib, :crypto, :public_key, :inets]],
      docs: docs(),
-     description: description(),
+     description: @project_description,
      source_url: @source_url,
      package: package(),
      deps: deps()]
@@ -28,12 +32,6 @@ defmodule PlugRest.Mixfile do
      {:cowboy, "~> 1.0"},
      {:ex_doc, ">= 0.0.0", only: :dev},
      {:dialyxir, "~> 0.3.5", only: [:dev]}]
-  end
-
-  defp description do
-    """
-    REST behaviour and Plug router for hypermedia web applications
-    """
   end
 
   defp docs() do
@@ -51,7 +49,9 @@ defmodule PlugRest.Mixfile do
      name: :plug_rest,
      maintainers: ["Christopher Adams"],
      licenses: ["MIT"],
-     links: %{github: "https://github.com/christopheradams/plug_rest"}
+     links: %{
+       "GitHub" => @source_url
+     }
     ]
   end
 end
