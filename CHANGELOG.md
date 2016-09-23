@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.10.1
+
+* Bug fixes
+  * Fix allowed_methods in resource template
+
 ## v0.10.0
 
 * Enhancements

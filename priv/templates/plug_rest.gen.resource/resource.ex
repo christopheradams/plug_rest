@@ -2,7 +2,7 @@ defmodule <%= module %> do
   use <%= resources_use %>
 
   def allowed_methods(conn, state) do
-    {["GET,", "HEAD", "OPTIONS"], conn, state}
+    {["GET", "HEAD", "OPTIONS", "POST"], conn, state}
   end
 
   def allow_missing_post(conn, state) do
