@@ -48,7 +48,7 @@ defmodule PlugRest.Mixfile do
     [
      name: :plug_rest,
      maintainers: ["Christopher Adams"],
-     licenses: ["MIT"],
+     licenses: ["Apache 2.0"],
      links: %{
        "GitHub" => @source_url
      }
