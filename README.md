@@ -115,6 +115,7 @@ If starting a new project, generate a supervisor application:
 
 ```sh
 $ mix new my_app --sup
+$ cd my_app
 ```
 
 Add PlugRest to your project in two steps:
@@ -137,11 +138,13 @@ Add PlugRest to your project in two steps:
     end
     ```
 
+Install the dependencies by running `mix deps.get` and `mix deps.compile`.
+
 ## Getting Started
 
 ### Resources
 
-Create a file at `lib/my_app/hello_resource.ex` to hold your Resource
+Create a file at `lib/my_app/resources/hello_resource.ex` to hold your Resource
 Handler:
 
 ```elixir
@@ -231,6 +234,7 @@ children = [
 Compile your application and then run it:
 
 ```sh
+$ mix compile
 $ iex -S mix
 ```
 
@@ -245,6 +249,8 @@ implemented) by using a Mix task:
 ```sh
 $ mix plug_rest.gen.resource UserResource
 ```
+
+The task will create a resource at `lib/my_app/resources/user_resource.ex`.
 
 ### Callbacks
 
