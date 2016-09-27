@@ -154,7 +154,7 @@ defmodule PlugRest.Resource do
       @behaviour PlugRest.Resource
 
       import Plug.Conn
-      import PlugRest.Resource
+      import PlugRest.Resource, only: [put_rest_body: 2, get_rest_body: 1]
 
       def init(options) do
         options
@@ -1773,19 +1773,13 @@ defmodule PlugRest.Resource do
     Map.get(conn.private, :plug_rest_body)
   end
 
-  @doc """
-  Returns the requested media type
-
-  """
+  @doc false
   @spec get_media_type(conn) :: media_type | nil
   def get_media_type(conn) do
     Map.get(conn.private, :plug_rest_format)
   end
 
-  @doc """
-  Puts the media type in the connection
-
-  """
+  @doc false
   @spec put_media_type(conn, media_type) :: conn
   def put_media_type(conn, media_type) do
     put_private(conn, :plug_rest_format, media_type)

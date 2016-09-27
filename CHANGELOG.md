@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.10.2-dev
+
+* Bug fixes
+  * List only the functions that should be imported into each Resource
+
 ## v0.10.1
 
 * Bug fixes
