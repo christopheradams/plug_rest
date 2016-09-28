@@ -181,6 +181,7 @@ defmodule PlugRest.Resource do
   @type media_type :: PlugRest.State.media_type
   @type content_handler :: PlugRest.State.content_handler
   @type content_type_p :: {binary() | media_type, handler}
+  @type content_type_a :: {binary() | media_type, handler}
 
   @type etags_list :: PlugRest.Conn.etags_list
   @type priority_type :: PlugRest.Conn.priority_type
@@ -276,7 +277,8 @@ defmodule PlugRest.Resource do
         {false, conn, state}
       end
   """
-  @callback content_types_accepted(conn, state) :: {[media_type], conn, state}
+
+  @callback content_types_accepted(conn, state) :: {[content_type_a], conn, state}
                                                  | {:stop, conn, state}
   @optional_callbacks [content_types_accepted: 2]
 
