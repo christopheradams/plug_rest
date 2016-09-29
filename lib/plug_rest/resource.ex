@@ -197,6 +197,9 @@ defmodule PlugRest.Resource do
   @doc """
   Sets up the connection and handler state before other REST callbacks
 
+  - Methods: all
+  - Default: `:ok`
+
   ## Examples
 
         def init(conn, state) do
@@ -212,6 +215,14 @@ defmodule PlugRest.Resource do
   @doc """
   Returns the list of allowed methods
 
+  - Methods: all
+  - Default: `["GET", "HEAD", "OPTIONS"]`
+
+  Methods are case sensitive and should be given in uppercase.
+
+  If the request uses a method that is not allowed, the resource will
+  respond `405 Method Not Allowed`.
+
   ## Examples
 
       def allowed_methods(conn, state) do
@@ -224,6 +235,20 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns whether POST is allowed when the resource doesn't exist
+
+  - Methods: POST
+  - Default: `true`
+
+  This function will be called when `resource_exists` is `false` and
+  the request method is POST. Returning `true` means the missing
+  resource can process the enclosed representation, and the resource's
+  content accepted handler will be invoked.
+
+  Returning `true` means POST should update an existing resource and
+  create one if it is missing.
+
+  Returning `false` means POST to a missing resource will send `404
+  Not Found`.
 
   ## Examples
 
@@ -238,6 +263,16 @@ defmodule PlugRest.Resource do
   @doc """
   Returns the list of charsets the resource provides
 
+  - Methods:  GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: Skip to the next step if undefined.
+
+  The list must be ordered by priority.
+
+  The first charset will be chosen if the client does not send an
+  accept-charset header, or the first that matches.
+
+  The charset should be returned as a lowercase string.
+
   ## Examples
 
       def charsets_provided(conn, state) do
@@ -251,15 +286,49 @@ defmodule PlugRest.Resource do
   @doc """
   Returns the list of content-types the resource accepts
 
-  The list must be ordered in order of preference.
+  - Methods: POST, PUT, PATCH
+  - Default: Crash if undefined.
 
-  Each content-type can be given either as a binary string or as a tuple containing the type, subtype and parameters.
+  The list must be ordered by priority.
+
+  Each content-type can be given either as a string like
+  `"text/html"`; or a tuple in the form `{type, subtype, params}`,
+  where params can be `%{}` (no params acceptable), `:*` (all params
+  acceptable), or a map of acceptable params `%{"level" => "1"}`.
+
+  If no content types match, a `415 Unsupported Media Type` response
+  will be sent.
 
   ## Examples
 
       def content_types_accepted(conn, state) do
         {[{"application/json", :from_json}], conn, state}
       end
+
+  The content accepted handler value is the name of the callback that
+  will be called if the content-type matches. It is defined as
+  follows.
+
+  - Value type: `true | {true, URL} | false`
+  - Default: Crash if undefined.
+
+  Process the request body
+
+  This function should create or update the resource based on the
+  request body and the method used. Consult the `Plug.Conn` and
+  `Plug.Parsers` docs for information on parsing and reading the
+  request body params.
+
+  Returning `true` means the process was successful. Returning `{true,
+  URL}` means a new resource was created at that location.
+
+  Returning `false` will send a `400 Bad Request` response.
+
+  If a response body must be sent, the appropriate media-type, charset
+  and language can be manipulated using `Plug.Conn`. The body can be
+  set using `put_rest_body/2`.
+
+  ## Examples
 
       # post accepted
       def from_json(conn, :success = state) do
@@ -285,11 +354,39 @@ defmodule PlugRest.Resource do
   @doc """
   Returns the list of content-types the resource provides
 
+  - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: `[{{"text", "html", %{}}, :to_html}]`
+
+  The list must be ordered by priority.
+
+  Each content-type can be given either as a string like
+  `"text/html"`; or a tuple in the form `{type, subtype, params}`,
+  where params can be `%{}` (no params acceptable), `:*` (all params
+  acceptable), or a map of acceptable params `%{"level" => "1"}`.
+
+  PlugRest will choose the content-type through content negotiation
+  with the client.
+
+  If content negotiation fails, a `406 Not Acceptable` response will
+  be sent.
+
   ## Examples
 
       def content_types_provided(conn, state) do
         {[{"application/json", :to_json}], conn, state}
       end
+
+  The content provided handler names a function that will return a
+  representation of the resource using that content-type. It is
+  defined as follows.
+
+  - Methods: GET, HEAD
+  - Value type: `binary() | {:chunked, Enum.t} | {:file, binary()}`
+  - Default: Crash if undefined.
+
+  Return the response body.
+
+  ## Examples
 
       def to_json(conn, state) do
         {"{}", conn, state}
@@ -301,6 +398,14 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns whether the delete action has been completed
+
+  - Methods: DELETE
+  - Default: `true`
+
+  This function is called after a successful `delete_resource`.
+  Returning `true` means the delete has completed. Returning `false`
+  means the request was accepted but may not have finished, and
+  responds with `202 Accepted`.
 
   ## Examples
 
@@ -315,6 +420,12 @@ defmodule PlugRest.Resource do
   @doc """
   Deletes the resource
 
+  - Methods: DELETE
+  - Default: `false`
+
+  Returning `true` means the delete request can be enacted. Returning
+  `false` will send a `500` error.
+
   ## Examples
 
       def delete_resource(conn, state) do
@@ -327,6 +438,12 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns the date of expiration of the resource
+
+  - Methods: GET, HEAD
+  - Default: `nil`
+
+  This date will be sent as the value of the expires header. The date
+  can be specified as a `datetime()` tuple or a string.
 
   ## Examples
 
@@ -341,6 +458,11 @@ defmodule PlugRest.Resource do
   @doc """
   Returns whether access to the resource is forbidden
 
+  - Methods: all
+  - Default: `false`
+
+  Returning `true` will send a `403 Forbidden` response.
+
   ## Examples
 
       def forbidden(conn, state) do
@@ -353,6 +475,11 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns the entity tag of the resource
+
+  - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: `true`
+
+  This value will be sent as the value of the etag header.
 
   ## Examples
 
@@ -378,6 +505,13 @@ defmodule PlugRest.Resource do
   @doc """
   Returns whether the user is authorized to perform the action
 
+  - Methods: all
+  - Default: `true`
+
+  Returning `{false, binary()}` will send a `401 Unauthorized`
+  response. The value of the `binary()` will be set as the
+  WWW-authenticate header.
+
   ## Examples
 
       def is_authorized(conn, state) do
@@ -389,7 +523,12 @@ defmodule PlugRest.Resource do
   @optional_callbacks [is_authorized: 2]
 
   @doc """
-  Returns whether the put action results in a conflict
+  Returns whether the PUT action results in a conflict
+
+  - Methods: PUT
+  - Default: `false`
+
+  Returning `true` will send a `409 Conflict` response.
 
   ## Examples
 
@@ -403,6 +542,22 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns the list of known methods
+
+  - Methods: all
+  - Default: `["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]`
+
+  Specifies the full list of HTTP methods known by the server, even if
+  they aren't allowed in this resource.
+
+  The default list can be configured in `config.exs`:
+
+      config :plug_rest,
+        known_methods: ["GET", "HEAD", "OPTIONS", "TRACE"]
+
+  If a Resource implements the `known_methods` callback, that list
+  always takes precedence over the default list.
+
+  Methods are case sensitive and should be given in uppercase.
 
   ## Examples
 
@@ -418,6 +573,14 @@ defmodule PlugRest.Resource do
   @doc """
   Returns the list of languages the resource provides
 
+  - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: Skip to the next step if undefined.
+
+  The first language will be chosen if the client does not send an
+  accept-language header, or the first that matches.
+
+  The language should be returned as a lowercase binary.
+
   ## Examples
 
       def languages_provided(conn, state) do
@@ -430,6 +593,13 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns the date of last modification of the resource
+
+  - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: `nil`
+
+  Returning a `datetime()` tuple will set the last-modified header and
+  be used for comparison in conditional if-modified-since and
+  if-unmodified-since requests.
 
   ## Examples
 
@@ -444,6 +614,11 @@ defmodule PlugRest.Resource do
   @doc """
   Returns whether the request is malformed
 
+  - Methods: all
+  - Default: `false`
+
+  Returning true will send a `400 Bad Request` response.
+
   ## Examples
 
       def malformed_request(conn, state) do
@@ -457,10 +632,16 @@ defmodule PlugRest.Resource do
   @doc """
   Returns whether the resource was permanently moved
 
+  - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: `false`
+
+  Returning `{true, URI}` will send a `301 Moved Permanently` response
+  with the URI in the Location header.
+
   ## Examples
 
       def moved_permanently(conn, state) do
-        {false, conn, state}
+        {{true, "/new_location"}, conn, state}
       end
   """
   @callback moved_permanently(conn, state) :: {{true, binary()} | false, conn, state}
@@ -470,10 +651,16 @@ defmodule PlugRest.Resource do
   @doc """
   Returns whether the resource was temporarily moved
 
+  - Methods: GET, HEAD, POST, PATCH, DELETE
+  - Default: `false`
+
+  Returning `{true, URI}` will send a `307 Temporary Redirect`
+  response with the URI in the Location header.
+
   ## Examples
 
       def moved_temporarily(conn, state) do
-        {false, conn, state}
+        {{true, "/new_location"}, conn, state}
       end
   """
   @callback moved_temporarily(conn, state) :: {{true, binary()} | false, conn, state}
@@ -482,6 +669,18 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns whether there are multiple representations of the resource
+
+  - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: `false`
+
+  Returning `true` means that multiple representations of the resource
+  are possible and one cannot be chosen automatically. This will send
+  a `300 Multiple Choices` response. The response body should include
+  information about the different representations using
+  `set_rest_body/2`. The content-type that was already negotiated can
+  be retrieved by calling:
+
+      [content-type] = get_resp_header(conn, "content-type")
 
   ## Examples
 
@@ -496,9 +695,14 @@ defmodule PlugRest.Resource do
   @doc """
   Handles a request for information
 
-  The response should inform the client the communication options available for this resource.
+  - Methods: OPTIONS
+  - Default: `true`
 
-  By default, Cowboy will send a 200 OK response with the allow header set.
+  The response should inform the client the communication options
+  available for this resource.
+
+  By default, PlugRest will send a `200 OK` response with the list of
+  supported methods in the Allow header.
 
   ## Examples
 
@@ -513,6 +717,13 @@ defmodule PlugRest.Resource do
   @doc """
   Returns whether the resource existed previously
 
+  - Methods: GET, HEAD, POST, PATCH, DELETE
+  - Default: `false`
+
+  Returning `true` will invoke `moved_permanently` and
+  `moved_temporarily` to determine whether to send a `301 Moved
+  Permanently`, `307 Temporary Redirect`, or `410 Gone` response.
+
   ## Examples
 
       def previously_existed(conn, state) do
@@ -525,6 +736,12 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns whether the resource exists
+
+  - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: `true`
+
+  Returning `false` will send a `404 Not Found` response, unless the
+  method is POST and `allow_missing_post` is true.
 
   ## Examples
 
@@ -539,6 +756,13 @@ defmodule PlugRest.Resource do
   @doc """
   Returns whether the service is available
 
+  - Methods: all
+  - Default: `true`
+
+  Use this to confirm all backend systems are up.
+
+  Returning `false` will send a `503 Service Unavailable` response.
+
   ## Examples
 
       def service_available(conn, state) do
@@ -551,6 +775,11 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns whether the requested URI is too long
+
+  - Methods: all
+  - Default: `false`
+
+  Returning `true` will send a `414 Request-URI Too Long` response.
 
   ## Examples
 
@@ -565,6 +794,14 @@ defmodule PlugRest.Resource do
   @doc """
   Returns whether the content-* headers are valid
 
+  - Methods: all
+  - Default: `true`
+
+  This functions should check for invalid or unknown content-*
+  headers.
+
+  Returning `false` will send a `501 Not Implemented` response.
+
   ## Examples
 
       def valid_content_headers(conn, state) do
@@ -577,6 +814,12 @@ defmodule PlugRest.Resource do
 
   @doc """
   Returns whether the request body length is within acceptable boundaries
+
+  - Methods: all
+  - Default: `true`
+
+  Returning `false` will send a `413 Request Entity Too Large`
+  response.
 
   ## Examples
 
@@ -591,11 +834,21 @@ defmodule PlugRest.Resource do
   @doc """
   Return the list of headers that affect the representation of the resource
 
+  - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
+  - Default: `[]`
+
+  This function may return a list of strings saying which headers
+  should be included in the response's Vary header.
+
+  PlugRest will automatically add the Accept, Accept-language and
+  Accept-charset headers to the list if the respective functions were
+  defined in the resource.
+
   ## Examples
 
-      # vary: accept-language
+      # vary: user-agent
       def variances(conn, state) do
-        {["accept-language"], conn, state}
+        {["user-agent"], conn, state}
       end
   """
   @callback variances(conn, state) :: {[binary()], conn, state}
@@ -605,10 +858,8 @@ defmodule PlugRest.Resource do
   @doc """
   Executes the REST state machine with a connection and resource
 
-  Accepts a Plug.Conn struct, a PlugRest.Resource handler, and the
-  initial state of the handler, and executes the REST state machine.
-
-  ## Examples
+  Accepts a `Plug.Conn` struct, a `PlugRest.Resource` module, and the
+  initial state of the resource, and executes the REST state machine.
   """
   @spec upgrade(conn, handler, any()) :: conn
   def upgrade(conn, handler, handler_state) do

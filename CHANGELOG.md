@@ -2,6 +2,9 @@
 
 ## v0.10.2-dev
 
+* Enhancements
+  * Improve documentation of REST callbacks
+
 * Bug fixes
   * Fix spec of `content_types_accepted` callback
   * List only the functions that should be imported into each Resource
