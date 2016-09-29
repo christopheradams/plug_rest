@@ -4,6 +4,7 @@
 
 * Enhancements
   * Improve documentation of REST callbacks
+  * Add documentation to resource template
 
 * Bug fixes
   * Fix spec of `content_types_accepted` callback
