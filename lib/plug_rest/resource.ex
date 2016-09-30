@@ -502,6 +502,7 @@ defmodule PlugRest.Resource do
       end
   """
   @callback generate_etag(conn, state) :: {binary() | {:weak | :strong, binary()}, conn, state}
+                                        | {nil, conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [generate_etag: 2]
 
@@ -611,6 +612,7 @@ defmodule PlugRest.Resource do
       end
   """
   @callback last_modified(conn, state) :: {:calendar.datetime(), conn, state}
+                                        | {nil, conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [last_modified: 2]
 

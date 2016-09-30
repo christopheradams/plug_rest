@@ -8,6 +8,7 @@
 
 * Bug fixes
   * Fix spec of `content_types_accepted` callback
+  * Show `nil` return type in `expires` and `generate_etag` callbacks
   * List only the functions that should be imported into each Resource
 
 ## v0.10.1
