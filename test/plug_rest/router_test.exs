@@ -26,6 +26,18 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule InitResource do
+    use PlugRest.Resource
+
+    def init(conn, state) do
+      {state, conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"#{state}", conn, state}
+    end
+  end
+
   defmodule ErrorResource do
     use PlugRest.Resource
 
@@ -547,6 +559,8 @@ defmodule PlugRest.RouterTest do
     resource "/", IndexResource
     resource "/raise", ErrorResource
     resource "/pipeline", PipelineResource
+    resource "/init_ok", InitResource, :ok
+    resource "/init_error", InitResource, :error
     resource "/service_unavailable", ServiceAvailableResource, false
     resource "/known_methods", KnownMethodsResource
     resource "/uri_too_long", UriTooLongResource
@@ -630,6 +644,16 @@ defmodule PlugRest.RouterTest do
     conn = conn(:get, "/pipeline")
     conn = RestRouter.call(conn, [])
     assert conn.resp_body == "Hello"
+  end
+
+  test "init ok" do
+    build_conn(:get, "/init_ok")
+    |> test_status(200)
+  end
+
+  test "init error" do
+    build_conn(:get, "/init_error")
+    |> test_status(200)
   end
 
   test "match can match known route" do
