@@ -5,7 +5,7 @@ defmodule PlugRest.Mixfile do
   REST behaviour and Plug router for hypermedia web applications
   """
 
-  @version "0.10.2"
+  @version "0.11.0-dev"
   @source_url "https://github.com/christopheradams/plug_rest"
 
   def project do

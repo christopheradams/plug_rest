@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.11.0-dev
+
+* Backwards incompatible changes
+  * The resource `init/2` callback will send 500 for any return
+    value other than `:ok`
+
 ## v0.10.2
 
 * Enhancements

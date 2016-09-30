@@ -653,7 +653,7 @@ defmodule PlugRest.RouterTest do
 
   test "init error" do
     build_conn(:get, "/init_error")
-    |> test_status(200)
+    |> test_status(500)
   end
 
   test "match can match known route" do

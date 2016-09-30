@@ -877,7 +877,7 @@ defmodule PlugRest.Resource do
     state = %PlugRest.State{method: method, known_methods: known_methods,
                             handler: handler, handler_state: handler_state}
 
-    expect(conn, state, :init, :ok, &service_available/2, &service_available/2)
+    expect(conn, state, :init, :ok, &service_available/2, 500)
   end
 
   @spec service_available(conn, rest_state) :: conn
