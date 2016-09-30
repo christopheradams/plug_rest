@@ -7,6 +7,7 @@
   * Add documentation to resource template
 
 * Bug fixes
+  * Fix typespec for handler `state` vs `rest_state`
   * Fix spec of `content_types_accepted` callback
   * Show `nil` return type in `expires` and `generate_etag` callbacks
   * List only the functions that should be imported into each Resource
