@@ -176,23 +176,24 @@ defmodule PlugRest.Resource do
   end
 
   @type conn :: Plug.Conn.t
-  @type opts :: Plug.opts
   @type state :: any
 
   @typep rest_state :: PlugRest.State.t
 
-  @type etag :: PlugRest.State.etag
-  @type handler :: PlugRest.State.handler
-  @type media_type :: PlugRest.State.media_type
-  @type content_handler :: PlugRest.State.content_handler
-  @type content_type_p :: {binary() | media_type, handler}
-  @type content_type_a :: {binary() | media_type, handler}
+  @type accept_resource :: atom
+  @type provide_resource :: atom
+  @type media_type :: {binary, binary, %{binary => binary} | :*}
+  @type content_type_a :: {binary() | media_type, accept_resource}
+  @type content_type_p :: {binary() | media_type, provide_resource}
 
-  @type etags_list :: PlugRest.Conn.etags_list
-  @type priority_type :: PlugRest.Conn.priority_type
-  @type quality_type :: PlugRest.Conn.quality_type
+  @typep content_handler :: PlugRest.State.content_handler
 
-  @type status_code :: 200..503
+  @typep etag :: PlugRest.State.etag
+  @typep etags_list :: PlugRest.Conn.etags_list
+  @typep priority_type :: PlugRest.Conn.priority_type
+  @typep quality_type :: PlugRest.Conn.quality_type
+
+  @typep status_code :: 200..503
 
   @default_media_type {"text", "html", %{}}
   @default_content_handler {@default_media_type, :to_html}
@@ -868,7 +869,7 @@ defmodule PlugRest.Resource do
   Accepts a `Plug.Conn` struct, a `PlugRest.Resource` module, and the
   initial state of the resource, and executes the REST state machine.
   """
-  @spec upgrade(conn, handler, state) :: conn
+  @spec upgrade(conn, atom, state) :: conn
   def upgrade(conn, handler, handler_state) do
     method = conn.method
     known_methods = Application.get_env(:plug_rest, :known_methods)

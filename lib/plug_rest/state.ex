@@ -4,7 +4,7 @@ defmodule PlugRest.State do
   @type etag             :: binary | {:weak | :strong, binary}
   @type handler          :: atom
   @type media_type       :: {binary, binary, %{binary => binary} | :*}
-  @type content_handler  :: {media_type, handler}
+  @type content_handler  :: {media_type, atom}
 
   @typep method          :: binary
   @typep handler_state   :: any
