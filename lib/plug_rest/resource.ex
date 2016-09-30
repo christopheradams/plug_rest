@@ -156,14 +156,17 @@ defmodule PlugRest.Resource do
       import Plug.Conn
       import PlugRest.Resource, only: [put_rest_body: 2, get_rest_body: 1]
 
+      @doc false
       def init(options) do
         options
       end
 
+      @doc false
       def call(conn, options) do
         rest(conn, options)
       end
 
+      @doc false
       def rest(conn, options) do
         PlugRest.Resource.upgrade(conn, __MODULE__, options)
       end
