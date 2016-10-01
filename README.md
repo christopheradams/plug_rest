@@ -424,28 +424,6 @@ The Cowboy documentation has more details on the REST protocol:
 * [REST flowcharts](http://ninenines.eu/docs/en/cowboy/2.0/guide/rest_flowcharts/)
 * [Designing a resource handler](http://ninenines.eu/docs/en/cowboy/2.0/guide/resource_design/)
 
-Differences between PlugRest and cowboy_rest:
-
-* Each callback accepts a Plug `conn` struct instead of a Cowboy `Req`
-  record.
-* The `init/2` callback is not required.
-* The default values of `expires/2`, `generate_etag/2`, and
-  `last_modified/2` are `nil` instead of `:undefined`
-* The content callbacks (like `to_html`) return `{body, conn, state}`
-  where the body is one of `binary()`, `{:chunked, Enum.t}`, or
-  `{:file, binary()}`.
-* Other callbacks that need to set the body on PUT, POST, or DELETE,
-  can use `put_rest_body/2` taking `(conn, body)` before returning
-  it. The body can only be a `binary()`.
-* The content types provided and accepted callbacks can describe each
-  media type with a String like `"text/html"`; or a tuple in the form
-  `{type, subtype, params}`, where params can be `%{}` (no params
-  acceptable), `:*` (all params acceptable), or a map of acceptable
-  params `%{"level" => "1"}`.
-* Exceptions raised by a resource are not caught, but instead allowed
-  to bubble up to Plug's Debugger or ErrorHandler if they are
-  available.
-
 ### Upgrading
 
 PlugRest is still in an initial development phase. Expect breaking
