@@ -2,6 +2,9 @@
 
 ## v0.11.0-dev
 
+* Enhancements
+  * Make resource gen task work in umbrella projects
+
 * Backwards incompatible changes
   * The resource `init/2` callback will send 500 for any return
     value other than `:ok`

@@ -17,11 +17,14 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
   The resources target directory can be changed with the option:
 
       mix plug_rest.gen.resource UserResource --dir "web/resources"
+
+  In an umbrella project, run the mix task in the root of the app, or
+  specify the app with:
+
+      mix plug_rest.gen.resource UserResource --app my_app
   """
   def run(args) do
-    no_umbrella!("plug_rest.gen.resource")
-
-    switches = [dir: :binary, use: :binary]
+    switches = [dir: :binary, use: :binary, app: :string]
     {opts, parsed, _} = OptionParser.parse(args, switches: switches)
 
     resource =
@@ -31,11 +34,26 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
         [_ | _] -> Mix.raise "plug_rest.gen.resource expects a single Resource name"
       end
 
+    app_lib = case Mix.Project.umbrella? or !is_nil(opts[:app]) do
+                true ->
+                  opts[:app]
+                false  ->
+                  Mix.Project.config |> Keyword.get(:app) |> Atom.to_string
+              end
+
+    if is_nil(app_lib) do
+      Mix.raise ("The app must be specified in mix.exs or with the --app switch")
+    end
+
+    apps_path = case Mix.Project.umbrella? do
+                  true -> Path.join([Mix.Project.config[:apps_path], app_lib])
+                  false -> "."
+                end
+
     underscored = Macro.underscore(resource)
-    app_lib = Mix.Project.config |> Keyword.fetch!(:app) |> Atom.to_string
     app_mod = Macro.camelize(app_lib)
 
-    default_opts = [dir: Path.join(["lib", app_lib, "resources"]),
+    default_opts = [dir: Path.join([apps_path, "lib", app_lib, "resources"]),
                     use: "PlugRest.Resource"]
 
     opts = Keyword.merge(default_opts, opts)
@@ -56,14 +74,5 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
     Mix.shell.info """
     #{resource_module} created at #{file}
     """
-  end
-
-  @doc """
-  Raises on umbrella application.
-  """
-  def no_umbrella!(task) do
-    if Mix.Project.umbrella? do
-      Mix.raise "Cannot run task #{inspect task} from umbrella application"
-    end
   end
 end
