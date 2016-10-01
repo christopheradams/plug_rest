@@ -421,10 +421,8 @@ To get the `resource` macro directly in your Phoenix router, use
 The Cowboy documentation has more details on the REST protocol:
 
 * [REST principles](http://ninenines.eu/docs/en/cowboy/2.0/guide/rest_principles/)
-* [Handling REST requests](http://ninenines.eu/docs/en/cowboy/2.0/guide/rest_handlers/)
 * [REST flowcharts](http://ninenines.eu/docs/en/cowboy/2.0/guide/rest_flowcharts/)
 * [Designing a resource handler](http://ninenines.eu/docs/en/cowboy/2.0/guide/resource_design/)
-* [Function Reference: cowboy_rest](http://ninenines.eu/docs/en/cowboy/2.0/manual/cowboy_rest/)
 
 Differences between PlugRest and cowboy_rest:
 
