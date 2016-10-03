@@ -50,7 +50,7 @@ defmodule PlugRest.Resource do
   no default value.
 
       allowed_methods        : ["GET", "HEAD", "OPTIONS"]
-      allow_missing_post     : true
+      allow_missing_post     : false
       charsets_provided      : skip
       content_types_accepted : none
       content_types_provided : [{{"text", "html", %{}}, :to_html}]
@@ -243,7 +243,7 @@ defmodule PlugRest.Resource do
   Returns whether POST is allowed when the resource doesn't exist
 
   - Methods: POST
-  - Default: `true`
+  - Default: `false`
 
   This function will be called when `resource_exists` is `false` and
   the request method is POST. Returning `true` means the missing
@@ -1619,7 +1619,7 @@ defmodule PlugRest.Resource do
 
   @spec allow_missing_post(conn, state, status_code) :: conn
   defp allow_missing_post(conn, state, on_false) do
-    expect(conn, state, :allow_missing_post, true, &accept_resource/2, on_false)
+    expect(conn, state, :allow_missing_post, false, on_false, &accept_resource/2)
   end
 
 

@@ -8,6 +8,7 @@
 * Backwards incompatible changes
   * The resource `init/2` callback will send 500 for any return
     value other than `:ok`
+  * Change `allow_missing_post` default to `false`
 
 ## v0.10.2
 

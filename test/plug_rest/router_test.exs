@@ -175,6 +175,10 @@ defmodule PlugRest.RouterTest do
       {false, conn, state}
     end
 
+    def allow_missing_post(conn, state) do
+      {true, conn, state}
+    end
+
     def content_types_accepted(conn, state) do
       {[{"mixed/multipart", :from_multipart}], conn, state}
     end
@@ -216,6 +220,10 @@ defmodule PlugRest.RouterTest do
     end
 
     def resource_exists(conn, state) do
+      {true, conn, state}
+    end
+
+    def allow_missing_post(conn, state) do
       {true, conn, state}
     end
 
@@ -1013,7 +1021,7 @@ defmodule PlugRest.RouterTest do
     conn(:post, "/default_allow_missing", "test=test")
     |> put_req_header("content-type", "mixed/multipart")
     |> RestRouter.call([])
-    |> test_status(204)
+    |> test_status(404)
   end
 
   test "allow missing" do

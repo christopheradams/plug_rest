@@ -228,7 +228,7 @@ defmodule <%= module %> do
   # Returning `false` means POST to a missing resource will return `404
   # Not Found`.
   def allow_missing_post(conn, state) do
-    {true, conn, state}
+    {false, conn, state}
   end
 
   # Deletes the resource
