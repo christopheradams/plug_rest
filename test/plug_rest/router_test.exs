@@ -408,6 +408,38 @@ defmodule PlugRest.RouterTest do
     end
   end
 
+  defmodule MissingPostResource do
+    use PlugRest.Resource
+
+    def allowed_methods(conn, state) do
+      {["GET", "HEAD", "OPTIONS", "POST"], conn, state}
+    end
+
+    def resource_exists(conn, state) do
+      {false, conn, state}
+    end
+
+    def allow_missing_post(_conn, :no_call) do
+      :no_call
+    end
+
+    def allow_missing_post(conn, a_m_p = state) do
+      {a_m_p, conn, state}
+    end
+
+    def content_types_accepted(conn, state) do
+      {[{"mixed/multipart", :from_content}], conn, state}
+    end
+
+    def from_content(conn, state) do
+      {true, conn, state}
+    end
+
+    def to_html(conn, state) do
+      {"allow missing", conn, state}
+    end
+  end
+
   defmodule GoneResource do
     use PlugRest.Resource
 
@@ -590,6 +622,9 @@ defmodule PlugRest.RouterTest do
     resource "/moved_permanently", MovedPermanentlyResource
     resource "/moved_temporarily", MovedTemporarilyResource
     resource "/gone", GoneResource
+    resource "/default_allow_missing", MissingPostResource, :no_call
+    resource "/allow_missing", MissingPostResource, true
+    resource "/disallow_missing", MissingPostResource, false
     resource "/last_modified", LastModifiedResource
     resource "/modified_undefined", IndexResource
     resource "/nil_modified", NilModifiedResource
@@ -971,6 +1006,30 @@ defmodule PlugRest.RouterTest do
 
   test "gone returns 410" do
     build_conn(:get, "/gone") |> test_status(410)
+  end
+
+  test "default allow missing" do
+    build_conn(:get, "/default_allow_missing") |> test_status(404)
+    conn(:post, "/default_allow_missing", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> RestRouter.call([])
+    |> test_status(204)
+  end
+
+  test "allow missing" do
+    build_conn(:get, "/allow_missing") |> test_status(404)
+    conn(:post, "/allow_missing", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> RestRouter.call([])
+    |> test_status(204)
+  end
+
+  test "disallow missing" do
+    build_conn(:get, "/disallow_missing") |> test_status(404)
+    conn(:post, "/disallow_missing", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> RestRouter.call([])
+    |> test_status(404)
   end
 
   test "if match precondition fails" do
