@@ -483,7 +483,7 @@ defmodule PlugRest.Resource do
   Returns the entity tag of the resource
 
   - Methods: GET, HEAD, POST, PUT, PATCH, DELETE
-  - Default: `true`
+  - Default: `nil`
 
   This value will be sent as the value of the etag header.
 
