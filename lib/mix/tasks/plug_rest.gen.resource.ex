@@ -22,6 +22,10 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
   specify the app with:
 
       mix plug_rest.gen.resource UserResource --app my_app
+
+  To create a resource with no tutorial comments:
+
+      mix plug_rest.gen.resource UserResource --no-comments
   """
   def run(args) do
     switches = [dir: :binary, use: :binary, app: :string]
@@ -54,7 +58,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
     app_mod = Macro.camelize(app_lib)
 
     default_opts = [dir: Path.join([apps_path, "lib", app_lib, "resources"]),
-                    use: "PlugRest.Resource"]
+                    use: "PlugRest.Resource", no_comments: false]
 
     opts = Keyword.merge(default_opts, opts)
 
@@ -67,6 +71,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
     template_path = "priv/templates/plug_rest.gen.resource/resource.ex"
     template = Path.join(plug_app_dir, template_path)
     contents = EEx.eval_file(template, [module: resource_module,
+                                        comments: !opts[:no_comments],
                                         resources_use: opts[:use]])
 
     :ok = File.write(file, contents)

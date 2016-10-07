@@ -4,6 +4,7 @@
 
 * Enhancements
   * Make resource gen task work in umbrella projects
+  * Add switch to generate resource with no tutorial comments
 
 * Backwards incompatible changes
   * The resource `init/2` callback will send 500 for any return
