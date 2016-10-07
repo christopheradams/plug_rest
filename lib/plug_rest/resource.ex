@@ -175,20 +175,67 @@ defmodule PlugRest.Resource do
     end
   end
 
+  @typedoc "A Module adopting the `PlugRest.Resource` behaviour"
+  @type resource :: atom
+
+  @typedoc "A `%Plug.Conn{}` struct representing the connection"
   @type conn :: Plug.Conn.t
+
+  @typedoc "The state of the resource"
   @type state :: any
 
   @typep rest_state :: PlugRest.State.t
 
+  @typedoc "The callback accepting a representation of the resource for a content-type"
   @type accept_resource :: atom
+
+  @typedoc "The callback providing a representation of the resource for a content-type"
   @type provide_resource :: atom
+
+  @typedoc "A representation of a content-type match"
   @type media_type :: {binary, binary, %{binary => binary} | :*}
+
+  @typedoc "A content-type accepted handler, comprising a media type and acccept callback"
   @type content_type_a :: {binary() | media_type, accept_resource}
+
+  @typedoc "A content-type provided handler, comprising a media type and provide callback"
   @type content_type_p :: {binary() | media_type, provide_resource}
+
+  @typedoc "An HTTP method written in uppercase"
+  @type method :: binary
+
+  @typedoc "A language tag written in lowercase"
+  @type language :: binary
+
+  @typedoc "A charset written in lowercase"
+  @type charset :: binary
+
+  @typedoc "The name of an HTTP header"
+  @type header_name :: binary
+
+  @typedoc "A WWW-Authenticate header value"
+  @type auth_head :: binary
+
+  @typedoc "A URI"
+  @type uri :: binary
 
   @typep content_handler :: PlugRest.State.content_handler
 
-  @typep etag :: PlugRest.State.etag
+  @typedoc """
+  An entity tag
+
+  ## Examples
+      # ETag: W/"etag-header-value"
+      {:weak, "etag-header-value"}
+
+      # ETag: "etag-header-value"
+      {:strong, "etag-header-value"}
+
+      # ETag: "etag-header-value"
+      {"\\"etag-header-value\\""}
+  """
+  @type etag :: binary | {:weak | :strong, binary}
+
   @typep etags_list :: PlugRest.Conn.etags_list
   @typep priority_type :: PlugRest.Conn.priority_type
   @typep quality_type :: PlugRest.Conn.quality_type
@@ -235,7 +282,7 @@ defmodule PlugRest.Resource do
         {["GET,", "HEAD", "OPTIONS"], conn, state}
       end
   """
-  @callback allowed_methods(conn, state) :: {[binary()], conn, state}
+  @callback allowed_methods(conn, state) :: {[method], conn, state}
                                           | {:stop, conn, state}
   @optional_callbacks [allowed_methods: 2]
 
@@ -285,7 +332,7 @@ defmodule PlugRest.Resource do
         {["utf-8"], conn, state}
       end
   """
-  @callback charsets_provided(conn, state) :: {[binary()], conn, state}
+  @callback charsets_provided(conn, state) :: {[charset], conn, state}
                                             | {:stop, conn, state}
   @optional_callbacks [charsets_provided: 2]
 
@@ -504,7 +551,7 @@ defmodule PlugRest.Resource do
         {"\\"etag-header-value\\""}, conn, state}
       end
   """
-  @callback generate_etag(conn, state) :: {binary() | {:weak | :strong, binary()}, conn, state}
+  @callback generate_etag(conn, state) :: {etag, conn, state}
                                         | {nil, conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [generate_etag: 2]
@@ -525,7 +572,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback is_authorized(conn, state) :: {true | {false, binary()}, conn, state}
+  @callback is_authorized(conn, state) :: {true | {false, auth_head}, conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [is_authorized: 2]
 
@@ -573,7 +620,7 @@ defmodule PlugRest.Resource do
          conn, state}
       end
   """
-  @callback known_methods(conn, state) :: {[binary()], conn, state}
+  @callback known_methods(conn, state) :: {[method], conn, state}
                                         | {:stop, conn, state}
   @optional_callbacks [known_methods: 2]
 
@@ -594,7 +641,7 @@ defmodule PlugRest.Resource do
         {["en"], conn, state}
       end
   """
-  @callback languages_provided(conn, state) :: {[binary()], conn, state}
+  @callback languages_provided(conn, state) :: {[language], conn, state}
                                              | {:stop, conn, state}
   @optional_callbacks [languages_provided: 2]
 
@@ -652,7 +699,7 @@ defmodule PlugRest.Resource do
         {{true, "/new_location"}, conn, state}
       end
   """
-  @callback moved_permanently(conn, state) :: {{true, binary()} | false, conn, state}
+  @callback moved_permanently(conn, state) :: {{true, uri} | false, conn, state}
                                             | {:stop, conn, state}
   @optional_callbacks [moved_permanently: 2]
 
@@ -671,7 +718,7 @@ defmodule PlugRest.Resource do
         {{true, "/new_location"}, conn, state}
       end
   """
-  @callback moved_temporarily(conn, state) :: {{true, binary()} | false, conn, state}
+  @callback moved_temporarily(conn, state) :: {{true, uri} | false, conn, state}
                                             | {:stop, conn, state}
   @optional_callbacks [moved_temporarily: 2]
 
@@ -859,7 +906,7 @@ defmodule PlugRest.Resource do
         {["user-agent"], conn, state}
       end
   """
-  @callback variances(conn, state) :: {[binary()], conn, state}
+  @callback variances(conn, state) :: {[header_name], conn, state}
                                     | {:stop, conn, state}
   @optional_callbacks [variances: 2]
 
@@ -869,13 +916,13 @@ defmodule PlugRest.Resource do
   Accepts a `Plug.Conn` struct, a `PlugRest.Resource` module, and the
   initial state of the resource, and executes the REST state machine.
   """
-  @spec upgrade(conn, atom, state) :: conn
-  def upgrade(conn, handler, handler_state) do
+  @spec upgrade(conn, resource, state) :: conn
+  def upgrade(conn, resource, resource_state) do
     method = conn.method
     known_methods = Application.get_env(:plug_rest, :known_methods)
 
     state = %PlugRest.State{method: method, known_methods: known_methods,
-                            handler: handler, handler_state: handler_state}
+                            handler: resource, handler_state: resource_state}
 
     expect(conn, state, :init, :ok, &service_available/2, 500)
   end

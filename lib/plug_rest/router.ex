@@ -65,6 +65,17 @@ defmodule PlugRest.Router do
       %{"rest" => ["value", "extra"]}
   """
 
+  @typedoc "A URL path"
+  @type path :: String.t
+
+  @typedoc "A Plug Module"
+  @type plug :: atom
+
+  @typedoc "Options for the Plug"
+  @type plug_opts :: any
+
+  @typedoc "Options for a Router macro"
+  @type options :: list
 
   @doc false
   defmacro __using__(_options) do
@@ -119,13 +130,13 @@ defmodule PlugRest.Router do
 
       resource "/pages/:page", PageResource, [], host: "host1.example.com"
   """
-  @spec resource(String.t, atom(), any(), list()) :: Macro.t
+  @spec resource(path, plug, plug_opts, options) :: Macro.t
   defmacro resource(path, plug, plug_opts \\ [], options \\ []) do
     add_resource(path, plug, plug_opts, options)
   end
 
   ## Compiles the resource into a match macro from Plug.Router
-  @spec add_resource(String.t, atom(), any(), list()) :: Macro.t
+  @spec add_resource(path, plug, plug_opts, options) :: Macro.t
   defp add_resource(path, plug, plug_opts, options) do
     {vars, _match} = Plug.Router.Utils.build_path_match(path)
 
