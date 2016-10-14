@@ -71,7 +71,7 @@ end
   - Built-in HEAD and OPTIONS responses, and easy handling of GET,
     POST, PUT, PATCH, and DELETE requests
   - Content negotiation for media types, languages, and charsets
-  - Basic access authentication
+  - HTTP access authentication
   - Observance of etag, expires, last-modified, and vary headers
   - Multiple choices for redirects, not modified responses, etc.
   - Correct HTTP status codes for common 400 and 500 level errors
