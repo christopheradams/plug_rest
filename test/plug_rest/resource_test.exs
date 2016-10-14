@@ -352,6 +352,10 @@ defmodule PlugRest.ResourceTest do
     def resource_exists(conn, false = state) do
       {false, conn, state}
     end
+
+    def resource_exists(conn, state) do
+      {true, conn, state}
+    end
   end
 
   defmodule PreviouslyExisted do
