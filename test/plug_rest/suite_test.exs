@@ -17,21 +17,17 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def content_types_provided(conn, state) do
       {[{{"text", "plain", %{}}, :get_text_plain}], conn, state}
     end
-
 
     def get_text_plain(conn, state) do
       {"This is REST!", conn, state}
     end
 
-
     def expires(conn, state) do
       {"0", conn, state}
     end
-
   end
 
   defmodule :rest_expires do
@@ -41,26 +37,21 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def content_types_provided(conn, state) do
       {[{{"text", "plain", %{}}, :get_text_plain}], conn, state}
     end
-
 
     def get_text_plain(conn, state) do
       {"This is REST!", conn, state}
     end
 
-
     def expires(conn, state) do
       {{{2012, 9, 21}, {22, 36, 14}}, conn, state}
     end
 
-
     def last_modified(conn, state) do
       {{{2012, 9, 21}, {22, 36, 14}}, conn, state}
     end
-
   end
 
   defmodule :rest_forbidden_resource do
@@ -70,11 +61,9 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, var_forbidden}
     end
 
-
     def allowed_methods(conn, state) do
       {["GET", "HEAD", "POST"], conn, state}
     end
-
 
     def forbidden(conn, state = true) do
       {true, conn, state}
@@ -84,26 +73,21 @@ defmodule PlugRest.SuiteTest do
       {false, conn, state}
     end
 
-
     def content_types_provided(conn, state) do
       {[{{"text", "plain", %{}}, :to_text}], conn, state}
     end
-
 
     def content_types_accepted(conn, state) do
       {[{{"text", "plain", %{}}, :from_text}], conn, state}
     end
 
-
     def to_text(conn, state) do
       {"This is REST!", conn, state}
     end
 
-
     def from_text(conn, state) do
       {{true, conn.request_path}, conn, state}
     end
-
   end
 
   defmodule :rest_missing_callbacks do
@@ -113,21 +97,17 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def allowed_methods(conn, state) do
       {["GET", "PUT"], conn, state}
     end
-
 
     def content_types_accepted(conn, state) do
       {[{"application/json", :put_application_json}], conn, state}
     end
 
-
     def content_types_provided(conn, state) do
       {[{"text/plain", :get_text_plain}], conn, state}
     end
-
   end
 
   defmodule :rest_nodelete_resource do
@@ -137,21 +117,17 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def allowed_methods(conn, state) do
       {["GET", "HEAD", "DELETE"], conn, state}
     end
-
 
     def content_types_provided(conn, state) do
       {[{{"text", "plain", %{}}, :get_text_plain}], conn, state}
     end
 
-
     def get_text_plain(conn, state) do
       {"This is REST!", conn, state}
     end
-
   end
 
   defmodule :rest_param_all do
@@ -161,16 +137,13 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def allowed_methods(conn, state) do
       {["GET", "PUT"], conn, state}
     end
 
-
     def content_types_provided(conn, state) do
       {[{{"text", "plain", :*}, :get_text_plain}], conn, state}
     end
-
 
     def get_text_plain(conn, state) do
       media_type = PlugRest.Resource.get_media_type(conn)
@@ -185,16 +158,13 @@ defmodule PlugRest.SuiteTest do
       {body, conn, state}
     end
 
-
     def content_types_accepted(conn, state) do
       {[{{"text", "plain", :*}, :put_text_plain}], conn, state}
     end
 
-
     def put_text_plain(conn, state) do
       {true, conn, state}
     end
-
   end
 
   defmodule :rest_patch_resource do
@@ -204,21 +174,17 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def allowed_methods(conn, state) do
       {["HEAD", "GET", "PATCH"], conn, state}
     end
-
 
     def content_types_provided(conn, state) do
       {[{{"text", "plain", %{}}, :get_text_plain}], conn, state}
     end
 
-
     def get_text_plain(conn, state) do
       {"This is REST!", conn, state}
     end
-
 
     def content_types_accepted(conn, state) do
       case conn.method do
@@ -228,7 +194,6 @@ defmodule PlugRest.SuiteTest do
           {[], conn, state}
       end
     end
-
 
     def patch_text_plain(conn, state) do
       case read_body(conn)  do
@@ -240,7 +205,6 @@ defmodule PlugRest.SuiteTest do
           {true, conn0, state}
       end
     end
-
   end
 
   defmodule :rest_post_charset_resource do
@@ -250,21 +214,17 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def allowed_methods(conn, state) do
       {["POST"], conn, state}
     end
-
 
     def content_types_accepted(conn, state) do
       {[{{"text", "plain", %{"charset" => "utf-8"}}, :from_text}], conn, state}
     end
 
-
     def from_text(conn, state) do
       {true, conn, state}
     end
-
   end
 
   defmodule :rest_postonly_resource do
@@ -274,21 +234,17 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def allowed_methods(conn, state) do
       {["POST"], conn, state}
     end
-
 
     def content_types_accepted(conn, state) do
       {[{{"text", "plain", %{}}, :from_text}], conn, state}
     end
 
-
     def from_text(conn, state) do
       {true, conn, state}
     end
-
   end
 
   defmodule :rest_resource_etags do
@@ -297,7 +253,6 @@ defmodule PlugRest.SuiteTest do
     def init(conn, opts) do
       {:ok, conn, opts}
     end
-
 
     def generate_etag(conn, state) do
       %{"type" => type} = fetch_query_params(conn).query_params
@@ -317,16 +272,13 @@ defmodule PlugRest.SuiteTest do
       end
     end
 
-
     def content_types_provided(conn, state) do
       {[{{"text", "plain", %{}}, :get_text_plain}], conn, state}
     end
 
-
     def get_text_plain(conn, state) do
       {"This is REST!", conn, state}
     end
-
   end
 
   defmodule :rest_simple_resource do
@@ -336,16 +288,13 @@ defmodule PlugRest.SuiteTest do
       {:ok, conn, opts}
     end
 
-
     def content_types_provided(conn, state) do
       {[{{"text", "plain", %{}}, :get_text_plain}], conn, state}
     end
 
-
     def get_text_plain(conn, state) do
       {"This is REST!", conn, state}
     end
-
   end
 
   defmodule RestRouter do
