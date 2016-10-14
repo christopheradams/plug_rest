@@ -2,15 +2,11 @@ defmodule PlugRest.ResourceTest do
   use ExUnit.Case
   use Plug.Test
 
+  import PlugRest.TestHelper
+
   ## Resources
 
-  defmodule IndexResource do
-    use PlugRest.Resource
-
-    def to_html(conn, state) do
-      {"Plug REST", conn, state}
-    end
-  end
+  build_resource(IndexResource, [to_html: "Plug REST"])
 
   defmodule InitResource do
     use PlugRest.Resource
@@ -32,13 +28,7 @@ defmodule PlugRest.ResourceTest do
     end
   end
 
-  defmodule ServiceUnavailableResource do
-    use PlugRest.Resource
-
-    def service_available(conn, state) do
-      {false, conn, state}
-    end
-  end
+  build_resource(ServiceUnavailableResource, [service_available: false])
 
   defmodule KnownMethodsResource do
     use PlugRest.Resource
@@ -56,73 +46,22 @@ defmodule PlugRest.ResourceTest do
     end
   end
 
-  defmodule UriTooLongResource do
-    use PlugRest.Resource
+  build_resource(UriTooLongResource, [uri_too_long: true])
 
-    def uri_too_long(conn, state) do
-      {true, conn, state}
-    end
-  end
+  build_resource(AllowedMethodsResource,
+    [allowed_methods: ["HEAD", "GET", "POST", "OPTIONS"]])
 
-  defmodule AllowedMethodsResource do
-    use PlugRest.Resource
+  build_resource(MalformedRequestResource, [malformed_request: true])
 
-    def allowed_methods(conn, state) do
-      {["HEAD", "GET", "POST", "OPTIONS"], conn, state}
-    end
-  end
+  build_resource(UnauthorizedResource, [is_authorized: {false, "AuthHeader"}])
 
-  defmodule MalformedRequestResource do
-    use PlugRest.Resource
+  build_resource(ForbiddenResource, [forbidden: true])
 
-    def malformed_request(conn, state) do
-      {true, conn, state}
-    end
-  end
+  build_resource(InvalidContentHeadersResource, [valid_content_headers: false])
 
-  defmodule UnauthorizedResource do
-    use PlugRest.Resource
+  build_resource(InvalidEntityLengthResource, [valid_entity_length: false])
 
-    def is_authorized(conn, state) do
-      {{false, "AuthHeader"}, conn, state}
-    end
-  end
-
-  defmodule ForbiddenResource do
-    use PlugRest.Resource
-
-    def forbidden(conn, state) do
-      {true, conn, state}
-    end
-  end
-
-  defmodule InvalidContentHeadersResource do
-    use PlugRest.Resource
-
-    def valid_content_headers(conn, state) do
-      {false, conn, state}
-    end
-  end
-
-  defmodule InvalidEntityLengthResource do
-    use PlugRest.Resource
-
-    def valid_entity_length(conn, state) do
-      {false, conn, state}
-    end
-  end
-
-  defmodule ConflictResource do
-    use PlugRest.Resource
-
-    def allowed_methods(conn, state) do
-      {["PUT"], conn, state}
-    end
-
-    def is_conflict(conn, state) do
-      {:true, conn, state}
-    end
-  end
+  build_resource(ConflictResource, [allowed_methods: ["PUT"], is_conflict: :true])
 
   defmodule DeleteResource do
     use PlugRest.Resource
@@ -146,49 +85,16 @@ defmodule PlugRest.ResourceTest do
     end
   end
 
-  defmodule PostNewResource do
-    use PlugRest.Resource
+  build_resource(PostNewResource,
+    [allowed_methods: ["GET", "OPTIONS", "HEAD", "POST"],
+     resource_exists: false, allow_missing_post: true,
+     content_types_accepted: [{"mixed/multipart", :from_multipart}],
+     from_multipart: {true, "/post_new/1234"}])
 
-    def allowed_methods(conn, state) do
-      {["GET", "OPTIONS", "HEAD", "POST"], conn, state}
-    end
-
-    def resource_exists(conn, state) do
-      {false, conn, state}
-    end
-
-    def allow_missing_post(conn, state) do
-      {true, conn, state}
-    end
-
-    def content_types_accepted(conn, state) do
-      {[{"mixed/multipart", :from_multipart}], conn, state}
-    end
-
-    def from_multipart(conn, state) do
-      {{true, "/post_new/1234"}, conn, state}
-    end
-  end
-
-  defmodule PutNewResource do
-    use PlugRest.Resource
-
-    def allowed_methods(conn, state) do
-      {["GET", "OPTIONS", "HEAD", "PUT"], conn, state}
-    end
-
-    def resource_exists(conn, state) do
-      {false, conn, state}
-    end
-
-    def content_types_accepted(conn, state) do
-      {[{"mixed/multipart", :from_multipart}], conn, state}
-    end
-
-    def from_multipart(conn, state) do
-      {true, conn, state}
-    end
-  end
+  build_resource(PutNewResource,
+    [allowed_methods: ["GET", "OPTIONS", "HEAD", "PUT"], resource_exists: false,
+     content_types_accepted: [{"mixed/multipart", :from_multipart}],
+     from_multipart: true])
 
   defmodule RespBodyResource do
     use PlugRest.Resource
@@ -232,83 +138,25 @@ defmodule PlugRest.ResourceTest do
     end
   end
 
-  defmodule JsonResource do
-    use PlugRest.Resource
+  build_resource(JsonResource,
+    [allowed_methods: ["GET", "POST"],
+     content_types_provided: [{{"application", "json", :*}, :to_json}],
+     content_types_accepted: [{{"application", "json", :*}, :from_json}],
+     to_json: "{}", from_json: {true, "/new"}])
 
-    def allowed_methods(conn, state) do
-      {["GET", "POST"], conn, state}
-    end
+  build_resource(BinaryCtpResource,
+    [content_types_provided: [{"application/json", :to_json}], to_json: "{}"])
 
-    def content_types_provided(conn, state) do
-      {[{{"application", "json", :*}, :to_json}], conn, state}
-    end
+  build_resource(HypermediaResource,
+    [content_types_provided: [{{"text", "html", %{}}, :to_html},
+                              {{"application", "json", %{}}, :to_json}],
+     languages_provided: ["de", "en"], to_html: "Media",
+     to_json: "{\"title\": \"Media\"}"])
 
-    def content_types_accepted(conn, state) do
-      {[{{"application", "json", :*}, :from_json}], conn, state}
-    end
-
-    def to_json(conn, state) do
-      {"{}", conn, state}
-    end
-
-    def from_json(conn, state) do
-      {{true, "/new"}, conn, state}
-    end
-  end
-
-  defmodule BinaryCtpResource do
-    use PlugRest.Resource
-
-    def content_types_provided(conn, state) do
-      {[{"application/json", :to_json}], conn, state}
-    end
-
-    def to_json(conn, state) do
-      {"{}", conn, state}
-    end
-  end
-
-  defmodule HypermediaResource do
-    use PlugRest.Resource
-
-    def content_types_provided(conn, state) do
-      {[{{"text", "html", %{}}, :to_html},
-        {{"application", "json", %{}}, :to_json}
-      ], conn, state}
-    end
-
-    def languages_provided(conn, state) do
-      {["de", "en"], conn, state}
-    end
-
-    def to_html(conn, state) do
-      {"Media", conn, state}
-    end
-
-    def to_json(conn, state) do
-      {"{\"title\": \"Media\"}", conn, state}
-    end
-  end
-
-  defmodule AcceptAnyResource do
-    use PlugRest.Resource
-
-    def allowed_methods(conn, state) do
-      {["GET", "POST"], conn, state}
-    end
-
-    def content_types_accepted(conn, state) do
-      {[{:*, :from_content}], conn, state}
-    end
-
-    def from_content(conn, state) do
-      {true, conn, state}
-    end
-
-    def to_html(conn, state) do
-      {"html", conn, state}
-    end
-  end
+  build_resource(AcceptAnyResource,
+    [allowed_methods: ["GET", "POST"],
+     content_types_accepted: [{:*, :from_content}],
+     from_content: true, to_html: "html"])
 
   defmodule CtpParamsResource do
     use PlugRest.Resource
@@ -322,29 +170,11 @@ defmodule PlugRest.ResourceTest do
     end
   end
 
-  defmodule LanguagesResource do
-    use PlugRest.Resource
+  build_resource(LanguagesResource,
+    [languages_provided: ["de", "en"], to_html: "Languages"])
 
-    def languages_provided(conn, state) do
-      {["de", "en"], conn, state}
-    end
-
-    def to_html(conn, state) do
-      {"Languages", conn, state}
-    end
-  end
-
-  defmodule CharsetResource do
-    use PlugRest.Resource
-
-    def charsets_provided(conn, state) do
-      {["utf-8", "unicode-1-1"], conn, state}
-    end
-
-    def to_html(conn, state) do
-      {"Charsets", conn, state}
-    end
-  end
+  build_resource(CharsetResource,
+    [charsets_provided: ["utf-8", "unicode-1-1"], to_html: "Charsets"])
 
   defmodule ResourceExists do
     use PlugRest.Resource
@@ -370,37 +200,13 @@ defmodule PlugRest.ResourceTest do
     end
   end
 
-  defmodule MovedPermanentlyResource do
-    use PlugRest.Resource
+  build_resource(MovedPermanentlyResource,
+    [resource_exists: false, previously_existed: true,
+     moved_permanently: {true, "/moved"}])
 
-    def resource_exists(conn, state) do
-      {false, conn, state}
-    end
-
-    def previously_existed(conn, state) do
-      {true, conn, state}
-    end
-
-    def moved_permanently(conn, state) do
-      {{true, "/moved"}, conn, state}
-    end
-  end
-
-  defmodule MovedTemporarilyResource do
-    use PlugRest.Resource
-
-    def resource_exists(conn, state) do
-      {false, conn, state}
-    end
-
-    def previously_existed(conn, state) do
-      {true, conn, state}
-    end
-
-    def moved_temporarily(conn, state) do
-      {{true, "/temp"}, conn, state}
-    end
-  end
+  build_resource(MovedTemporarilyResource,
+    [resource_exists: false, previously_existed: true,
+     moved_temporarily: {true, "/temp"}])
 
   defmodule MissingPostResource do
     use PlugRest.Resource
@@ -434,46 +240,13 @@ defmodule PlugRest.ResourceTest do
     end
   end
 
-  defmodule GoneResource do
-    use PlugRest.Resource
+  build_resource(GoneResource,
+    [resource_exists: false, previously_existed: true, moved_temporarily: false])
 
-    def resource_exists(conn, state) do
-      {false, conn, state}
-    end
+  build_resource(LastModifiedResource,
+    [last_modified: {{2016, 7, 17}, {11, 49, 29}}, to_html: "Modified"])
 
-    def previously_existed(conn, state) do
-      {true, conn, state}
-    end
-
-    def moved_temporarily(conn, state) do
-      {false, conn, state}
-    end
-  end
-
-  defmodule LastModifiedResource do
-    use PlugRest.Resource
-
-    def last_modified(conn, state) do
-      modified = {{2016, 7, 17}, {11, 49, 29}}
-      {modified, conn, state}
-    end
-
-    def to_html(conn, state) do
-      {"Modified", conn, state}
-    end
-  end
-
-  defmodule NilModifiedResource do
-    use PlugRest.Resource
-
-    def last_modified(conn, state) do
-      {nil, conn, state}
-    end
-
-    def to_html(conn, state) do
-      {"Modified", conn, state}
-    end
-  end
+  build_resource(NilModifiedResource, [last_modified: nil, to_html: "Modified"])
 
   defmodule PipelineResource do
     use PlugRest.Resource
