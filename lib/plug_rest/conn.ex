@@ -31,7 +31,6 @@ defmodule PlugRest.Conn do
       {{2016, 7, 17}, {19, 54, 31}}
 
   """
-
   @spec parse_date_header(conn, String.t) :: [] | :calendar.time
   def parse_date_header(conn, header) do
     case get_req_header(conn, header) do
@@ -67,7 +66,6 @@ defmodule PlugRest.Conn do
       {"application", "json", %{}}
 
   """
-
   @spec parse_media_type_header(conn, String.t) :: media_type | :error
   def parse_media_type_header(conn, header) do
 
@@ -104,7 +102,6 @@ defmodule PlugRest.Conn do
       iex > PlugRest.Conn.parse_media_range_header(conn, "accept")
       [{{"text", "html", %{}}, 1.0, %{}}]
   """
-
   @spec parse_media_range_header(conn, header) :: {:ok, [priority_type]} | :error
   def parse_media_range_header(conn, header) do
     maybe_media_types =
@@ -141,7 +138,6 @@ defmodule PlugRest.Conn do
       [{:strong, "xyzzy"}]
 
   """
-
   @spec parse_entity_tag_header(conn, header) :: etags_list
   def parse_entity_tag_header(conn, header) do
     case get_req_header(conn, header) do
@@ -168,7 +164,6 @@ defmodule PlugRest.Conn do
       iex > PlugRest.Conn.parse_quality_header(conn, "accept-language")
       [{"da", 1.0}, {"en-gb", 0.8}, {"en", 0.7}]
   """
-
   @spec parse_quality_header(conn, String.t) :: [quality_type]
   def parse_quality_header(conn, header) when is_binary(header) do
     get_req_header(conn, header)
