@@ -147,38 +147,22 @@ defmodule PlugRest.Router do
     # will raise a compiler warning.
     binding =
       vars
-      |> Enum.map(fn(var) -> {Atom.to_string(var), Macro.var(var, nil)} end)
-      |> Enum.filter(fn({var, _macro}) -> String.at(var, 0) !== "_" end)
-
-    host = options[:host]
-    private = options[:private]
+      |> Enum.map(&{Atom.to_string(&1), Macro.var(&1, nil)})
+      |> Enum.reject(&match?({"_" <> _var, _macro}, &1))
 
     quote do
-      match unquote(path), host: unquote(host), private: unquote(private) do
+      match unquote(path), unquote(Keyword.take(options, [:host, :private])) do
         conn = var!(conn)
 
-        conn_params =
-          case conn.params do
-            %Plug.Conn.Unfetched{} -> %{}
-            p -> p
-          end
-
-        path_params =
-          Enum.reduce(
-            unquote(binding),
-            %{},
-            fn({k,v}, p) -> Map.put(p, k, v) end
-          )
-
         # Save dynamic path segments into conn.params
-        params = Map.merge(conn_params, path_params)
-        conn = %{conn | params: params}
+        conn = update_in conn.params, fn
+          %Plug.Conn.Unfetched{} -> unquote({:%{}, [], binding})
+          fetched -> Map.merge(fetched, unquote({:%{}, [], binding}))
+        end
 
         # Merge assigns
-        options = unquote(options)
-        assigns = conn.assigns
-          |> Map.merge(Keyword.get(options, :assigns, %{}))
-        conn = %{conn | assigns: assigns}
+        assigns = Keyword.get(unquote(options), :assigns, %{})
+        conn = update_in conn.assigns, &(Map.merge(&1, assigns))
 
         plug = unquote(plug)
         plug_opts = unquote(plug_opts)
