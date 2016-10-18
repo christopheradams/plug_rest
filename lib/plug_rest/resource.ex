@@ -236,6 +236,7 @@ defmodule PlugRest.Resource do
   """
   @type etag :: binary | {:weak | :strong, binary}
 
+  @typep etag_tuple :: {:weak | :strong, binary}
   @typep etags_list :: PlugRest.Conn.etags_list
   @typep priority_type :: PlugRest.Conn.priority_type
   @typep quality_type :: PlugRest.Conn.quality_type
@@ -1518,7 +1519,7 @@ defmodule PlugRest.Resource do
   end
 
 
-  @spec is_weak_match(etag, etags_list) :: boolean()
+  @spec is_weak_match(etag_tuple, [etag_tuple]) :: boolean()
   defp is_weak_match(_, []) do
     false
   end
