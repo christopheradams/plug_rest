@@ -411,6 +411,13 @@ defmodule PlugRest.SuiteTest do
     |> test_header("expires", "0")
   end
 
+  test "rest last modified undefined" do
+    conn(:get, "/simple")
+    |> put_req_header("if-modified-since", "Fri, 21 Sep 2012 22:36:14 GMT")
+    |> RestRouter.call([])
+    |> test_status(200)
+  end
+
   test "rest forbidden post" do
     conn(:post, "/forbidden_post", "Hello world!")
     |> put_req_header("content-type", "text/plain")
