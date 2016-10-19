@@ -138,18 +138,11 @@ defmodule PlugRest.Conn do
       [{:strong, "xyzzy"}]
 
   """
-  @spec parse_entity_tag_header(conn, header) :: etags_list
+  @spec parse_entity_tag_header(conn, header) :: etags_list | :*
   def parse_entity_tag_header(conn, header) do
     case get_req_header(conn, header) do
       [] -> []
-      ["*"] -> [%{}]
-      [etags] ->
-        etags
-        |> String.split
-        |> Enum.map(fn(e) ->
-          {etag} = List.to_tuple(:cowboy_http.entity_tag_match(e))
-          etag
-        end)
+      [etags] -> :cowboy_http.entity_tag_match(etags)
     end
   end
 

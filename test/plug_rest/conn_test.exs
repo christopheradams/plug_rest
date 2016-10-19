@@ -119,7 +119,7 @@ defmodule PlugRest.ConnTest do
     |> put_req_header("if-match", if_match)
     |> parse_entity_tag_header("if-match")
 
-    expected_headers = [%{}]
+    expected_headers = :*
 
     assert actual_headers == expected_headers
   end

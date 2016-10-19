@@ -1404,7 +1404,7 @@ defmodule PlugRest.Resource do
     case parse_entity_tag_header(conn, "if-match") do
       [] ->
         if_unmodified_since_exists(conn, state2)
-      [%{}] ->
+      :* ->
         if_unmodified_since_exists(conn, state2)
       etags_list ->
         if_match(conn, state2, etags_list)
@@ -1464,7 +1464,7 @@ defmodule PlugRest.Resource do
     case parse_entity_tag_header(conn, "if-none-match") do
       [] ->
         if_modified_since_exists(conn, state)
-      [%{}] ->
+      :* ->
         precondition_is_head_get(conn, state)
       etags_list ->
         if_none_match(conn, state, etags_list)
