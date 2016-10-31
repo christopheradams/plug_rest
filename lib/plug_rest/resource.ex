@@ -1314,15 +1314,16 @@ defmodule PlugRest.Resource do
 
   @spec set_content_type(conn, rest_state) :: conn
   defp set_content_type(conn, %{content_type_a: {{type, sub_type, params}, _fun},
-  charset_a: charset} = state) do
+                                charset_a: charset} = state) do
     params_bin = set_content_type_build_params(params)
     content_type = print_media_type({type, sub_type, params_bin})
-    conn2 = case charset do
-      nil ->
-        put_resp_content_type(conn, content_type)
-      ^charset ->
-        put_resp_content_type(conn, content_type, charset)
-    end
+    conn2 =
+      case charset do
+        nil ->
+          put_resp_content_type(conn, content_type)
+        ^charset ->
+          put_resp_content_type(conn, content_type, charset)
+      end
     conn2
     |> encodings_provided(state)
   end
@@ -1348,30 +1349,33 @@ defmodule PlugRest.Resource do
 
   @spec variances(conn, rest_state) :: conn
   defp variances(conn, %{content_types_p: c_tp, languages_p: l_p, charsets_p: c_p} = state) do
-    var_variances = case c_tp do
-      [] ->
-        []
-      [_] ->
-        []
-      [_ | _] ->
-        ["accept"]
-    end
-    variances2 = case l_p do
-      [] ->
-        var_variances
-      [_] ->
-        var_variances
-      [_ | _] ->
-        ["accept-language" | var_variances]
-    end
-    variances3 = case c_p do
-      [] ->
-        variances2
-      [_] ->
-        variances2
-      [_ | _] ->
-        ["accept-charset" | variances2]
-    end
+    var_variances =
+      case c_tp do
+        [] ->
+          []
+        [_] ->
+          []
+        [_ | _] ->
+          ["accept"]
+      end
+    variances2 =
+      case l_p do
+        [] ->
+          var_variances
+        [_] ->
+          var_variances
+        [_ | _] ->
+          ["accept-language" | var_variances]
+      end
+    variances3 =
+      case c_p do
+        [] ->
+          variances2
+        [_] ->
+          variances2
+        [_ | _] ->
+          ["accept-charset" | variances2]
+      end
     case variances(conn, state, variances3) do
       {variances4, conn2, state2} ->
         case for(v <- variances4, into: [], do: [", ", v]) do
@@ -1557,8 +1561,8 @@ defmodule PlugRest.Resource do
     case set_resp_etag(conn2, state) do
       {conn3, state2} ->
         case set_resp_expires(conn3, state2) do
-        {req4, state3} ->
-          respond(req4, state3, 304)
+          {req4, state3} ->
+            respond(req4, state3, 304)
         end
     end
   end
@@ -1676,12 +1680,12 @@ defmodule PlugRest.Resource do
       {c_ta, conn2, handler_state} ->
         c_ta2 = for(p <- c_ta, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state}
-          case parse_media_type_header(conn2, "content-type") do
-            :error ->
-              respond(conn2, state2, 415)
-            content_type ->
-              choose_content_type(conn2, state2, content_type, c_ta2)
-          end
+        case parse_media_type_header(conn2, "content-type") do
+          :error ->
+            respond(conn2, state2, 415)
+          content_type ->
+            choose_content_type(conn2, state2, content_type, c_ta2)
+        end
     end
   end
 
