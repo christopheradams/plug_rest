@@ -178,6 +178,14 @@ defmodule PlugRest.ResourceTest do
       {{true, "/new/1234"}, conn, state}
     end
 
+    def from_multipart(conn, %{location: :manual} = state) do
+      conn =
+        conn
+        |> put_resp_header("location", "/new/1234")
+        |> put_rest_body("#{conn.method} from multipart")
+      {true, conn, state}
+    end
+
     def from_multipart(conn, state) do
       conn = conn |> put_rest_body("#{conn.method} from multipart")
       {true, conn, state}
@@ -585,10 +593,17 @@ defmodule PlugRest.ResourceTest do
 
   ### content negotiation
 
-  test "post new resource" do
+  test "post new resource with new location" do
     conn(:post, "/", "test=test")
     |> put_req_header("content-type", "mixed/multipart")
     |> call_resource(ProcessCreateResource, %{location: :new, exists: false})
+    |> test_status(201)
+  end
+
+  test "post new resource with manual location" do
+    conn(:post, "/", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> call_resource(ProcessCreateResource, %{location: :manual, exists: false})
     |> test_status(201)
   end
 
@@ -597,6 +612,56 @@ defmodule PlugRest.ResourceTest do
     |> put_req_header("content-type", "mixed/multipart")
     |> call_resource(ProcessCreateResource, %{exists: false})
     |> test_status(201)
+  end
+
+  # TODO: Don't crash
+  test "put new resource with new location" do
+    assert_raise CaseClauseError, fn ->
+      conn(:put, "/", "test=test")
+      |> put_req_header("content-type", "mixed/multipart")
+      |> call_resource(ProcessCreateResource, %{location: :new, exists: false})
+      |> test_status(201)
+    end
+  end
+
+  test "put new resource with manual location" do
+    conn(:put, "/", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> call_resource(ProcessCreateResource, %{location: :manual, exists: false})
+    |> test_status(201)
+  end
+
+  # TODO: Don't crash
+  test "put existing resource with new location" do
+    assert_raise CaseClauseError, fn ->
+      conn(:put, "/", "test=test")
+      |> put_req_header("content-type", "mixed/multipart")
+      |> call_resource(ProcessCreateResource, %{location: :new, exists: true})
+      |> test_status(303)
+    end
+  end
+
+  # TODO: Return 303
+  test "put existing resource with manual location" do
+    conn(:put, "/", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> call_resource(ProcessCreateResource, %{location: :manual, exists: true})
+    |> test_status(200)
+  end
+
+  test "post existing resource with new location" do
+    conn(:post, "/", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> call_resource(ProcessCreateResource, %{location: :new, exists: true})
+    |> test_status(303)
+  end
+
+  # TODO: Return 303
+  test "post existing resource with manual location" do
+    conn(:post, "/", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> call_resource(ProcessCreateResource, %{location: :manual, exists: true})
+    |> test_status(200)
   end
 
   test "response body with put" do
