@@ -14,8 +14,7 @@ defmodule PlugRest.Mixfile do
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     dialyzer: [plt_add_deps: true,
-                plt_apps: [:erts, :kernel, :stdlib, :crypto, :public_key, :inets]],
+     dialyzer: [plt_add_apps: [:public_key, :inets, :mix, :eex]],
      docs: docs(),
      description: @project_description,
      source_url: @source_url,
@@ -31,7 +30,7 @@ defmodule PlugRest.Mixfile do
     [{:plug, "~> 1.0"},
      {:cowboy, "~> 1.0"},
      {:ex_doc, ">= 0.0.0", only: :dev},
-     {:dialyxir, "~> 0.3.5", only: [:dev]}]
+     {:dialyxir, "~> 0.4", only: [:dev]}]
   end
 
   defp docs() do
