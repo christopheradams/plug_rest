@@ -174,7 +174,7 @@ defmodule PlugRest.ResourceTest do
     end
 
     def from_multipart(conn, %{location: :new} = state) do
-      conn = conn |> put_rest_body("#{conn.method} from multipart")
+      conn = put_body(conn, state, "#{conn.method} from multipart")
       {{true, "/new/1234"}, conn, state}
     end
 
@@ -182,12 +182,12 @@ defmodule PlugRest.ResourceTest do
       conn =
         conn
         |> put_resp_header("location", "/new/1234")
-        |> put_rest_body("#{conn.method} from multipart")
+        |> put_body(state, "#{conn.method} from multipart")
       {true, conn, state}
     end
 
     def from_multipart(conn, state) do
-      conn = conn |> put_rest_body("#{conn.method} from multipart")
+      conn = put_body(conn, state, "#{conn.method} from multipart")
       {true, conn, state}
     end
 
@@ -196,8 +196,16 @@ defmodule PlugRest.ResourceTest do
     end
 
     def delete_completed(conn, state) do
-      conn2 = conn |> put_rest_body("#{conn.method} resource")
-      {true, conn2, state}
+      conn = put_body(conn, state, "#{conn.method} resource")
+      {true, conn, state}
+    end
+
+    defp put_body(conn, %{body: true} = _state, body) do
+      put_rest_body(conn, body)
+    end
+
+    defp put_body(conn, _state, _body) do
+      conn
     end
   end
 
@@ -593,6 +601,14 @@ defmodule PlugRest.ResourceTest do
 
   ### content negotiation
 
+  # TODO: Return 201
+  test "post new resource" do
+    conn(:post, "/", "test=test")
+    |> put_req_header("content-type", "mixed/multipart")
+    |> call_resource(ProcessCreateResource, %{exists: false})
+    |> test_status(204)
+  end
+
   test "post new resource with new location" do
     conn(:post, "/", "test=test")
     |> put_req_header("content-type", "mixed/multipart")
@@ -646,7 +662,7 @@ defmodule PlugRest.ResourceTest do
     conn(:put, "/", "test=test")
     |> put_req_header("content-type", "mixed/multipart")
     |> call_resource(ProcessCreateResource, %{location: :manual, exists: true})
-    |> test_status(200)
+    |> test_status(204)
   end
 
   test "post existing resource with new location" do
@@ -661,13 +677,13 @@ defmodule PlugRest.ResourceTest do
     conn(:post, "/", "test=test")
     |> put_req_header("content-type", "mixed/multipart")
     |> call_resource(ProcessCreateResource, %{location: :manual, exists: true})
-    |> test_status(200)
+    |> test_status(204)
   end
 
   test "response body with put" do
     conn = conn(:put, "/", "test=test")
     |> put_req_header("content-type", "mixed/multipart")
-    |> call_resource(ProcessCreateResource)
+    |> call_resource(ProcessCreateResource, %{body: true})
     |> test_status(200)
 
     assert conn.resp_body == "PUT from multipart"
@@ -676,7 +692,7 @@ defmodule PlugRest.ResourceTest do
   test "response body with post" do
     conn = conn(:post, "/", "test=test")
     |> put_req_header("content-type", "mixed/multipart")
-    |> call_resource(ProcessCreateResource)
+    |> call_resource(ProcessCreateResource, %{body: true})
     |> test_status(200)
 
     assert conn.resp_body == "POST from multipart"
@@ -685,7 +701,7 @@ defmodule PlugRest.ResourceTest do
   test "response body with post to non-existing resource" do
     conn = conn(:post, "/", "test=test")
     |> put_req_header("content-type", "mixed/multipart")
-    |> call_resource(ProcessCreateResource, %{exists: false})
+    |> call_resource(ProcessCreateResource, %{exists: false, body: true})
     |> test_status(200)
 
     assert conn.resp_body == "POST from multipart"
@@ -955,7 +971,7 @@ defmodule PlugRest.ResourceTest do
 
   test "response body with delete" do
     conn = conn(:delete, "/resp_body")
-    |> call_resource(ProcessCreateResource)
+    |> call_resource(ProcessCreateResource, %{body: true})
     |> test_status(200)
 
     assert conn.resp_body == "DELETE resource"
