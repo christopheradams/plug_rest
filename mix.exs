@@ -5,7 +5,7 @@ defmodule PlugRest.Mixfile do
   REST behaviour and Plug router for hypermedia web applications
   """
 
-  @version "0.11.0"
+  @version "0.11.1"
   @source_url "https://github.com/christopheradams/plug_rest"
 
   def project do
@@ -27,7 +27,7 @@ defmodule PlugRest.Mixfile do
   end
 
   defp deps do
-    [{:plug, "~> 1.0"},
+    [{:plug, "~> 1.3"},
      {:cowboy, "~> 1.0"},
      {:ex_doc, ">= 0.0.0", only: :dev},
      {:dialyxir, "~> 0.4", only: [:dev]}]

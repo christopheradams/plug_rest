@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.11.1
+
+* Bug fixes
+  * Update plug version in mix file and README
+
 ## v0.11.0
 
 * Enhancements
