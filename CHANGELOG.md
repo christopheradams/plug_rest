@@ -10,6 +10,7 @@
   * The resource `init/2` callback will send 500 for any return
     value other than `:ok`
   * Change `allow_missing_post` default to `false`
+  * Require Plug 1.3
 
 ## v0.10.2
 

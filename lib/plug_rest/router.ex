@@ -138,37 +138,11 @@ defmodule PlugRest.Router do
   ## Compiles the resource into a match macro from Plug.Router
   @spec add_resource(path, plug, plug_opts, options) :: Macro.t
   defp add_resource(path, plug, plug_opts, options) do
-    {vars, _match} = Plug.Router.Utils.build_path_match(path)
-
-    # Transform the list of path variables into a data structure that will
-    # bind to real path parameters inside the macro, like:
-    # `[{"bar", {:bar, [], nil}}]`. The first step creates the binding. The
-    # second removes any underscored variables, since using them in the macro
-    # will raise a compiler warning.
-    binding =
-      vars
-      |> Enum.map(&{Atom.to_string(&1), Macro.var(&1, nil)})
-      |> Enum.reject(&match?({"_" <> _var, _macro}, &1))
-
+    options = options
+      |> Keyword.put(:to, plug)
+      |> Keyword.put(:init_opts, plug_opts)
     quote do
-      match unquote(path), unquote(Keyword.take(options, [:host, :private])) do
-        conn = var!(conn)
-
-        # Save dynamic path segments into conn.params
-        conn = update_in conn.params, fn
-          %Plug.Conn.Unfetched{} -> unquote({:%{}, [], binding})
-          fetched -> Map.merge(fetched, unquote({:%{}, [], binding}))
-        end
-
-        # Merge assigns
-        assigns = Keyword.get(unquote(options), :assigns, %{})
-        conn = update_in conn.assigns, &(Map.merge(&1, assigns))
-
-        plug = unquote(plug)
-        plug_opts = unquote(plug_opts)
-
-        plug.call(conn, plug.init(plug_opts))
-      end
+      match unquote(path), unquote(options)
     end
   end
 end
