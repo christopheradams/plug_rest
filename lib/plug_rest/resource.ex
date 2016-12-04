@@ -1927,7 +1927,7 @@ defmodule PlugRest.Resource do
     end
   end
 
-  defp call(conn, %{handler: handler, handler_state: handler_state}= _state, callback) do
+  defp call(conn, %{handler: handler, handler_state: handler_state} = _state, callback) do
     case function_exported?(handler, callback, 2) do
       true ->
         apply(handler, callback, [conn, handler_state])

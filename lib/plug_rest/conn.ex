@@ -172,7 +172,7 @@ defmodule PlugRest.Conn do
   defp parse_accept_as_utils_media_type([accept]) when is_binary(accept) do
     accept
     |> Plug.Conn.Utils.list
-    |> Enum.map(fn "*"->"*/*"; e -> e end)
+    |> Enum.map(fn "*" -> "*/*"; e -> e end)
     |> Enum.map(&Plug.Conn.Utils.media_type/1)
   end
 
