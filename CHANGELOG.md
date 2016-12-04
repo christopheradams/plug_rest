@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.11.0-dev
+## v0.11.0
 
 * Enhancements
   * Make resource gen task work in umbrella projects
