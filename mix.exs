@@ -23,7 +23,8 @@ defmodule PlugRest.Mixfile do
   end
 
   def application do
-    [applications: [:plug, :cowboy, :logger, :inets, :public_key]]
+    [applications: [:plug, :cowboy, :logger, :inets, :public_key],
+     mod: {PlugRest, []}]
   end
 
   defp deps do
