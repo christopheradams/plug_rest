@@ -1777,7 +1777,7 @@ defmodule PlugRest.Resource do
           ^last_modified when is_nil(last_modified) ->
             set_resp_body_expires(conn2, state2)
           ^last_modified ->
-            last_modified_bin = :cowboy_clock.rfc1123(last_modified)
+            last_modified_bin = :rest_clock.rfc1123(last_modified)
             conn3 = put_resp_header(conn2, "last-modified", last_modified_bin)
             set_resp_body_expires(conn3, state2)
         end
@@ -1842,7 +1842,7 @@ defmodule PlugRest.Resource do
         conn3 = put_resp_header(conn2, "expires", var_expires)
         {conn3, state2}
       ^var_expires ->
-        expires_bin = :cowboy_clock.rfc1123(var_expires)
+        expires_bin = :rest_clock.rfc1123(var_expires)
         conn3 = put_resp_header(conn2, "expires", expires_bin)
         {conn3, state2}
     end
