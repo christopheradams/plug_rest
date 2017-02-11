@@ -142,7 +142,7 @@ defmodule PlugRest.Conn do
   def parse_entity_tag_header(conn, header) do
     case get_req_header(conn, header) do
       [] -> []
-      [etags] -> :cowboy_http.entity_tag_match(etags)
+      [etags] -> :rest_http.entity_tag_match(etags)
     end
   end
 
