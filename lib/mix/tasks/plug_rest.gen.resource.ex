@@ -28,7 +28,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
       mix plug_rest.gen.resource UserResource --no-comments
   """
   def run(args) do
-    switches = [dir: :binary, use: :binary, app: :string]
+    switches = [dir: :binary, use: :binary, app: :string, path: :string]
     {opts, parsed, _} = OptionParser.parse(args, switches: switches)
 
     resource =
@@ -64,8 +64,15 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
 
     resource_module = Enum.join([app_mod, resource], ".")
 
-    file = Path.join([opts[:dir], underscored]) <> ".ex"
-    create_directory Path.dirname(file)
+    file =
+      case String.slice(opts[:path], -3..-1) == ".ex" do
+        true ->
+          opts[:path]
+        false ->
+          Path.join([opts[:dir], underscored]) <> ".ex"
+      end
+
+    file |> Path.dirname |> create_directory
 
     plug_app_dir = Application.app_dir(:plug_rest)
     template_path = "priv/templates/plug_rest.gen.resource/resource.ex"
