@@ -38,21 +38,23 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
         [_ | _] -> Mix.raise "plug_rest.gen.resource expects a single Resource name"
       end
 
-    app_lib = case Mix.Project.umbrella? or !is_nil(opts[:app]) do
-                true ->
-                  opts[:app]
-                false  ->
-                  Mix.Project.config |> Keyword.get(:app) |> Atom.to_string
-              end
+    app_lib =
+      case Mix.Project.umbrella? or !is_nil(opts[:app]) do
+        true ->
+          opts[:app]
+        false  ->
+          Mix.Project.config |> Keyword.get(:app) |> Atom.to_string
+      end
 
     if is_nil(app_lib) do
       Mix.raise ("The app must be specified in mix.exs or with the --app switch")
     end
 
-    apps_path = case Mix.Project.umbrella? do
-                  true -> Path.join([Mix.Project.config[:apps_path], app_lib])
-                  false -> "."
-                end
+    apps_path =
+      case Mix.Project.umbrella? do
+        true -> Path.join([Mix.Project.config[:apps_path], app_lib])
+        false -> "."
+      end
 
     underscored = Macro.underscore(resource)
     app_mod = Macro.camelize(app_lib)
