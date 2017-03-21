@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.12.0
+
+* Enhancements
+  * Replace `dir` option in generator task with `path` option that can set the
+    target filename
+
 ## v0.11.1
 
 * Bug fixes
