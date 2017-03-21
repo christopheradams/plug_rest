@@ -14,9 +14,9 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
 
     * a resource file in lib/my_app/resources
 
-  The resources target directory can be changed with the option:
+  The resource file path can be set with the option:
 
-      mix plug_rest.gen.resource UserResource --dir "web/resources"
+      mix plug_rest.gen.resource UserResource --path "web/resources"
 
   In an umbrella project, run the mix task in the root of the app, or
   specify the app with:
@@ -28,7 +28,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
       mix plug_rest.gen.resource UserResource --no-comments
   """
   def run(args) do
-    switches = [dir: :binary, use: :binary, app: :string, path: :string]
+    switches = [use: :string, app: :string, path: :string]
     {opts, parsed, _} = OptionParser.parse(args, switches: switches)
 
     resource =
@@ -57,7 +57,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
     underscored = Macro.underscore(resource)
     app_mod = Macro.camelize(app_lib)
 
-    default_opts = [dir: Path.join([apps_path, "lib", app_lib, "resources"]),
+    default_opts = [path: Path.join([apps_path, "lib", app_lib, "resources"]),
                     use: "PlugRest.Resource", no_comments: false]
 
     opts = Keyword.merge(default_opts, opts)
@@ -69,7 +69,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
         true ->
           opts[:path]
         false ->
-          Path.join([opts[:dir], underscored]) <> ".ex"
+          Path.join([opts[:path], underscored]) <> ".ex"
       end
 
     file |> Path.dirname |> create_directory
