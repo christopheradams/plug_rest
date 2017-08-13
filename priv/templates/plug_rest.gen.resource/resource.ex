@@ -1,6 +1,6 @@
 defmodule <%= module %> do
   @moduledoc """
-  This is the documentation for the <%= module %> module.
+  This is the documentation for the <%= resource %> module.
 <%= if comments do %>
   See [PlugRest docs](https://hexdocs.pm/plug_rest/PlugRest.Resource.html)
   for more information on the REST callbacks.<% end %>

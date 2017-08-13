@@ -81,6 +81,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
     template = Path.join(plug_app_dir, template_path)
     contents = EEx.eval_file(template, [module: resource_module,
                                         comments: !opts[:no_comments],
+                                        resource: resource,
                                         resources_use: opts[:use]])
 
     :ok = File.write(file, contents)
