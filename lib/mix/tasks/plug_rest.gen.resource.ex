@@ -14,6 +14,11 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
 
       mix plug_rest.gen.resource UserResource --path "lib/my_app_web/resources"
 
+  By default the resource module will be named like `MyApp.UserResource`. This
+  can be overridden with the `--namespace` option:
+
+      mix plug_rest.gen.resource User --namespace MyApp.Resources
+
   In an umbrella project, run the mix task in the root of the app, or
   specify the app with:
 
@@ -32,6 +37,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
       use: :string,
       app: :string,
       path: :string,
+      namespace: :string,
     ]
 
     {opts, parsed, _} = OptionParser.parse(args, switches: switches)
@@ -83,7 +89,8 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
 
     :ok = file |> Path.dirname() |> create_directory()
 
-    resource_module = Enum.join([app_mod, resource], ".")
+    namespace = Keyword.get(opts, :namespace, app_mod)
+    resource_module = Enum.join([namespace, resource], ".")
 
     template_bindings = [
       module: resource_module,
