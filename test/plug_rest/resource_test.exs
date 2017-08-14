@@ -1007,7 +1007,8 @@ defmodule PlugRest.ResourceTest do
   test "send_file body" do
     conn = conn(:get, "/") |> call_resource(SendFileResource)
 
-    assert conn.state == :sent
+    # Testing against Plug 1.3 and 1.4
+    assert conn.state == :sent || conn.state == :file
     assert conn.status == 200
 
     assert conn.resp_body =~ "Hello World"
