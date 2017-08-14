@@ -125,8 +125,8 @@ Add PlugRest to your project in two steps:
     ```elixir
     def deps do
       [{:cowboy, "~> 1.0.0"},
-       {:plug, "~> 1.3"},
-       {:plug_rest, "~> 0.12.0"}]
+       {:plug, "~> 1.4"},
+       {:plug_rest, "~> 0.13"}]
     end
     ```
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.13.0
+
+* Enhancements
+  * [Generator] Add `namespace` option.
+
 ## v0.12.0
 
 * Enhancements
