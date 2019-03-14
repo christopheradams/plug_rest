@@ -1858,13 +1858,13 @@ defmodule PlugRest.Resource do
       :no_call ->
         {nil, conn, %{state | etag: :no_call}}
       {etag, conn2, handler_state} when is_binary(etag) ->
-        case :cowboy_http.entity_tag_match(etag) do
-          {:error, :badarg} ->
+        try do
+          etag2 = :cow_http_hd.parse_etag(etag)
+          {etag2, conn2, %{state | handler_state: handler_state, etag: etag2}}
+        rescue
+          _ ->
             raise PlugRest.RuntimeError,
               message: "Invalid ETag #{inspect etag} (#{inspect state.handler})"
-          tag_match ->
-            {etag2} = List.to_tuple(tag_match)
-            {etag2, conn2, %{state | handler_state: handler_state, etag: etag2}}
         end
       {etag, conn2, handler_state} ->
         {etag, conn2, %{state | handler_state: handler_state, etag: etag}}
@@ -1984,7 +1984,15 @@ defmodule PlugRest.Resource do
 
   defp terminate(conn, %{resp_body: {:chunked, body}} = _state) do
     conn2 = conn |> send_chunked(conn.status)
-    Enum.into(body, conn2)
+
+    Enum.reduce_while(body, conn2, fn (chunk, conn) ->
+      case Plug.Conn.chunk(conn, chunk) do
+        {:ok, conn} ->
+          {:cont, conn}
+        {:error, :closed} ->
+          {:halt, conn}
+      end
+    end)
   end
 
   defp terminate(conn, %{resp_body: {:file, filename}} = _state) do

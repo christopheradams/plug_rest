@@ -40,7 +40,7 @@ defmodule PlugRest.Conn do
         try do
           date =
             date_header
-            |> String.to_char_list
+            |> String.to_charlist
             |> :httpd_util.convert_request_date
 
           case date do
@@ -142,7 +142,13 @@ defmodule PlugRest.Conn do
   def parse_entity_tag_header(conn, header) do
     case get_req_header(conn, header) do
       [] -> []
-      [etags] -> :cowboy_http.entity_tag_match(etags)
+      [etags] ->
+        case header do
+          "if-match" ->
+            :cow_http_hd.parse_if_match(etags)
+          _ ->
+            :cow_http_hd.parse_if_none_match(etags)
+        end
     end
   end
 
