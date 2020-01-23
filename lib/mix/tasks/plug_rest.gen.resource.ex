@@ -87,7 +87,7 @@ defmodule Mix.Tasks.PlugRest.Gen.Resource do
           Mix.raise "The --path option must name a directory or .ex file"
       end
 
-    :ok = file |> Path.dirname() |> create_directory()
+    file |> Path.dirname() |> create_directory()
 
     namespace = Keyword.get(opts, :namespace, app_mod)
     resource_module = Enum.join([namespace, resource], ".")
