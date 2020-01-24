@@ -184,6 +184,12 @@ defmodule PlugRest.Resource do
   @typedoc "The state of the resource"
   @type state :: any
 
+  @typedoc "An ok callback value"
+  @type ok :: {:ok, conn, state}
+
+  @typedoc "A stop callback value"
+  @type stop :: {:stop, conn, state}
+
   @typep rest_state :: PlugRest.State.t
 
   @typedoc "The callback accepting a representation of the resource for a content-type"
@@ -260,8 +266,7 @@ defmodule PlugRest.Resource do
           {:ok, conn, state}
         end
   """
-  @callback init(conn, state) :: {:ok, conn, state}
-                               | {:stop, conn, state}
+  @callback init(conn, state) :: ok() | stop()
   @optional_callbacks [init: 2]
 
   ## REST handler callbacks
@@ -283,8 +288,7 @@ defmodule PlugRest.Resource do
         {["GET,", "HEAD", "OPTIONS"], conn, state}
       end
   """
-  @callback allowed_methods(conn, state) :: {[method], conn, state}
-                                          | {:stop, conn, state}
+  @callback allowed_methods(conn, state) :: {[method], conn, state} | stop()
   @optional_callbacks [allowed_methods: 2]
 
   @doc """
@@ -310,8 +314,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback allow_missing_post(conn, state) :: {boolean(), conn, state}
-                                             | {:stop, conn, state}
+  @callback allow_missing_post(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [allow_missing_post: 2]
 
   @doc """
@@ -333,8 +336,7 @@ defmodule PlugRest.Resource do
         {["utf-8"], conn, state}
       end
   """
-  @callback charsets_provided(conn, state) :: {[charset], conn, state}
-                                            | {:stop, conn, state}
+  @callback charsets_provided(conn, state) :: {[charset], conn, state} | stop()
   @optional_callbacks [charsets_provided: 2]
 
   @doc """
@@ -400,8 +402,7 @@ defmodule PlugRest.Resource do
         {false, conn, state}
       end
   """
-  @callback content_types_accepted(conn, state) :: {[content_type_a], conn, state}
-                                                 | {:stop, conn, state}
+  @callback content_types_accepted(conn, state) :: {[content_type_a], conn, state} | stop()
   @optional_callbacks [content_types_accepted: 2]
 
   @doc """
@@ -445,8 +446,7 @@ defmodule PlugRest.Resource do
         {"{}", conn, state}
       end
   """
-  @callback content_types_provided(conn, state) :: {[content_type_p], conn, state}
-                                                 | {:stop, conn, state}
+  @callback content_types_provided(conn, state) :: {[content_type_p], conn, state} | stop()
   @optional_callbacks [content_types_provided: 2]
 
   @doc """
@@ -466,8 +466,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback delete_completed(conn, state) :: {boolean(), conn, state}
-                                           | {:stop, conn, state}
+  @callback delete_completed(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [delete_completed: 2]
 
   @doc """
@@ -485,8 +484,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback delete_resource(conn, state) :: {boolean(), conn, state}
-                                          | {:stop, conn, state}
+  @callback delete_resource(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [delete_resource: 2]
 
   @doc """
@@ -504,8 +502,7 @@ defmodule PlugRest.Resource do
         {{{2012, 9, 21}, {22, 36, 14}}, conn, state}
       end
   """
-  @callback expires(conn, state) :: {:calendar.datetime() | binary() | nil, conn, state}
-                                  | {:stop, conn, state}
+  @callback expires(conn, state) :: {:calendar.datetime() | binary() | nil, conn, state} | stop()
   @optional_callbacks [expires: 2]
 
   @doc """
@@ -522,8 +519,7 @@ defmodule PlugRest.Resource do
         {false, conn, state}
       end
   """
-  @callback forbidden(conn, state) :: {boolean(), conn, state}
-                                    | {:stop, conn, state}
+  @callback forbidden(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [forbidden: 2]
 
   @doc """
@@ -551,9 +547,7 @@ defmodule PlugRest.Resource do
         {"\\"etag-header-value\\""}, conn, state}
       end
   """
-  @callback generate_etag(conn, state) :: {etag, conn, state}
-                                        | {nil, conn, state}
-                                        | {:stop, conn, state}
+  @callback generate_etag(conn, state) :: {etag, conn, state} | {nil, conn, state} | stop()
   @optional_callbacks [generate_etag: 2]
 
   @doc """
@@ -572,8 +566,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback is_authorized(conn, state) :: {true | {false, auth_head}, conn, state}
-                                        | {:stop, conn, state}
+  @callback is_authorized(conn, state) :: {true | {false, auth_head}, conn, state} | stop()
   @optional_callbacks [is_authorized: 2]
 
   @doc """
@@ -590,8 +583,7 @@ defmodule PlugRest.Resource do
         {false, conn, state}
       end
   """
-  @callback is_conflict(conn, state) :: {boolean(), conn, state}
-                                      | {:stop, conn, state}
+  @callback is_conflict(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [is_conflict: 2]
 
   @doc """
@@ -620,8 +612,7 @@ defmodule PlugRest.Resource do
          conn, state}
       end
   """
-  @callback known_methods(conn, state) :: {[method], conn, state}
-                                        | {:stop, conn, state}
+  @callback known_methods(conn, state) :: {[method], conn, state} | stop()
   @optional_callbacks [known_methods: 2]
 
   @doc """
@@ -641,8 +632,7 @@ defmodule PlugRest.Resource do
         {["en"], conn, state}
       end
   """
-  @callback languages_provided(conn, state) :: {[language], conn, state}
-                                             | {:stop, conn, state}
+  @callback languages_provided(conn, state) :: {[language], conn, state} | stop()
   @optional_callbacks [languages_provided: 2]
 
   @doc """
@@ -661,9 +651,8 @@ defmodule PlugRest.Resource do
         {{{2012, 9, 21}, {22, 36, 14}}, conn, state}
       end
   """
-  @callback last_modified(conn, state) :: {:calendar.datetime(), conn, state}
-                                        | {nil, conn, state}
-                                        | {:stop, conn, state}
+  @callback last_modified(conn, state) ::
+              {:calendar.datetime(), conn, state} | {nil, conn, state} | stop()
   @optional_callbacks [last_modified: 2]
 
   @doc """
@@ -680,8 +669,7 @@ defmodule PlugRest.Resource do
         {false, conn, state}
       end
   """
-  @callback malformed_request(conn, state) :: {boolean(), conn, state}
-                                            | {:stop, conn, state}
+  @callback malformed_request(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [malformed_request: 2]
 
   @doc """
@@ -699,8 +687,7 @@ defmodule PlugRest.Resource do
         {{true, "/new_location"}, conn, state}
       end
   """
-  @callback moved_permanently(conn, state) :: {{true, uri} | false, conn, state}
-                                            | {:stop, conn, state}
+  @callback moved_permanently(conn, state) :: {{true, uri} | false, conn, state} | stop()
   @optional_callbacks [moved_permanently: 2]
 
   @doc """
@@ -718,8 +705,7 @@ defmodule PlugRest.Resource do
         {{true, "/new_location"}, conn, state}
       end
   """
-  @callback moved_temporarily(conn, state) :: {{true, uri} | false, conn, state}
-                                            | {:stop, conn, state}
+  @callback moved_temporarily(conn, state) :: {{true, uri} | false, conn, state} | stop()
   @optional_callbacks [moved_temporarily: 2]
 
   @doc """
@@ -743,8 +729,7 @@ defmodule PlugRest.Resource do
         {false, conn, state}
       end
   """
-  @callback multiple_choices(conn, state) :: {boolean(), conn, state}
-                                           | {:stop, conn, state}
+  @callback multiple_choices(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [multiple_choices: 2]
 
   @doc """
@@ -765,8 +750,7 @@ defmodule PlugRest.Resource do
         {:ok, conn, state}
       end
   """
-  @callback options(conn, state) :: {:ok, conn, state}
-                                  | {:stop, conn, state}
+  @callback options(conn, state) :: {:ok, conn, state} | stop()
   @optional_callbacks [options: 2]
 
   @doc """
@@ -785,8 +769,7 @@ defmodule PlugRest.Resource do
         {false, conn, state}
       end
   """
-  @callback previously_existed(conn, state) :: {boolean(), conn, state}
-                                             | {:stop, conn, state}
+  @callback previously_existed(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [previously_existed: 2]
 
   @doc """
@@ -804,8 +787,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback resource_exists(conn, state) :: {boolean(), conn, state}
-                                          | {:stop, conn, state}
+  @callback resource_exists(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [resource_exists: 2]
 
   @doc """
@@ -824,8 +806,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback service_available(conn, state) :: {boolean(), conn, state}
-                                            | {:stop, conn, state}
+  @callback service_available(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [service_available: 2]
 
   @doc """
@@ -842,8 +823,7 @@ defmodule PlugRest.Resource do
         {false, conn, state}
       end
   """
-  @callback uri_too_long(conn, state) :: {boolean(), conn, state}
-                                       | {:stop, conn, state}
+  @callback uri_too_long(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [uri_too_long: 2]
 
   @doc """
@@ -863,8 +843,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback valid_content_headers(conn, state) :: {boolean(), conn, state}
-                                                | {:stop, conn, state}
+  @callback valid_content_headers(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [valid_content_headers: 2]
 
   @doc """
@@ -882,8 +861,7 @@ defmodule PlugRest.Resource do
         {true, conn, state}
       end
   """
-  @callback valid_entity_length(conn, state) :: {boolean(), conn, state}
-                                              | {:stop, conn, state}
+  @callback valid_entity_length(conn, state) :: {boolean(), conn, state} | stop()
   @optional_callbacks [valid_entity_length: 2]
 
   @doc """
@@ -906,8 +884,7 @@ defmodule PlugRest.Resource do
         {["user-agent"], conn, state}
       end
   """
-  @callback variances(conn, state) :: {[header_name], conn, state}
-                                    | {:stop, conn, state}
+  @callback variances(conn, state) :: {[header_name], conn, state} | stop()
   @optional_callbacks [variances: 2]
 
   @doc """
