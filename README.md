@@ -1,7 +1,5 @@
 # PlugRest
 
-<img src="https://s3.amazonaws.com/dikaio/cowboy.svg" width="90" height="90" />
-
 [![Build Status](https://travis-ci.org/christopheradams/plug_rest.svg?branch=master)](https://travis-ci.org/christopheradams/plug_rest)
 [![Hex Version](https://img.shields.io/hexpm/v/plug_rest.svg)](https://hex.pm/packages/plug_rest)
 
@@ -437,7 +435,5 @@ See the [CHANGELOG](CHANGELOG.md) for more information.
 PlugRest copyright &copy; 2016, [Christopher Adams](https://github.com/christopheradams)
 
 cowboy_rest copyright &copy; 2011-2014, Loïc Hoguin <essen@ninenines.eu>
-
-Cowboy logo copyright &copy; 2016, [dikaio](https://github.com/dikaio)
 
 PlugRest source code is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
