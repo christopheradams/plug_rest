@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.13.1
+
+* Bug fixes
+  * [Mix] Fix gen.resource task for Elixir 1.9
+
 ## v0.13.0
 
 * Enhancements
