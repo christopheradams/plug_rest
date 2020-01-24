@@ -120,7 +120,7 @@ defmodule PlugRest.ResourceTest do
     end
 
     def is_conflict(conn, state) do
-      {:true, conn, state}
+      {true, conn, state}
     end
   end
 
@@ -137,9 +137,11 @@ defmodule PlugRest.ResourceTest do
 
     def delete_completed(conn, state) do
       %{"completed" => completed} = fetch_query_params(conn).query_params
+
       case completed do
         "true" ->
           {true, conn, state}
+
         _ ->
           {false, conn, state}
       end
@@ -183,6 +185,7 @@ defmodule PlugRest.ResourceTest do
         conn
         |> put_resp_header("location", "/new/1234")
         |> put_body(state, "#{conn.method} from multipart")
+
       {true, conn, state}
     end
 
@@ -249,9 +252,7 @@ defmodule PlugRest.ResourceTest do
     use PlugRest.Resource
 
     def content_types_provided(conn, state) do
-      {[{{"text", "html", %{}}, :to_html},
-        {{"application", "json", %{}}, :to_json}
-      ], conn, state}
+      {[{{"text", "html", %{}}, :to_html}, {{"application", "json", %{}}, :to_json}], conn, state}
     end
 
     def languages_provided(conn, state) do
@@ -681,28 +682,31 @@ defmodule PlugRest.ResourceTest do
   end
 
   test "response body with put" do
-    conn = conn(:put, "/", "test=test")
-    |> put_req_header("content-type", "mixed/multipart")
-    |> call_resource(ProcessCreateResource, %{body: true})
-    |> test_status(200)
+    conn =
+      conn(:put, "/", "test=test")
+      |> put_req_header("content-type", "mixed/multipart")
+      |> call_resource(ProcessCreateResource, %{body: true})
+      |> test_status(200)
 
     assert conn.resp_body == "PUT from multipart"
   end
 
   test "response body with post" do
-    conn = conn(:post, "/", "test=test")
-    |> put_req_header("content-type", "mixed/multipart")
-    |> call_resource(ProcessCreateResource, %{body: true})
-    |> test_status(200)
+    conn =
+      conn(:post, "/", "test=test")
+      |> put_req_header("content-type", "mixed/multipart")
+      |> call_resource(ProcessCreateResource, %{body: true})
+      |> test_status(200)
 
     assert conn.resp_body == "POST from multipart"
   end
 
   test "response body with post to non-existing resource" do
-    conn = conn(:post, "/", "test=test")
-    |> put_req_header("content-type", "mixed/multipart")
-    |> call_resource(ProcessCreateResource, %{exists: false, body: true})
-    |> test_status(200)
+    conn =
+      conn(:post, "/", "test=test")
+      |> put_req_header("content-type", "mixed/multipart")
+      |> call_resource(ProcessCreateResource, %{exists: false, body: true})
+      |> test_status(200)
 
     assert conn.resp_body == "POST from multipart"
   end
@@ -970,9 +974,10 @@ defmodule PlugRest.ResourceTest do
   ### delete
 
   test "response body with delete" do
-    conn = conn(:delete, "/resp_body")
-    |> call_resource(ProcessCreateResource, %{body: true})
-    |> test_status(200)
+    conn =
+      conn(:delete, "/resp_body")
+      |> call_resource(ProcessCreateResource, %{body: true})
+      |> test_status(200)
 
     assert conn.resp_body == "DELETE resource"
   end
@@ -1017,25 +1022,28 @@ defmodule PlugRest.ResourceTest do
   ### stop
 
   test "stop a callback with no set response" do
-    conn = conn(:get, "/")
-    |> call_resource(StopResource)
-    |> test_status(204)
+    conn =
+      conn(:get, "/")
+      |> call_resource(StopResource)
+      |> test_status(204)
 
     assert conn.resp_body == ""
   end
 
   test "stop a callback with a response" do
-    conn = conn(:get, "/")
-    |> call_resource(StopResource, :resp)
-    |> test_status(200)
+    conn =
+      conn(:get, "/")
+      |> call_resource(StopResource, :resp)
+      |> test_status(200)
 
     assert conn.resp_body == "Resp"
   end
 
   test "stop a callback with a send response" do
-    conn = conn(:get, "/")
-    |> call_resource(StopResource, :send)
-    |> test_status(200)
+    conn =
+      conn(:get, "/")
+      |> call_resource(StopResource, :send)
+      |> test_status(200)
 
     assert conn.resp_body == "Sent"
   end
@@ -1043,18 +1051,22 @@ defmodule PlugRest.ResourceTest do
   ## errors
 
   test "callbacks can /raise errors" do
-    exception = assert_raise RuntimeError, fn ->
-      conn(:get, "/") |> call_resource(ErrorResource)
-     end
+    exception =
+      assert_raise RuntimeError, fn ->
+        conn(:get, "/") |> call_resource(ErrorResource)
+      end
+
     assert Plug.Exception.status(exception) == 500
   end
 
   test "resource module that does not exist" do
     message = ~r/module DoesNotExistModule is not available/
+
     exception =
       assert_raise UndefinedFunctionError, message, fn ->
         conn(:get, "/") |> call_resource(DoesNotExistModule)
       end
+
     assert Plug.Exception.status(exception) == 500
   end
 
@@ -1076,9 +1088,10 @@ defmodule PlugRest.ResourceTest do
 
     assert PlugRest.Resource.get_media_type(conn) == nil
 
-    conn = conn(:get, "/")
-    |> put_req_header("accept", "application/json")
-    |> call_resource(JsonResource)
+    conn =
+      conn(:get, "/")
+      |> put_req_header("accept", "application/json")
+      |> call_resource(JsonResource)
 
     assert PlugRest.Resource.get_media_type(conn) == {"application", "json", %{}}
   end
@@ -1105,8 +1118,10 @@ defmodule PlugRest.ResourceTest do
 
   test "REST body" do
     resp_body = "Body"
-    conn = conn(:get, "/test")
-    |> PlugRest.Resource.put_rest_body(resp_body)
+
+    conn =
+      conn(:get, "/test")
+      |> PlugRest.Resource.put_rest_body(resp_body)
 
     assert PlugRest.Resource.get_rest_body(conn) == resp_body
   end
@@ -1119,8 +1134,10 @@ defmodule PlugRest.ResourceTest do
 
   test "media type" do
     media_type = {"text", "html", %{}}
-    conn = conn(:get, "/test")
-    |> PlugRest.Resource.put_media_type(media_type)
+
+    conn =
+      conn(:get, "/test")
+      |> PlugRest.Resource.put_media_type(media_type)
 
     assert PlugRest.Resource.get_media_type(conn) == media_type
   end

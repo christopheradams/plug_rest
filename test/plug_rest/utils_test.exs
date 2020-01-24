@@ -21,5 +21,4 @@ defmodule PlugRest.UtilsTest do
 
     assert PlugRest.Utils.print_media_type({type, subtype, params}) == media_type
   end
-
 end

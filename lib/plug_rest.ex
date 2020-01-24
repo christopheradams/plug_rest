@@ -14,5 +14,4 @@ defmodule PlugRest do
     * [Plug](https://hexdocs.pm/plug) - a specification and conveniences
       for composable modules in between web applications
   """
-
 end

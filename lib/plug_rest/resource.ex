@@ -171,7 +171,7 @@ defmodule PlugRest.Resource do
         PlugRest.Resource.upgrade(conn, __MODULE__, options)
       end
 
-      defoverridable [init: 1, call: 2]
+      defoverridable init: 1, call: 2
     end
   end
 
@@ -179,7 +179,7 @@ defmodule PlugRest.Resource do
   @type resource :: atom
 
   @typedoc "A `%Plug.Conn{}` struct representing the connection"
-  @type conn :: Plug.Conn.t
+  @type conn :: Plug.Conn.t()
 
   @typedoc "The state of the resource"
   @type state :: any
@@ -190,7 +190,7 @@ defmodule PlugRest.Resource do
   @typedoc "A stop callback value"
   @type stop :: {:stop, conn, state}
 
-  @typep rest_state :: PlugRest.State.t
+  @typep rest_state :: PlugRest.State.t()
 
   @typedoc "The callback accepting a representation of the resource for a content-type"
   @type accept_resource :: atom
@@ -225,7 +225,7 @@ defmodule PlugRest.Resource do
   @typedoc "A URI"
   @type uri :: binary
 
-  @typep content_handler :: PlugRest.State.content_handler
+  @typep content_handler :: PlugRest.State.content_handler()
 
   @typedoc """
   An entity tag
@@ -243,9 +243,9 @@ defmodule PlugRest.Resource do
   @type etag :: binary | {:weak | :strong, binary}
 
   @typep etag_tuple :: {:weak | :strong, binary}
-  @typep etags_list :: PlugRest.Conn.etags_list
-  @typep priority_type :: PlugRest.Conn.priority_type
-  @typep quality_type :: PlugRest.Conn.quality_type
+  @typep etags_list :: PlugRest.Conn.etags_list()
+  @typep priority_type :: PlugRest.Conn.priority_type()
+  @typep quality_type :: PlugRest.Conn.quality_type()
 
   @typep status_code :: 200..503
 
@@ -898,8 +898,12 @@ defmodule PlugRest.Resource do
     method = conn.method
     known_methods = Application.get_env(:plug_rest, :known_methods)
 
-    state = %PlugRest.State{method: method, known_methods: known_methods,
-                            handler: resource, handler_state: resource_state}
+    state = %PlugRest.State{
+      method: method,
+      known_methods: known_methods,
+      handler: resource,
+      handler_state: resource_state
+    }
 
     expect(conn, state, :init, :ok, &service_available/2, 500)
   end
@@ -917,20 +921,27 @@ defmodule PlugRest.Resource do
           true -> next(conn, state, &uri_too_long/2)
           false -> next(conn, state, 501)
         end
-      :no_call when var_method === "HEAD" or var_method === "GET"
-      or var_method === "POST" or var_method === "PUT"
-      or var_method === "PATCH" or var_method === "DELETE"
-      or var_method === "OPTIONS" ->
+
+      :no_call
+      when var_method === "HEAD" or var_method === "GET" or
+             var_method === "POST" or var_method === "PUT" or
+             var_method === "PATCH" or var_method === "DELETE" or
+             var_method === "OPTIONS" ->
         next(conn, state, &uri_too_long/2)
+
       :no_call ->
         next(conn, state, 501)
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {list, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, known_methods: list}
+
         case Enum.member?(list, var_method) do
           true ->
             next(conn2, state2, &uri_too_long/2)
+
           false ->
             next(conn2, state2, 501)
         end
@@ -947,19 +958,26 @@ defmodule PlugRest.Resource do
     case call(conn, state, :allowed_methods) do
       :no_call when var_method === "HEAD" or var_method === "GET" ->
         next(conn, state, &malformed_request/2)
+
       :no_call when var_method === "OPTIONS" ->
         next(conn, %{state | allowed_methods: ["HEAD", "GET", "OPTIONS"]}, &malformed_request/2)
+
       :no_call ->
         method_not_allowed(conn, state, ["HEAD", "GET", "OPTIONS"])
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {list, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state}
+
         case Enum.member?(list, var_method) do
           true when var_method === "OPTIONS" ->
             next(conn2, %{state2 | allowed_methods: list}, &malformed_request/2)
+
           true ->
             next(conn2, state2, &malformed_request/2)
+
           false ->
             method_not_allowed(conn2, state2, list)
         end
@@ -986,10 +1004,13 @@ defmodule PlugRest.Resource do
     case call(conn, state, :is_authorized) do
       :no_call ->
         forbidden(conn, state)
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {true, conn2, handler_state} ->
         forbidden(conn2, %{state | handler_state: handler_state})
+
       {{false, auth_head}, conn2, handler_state} ->
         conn2
         |> put_resp_header("www-authenticate", auth_head)
@@ -1017,11 +1038,14 @@ defmodule PlugRest.Resource do
     case call(conn, state, :options) do
       :no_call when methods === [] ->
         conn |> put_resp_header("allow", "") |> respond(state, 200)
+
       :no_call ->
         <<", ", allow::binary>> = for(m <- methods, into: <<>>, do: <<", ", m::binary>>)
         conn |> put_resp_header("allow", allow) |> respond(state, 200)
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {:ok, conn2, handler_state} ->
         respond(conn2, %{state | handler_state: handler_state}, 200)
     end
@@ -1036,31 +1060,41 @@ defmodule PlugRest.Resource do
     case call(conn, state, :content_types_provided) do
       :no_call ->
         state2 = %{state | content_types_p: [@default_content_handler]}
+
         case parse_media_range_header(conn, "accept") do
           {:ok, []} ->
             conn
             |> put_resp_content_type(print_media_type(@default_media_type))
             |> languages_provided(%{state2 | content_type_a: @default_content_handler})
+
           {:ok, accept} ->
             choose_media_type(conn, state2, prioritize_accept(accept))
+
           :error ->
             respond(conn, state2, 400)
         end
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {[], conn2, handler_state} ->
         not_acceptable(conn2, %{state | handler_state: handler_state})
+
       {c_tp, conn2, handler_state} ->
         c_tp2 = for(p <- c_tp, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state, content_types_p: c_tp2}
+
         case parse_media_range_header(conn2, "accept") do
           {:ok, []} ->
             {p_mt, _fun} = head_ctp = hd(c_tp2)
+
             conn2
             |> put_resp_content_type(print_media_type(p_mt))
             |> languages_provided(%{state2 | content_type_a: head_ctp})
+
           {:ok, accept} ->
             choose_media_type(conn2, state2, prioritize_accept(accept))
+
           :error ->
             respond(conn2, state2, 400)
         end
@@ -1081,9 +1115,9 @@ defmodule PlugRest.Resource do
   defp prioritize_accept(accept) do
     accept
     |> Enum.sort(fn
-      {media_type_a, quality, _accept_params_a},
-      {media_type_b, quality, _accept_params_b} ->
+      {media_type_a, quality, _accept_params_a}, {media_type_b, quality, _accept_params_b} ->
         prioritize_mediatype(media_type_a, media_type_b)
+
       {_media_type_a, quality_a, _accept_params_a},
       {_media_type_b, quality_b, _accept_params_b} ->
         quality_a > quality_b
@@ -1097,13 +1131,17 @@ defmodule PlugRest.Resource do
         case sub_type_b do
           ^sub_type_a ->
             length(params_a) > length(params_b)
+
           "*" ->
             true
+
           _any ->
             false
         end
+
       "*" ->
         true
+
       _any ->
         false
     end
@@ -1123,14 +1161,24 @@ defmodule PlugRest.Resource do
     choose_media_type(conn, state, accept)
   end
 
-  defp match_media_type(conn, state, accept, c_tp,
-  media_type = {{"*", "*", _params_a}, _q_a, _a_pa}) do
+  defp match_media_type(
+         conn,
+         state,
+         accept,
+         c_tp,
+         media_type = {{"*", "*", _params_a}, _q_a, _a_pa}
+       ) do
     match_media_type_params(conn, state, accept, c_tp, media_type)
   end
 
-  defp match_media_type(conn, state, accept, c_tp = [{{type, sub_type_p, _p_p}, _fun} | _tail],
-  media_type = {{type, sub_type_a, _p_a}, _q_a, _a_pa})
-  when sub_type_p === sub_type_a or sub_type_a === "*" do
+  defp match_media_type(
+         conn,
+         state,
+         accept,
+         c_tp = [{{type, sub_type_p, _p_p}, _fun} | _tail],
+         media_type = {{type, sub_type_a, _p_a}, _q_a, _a_pa}
+       )
+       when sub_type_p === sub_type_a or sub_type_a === "*" do
     match_media_type_params(conn, state, accept, c_tp, media_type)
   end
 
@@ -1138,26 +1186,37 @@ defmodule PlugRest.Resource do
     match_media_type(conn, state, accept, tail, media_type)
   end
 
-  @spec match_media_type_params(conn, state, [priority_type], [content_handler], priority_type) :: conn
-  defp match_media_type_params(conn, state, _accept,
-  [provided = {{t_p, s_tp, :*}, _fun} | _tail],
-  {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
+  @spec match_media_type_params(conn, state, [priority_type], [content_handler], priority_type) ::
+          conn
+  defp match_media_type_params(
+         conn,
+         state,
+         _accept,
+         [provided = {{t_p, s_tp, :*}, _fun} | _tail],
+         {{_t_a, _s_ta, params_a}, _q_a, _a_pa}
+       ) do
     p_mt = {t_p, s_tp, params_a}
+
     conn
     |> put_media_type(p_mt)
     |> put_resp_content_type(print_media_type(p_mt))
     |> languages_provided(%{state | content_type_a: provided})
   end
 
-  defp match_media_type_params(conn, state, accept,
-  [provided = {p_mt = {_t_p, _s_tp, params_p}, _fun} | tail],
-  media_type = {{_t_a, _s_ta, params_a}, _q_a, _a_pa}) do
+  defp match_media_type_params(
+         conn,
+         state,
+         accept,
+         [provided = {p_mt = {_t_p, _s_tp, params_p}, _fun} | tail],
+         media_type = {{_t_a, _s_ta, params_a}, _q_a, _a_pa}
+       ) do
     case params_p === params_a do
       true ->
         conn
         |> put_media_type(p_mt)
         |> put_resp_content_type(print_media_type(p_mt))
         |> languages_provided(%{state | content_type_a: provided})
+
       false ->
         match_media_type(conn, state, accept, tail, media_type)
     end
@@ -1168,15 +1227,20 @@ defmodule PlugRest.Resource do
     case call(conn, state, :languages_provided) do
       :no_call ->
         charsets_provided(conn, state)
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {[], conn2, handler_state} ->
         not_acceptable(conn2, %{state | handler_state: handler_state})
+
       {l_p, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, languages_p: l_p}
+
         case parse_quality_header(conn2, "accept-language") do
           [] ->
             set_language(conn2, %{state2 | language_a: hd(l_p)})
+
           accept_language ->
             accept_language2 = prioritize_languages(accept_language)
             choose_language(conn2, state2, accept_language2)
@@ -1214,9 +1278,11 @@ defmodule PlugRest.Resource do
 
   defp match_language(conn, state, accept, [provided | tail], language = {tag, _quality}) do
     var_length = byte_size(tag)
+
     case provided do
       <<^tag::size(var_length)-binary, ?-, _any::bits>> ->
         set_language(conn, %{state | language_a: provided})
+
       _any ->
         match_language(conn, state, accept, tail, language)
     end
@@ -1234,15 +1300,20 @@ defmodule PlugRest.Resource do
     case call(conn, state, :charsets_provided) do
       :no_call ->
         set_content_type(conn, state)
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {[], conn2, handler_state} ->
         not_acceptable(conn2, %{state | handler_state: handler_state})
+
       {c_p, conn2, handler_state} ->
         state2 = %{state | handler_state: handler_state, charsets_p: c_p}
+
         case parse_quality_header(conn2, "accept-charset") do
           [] ->
             set_content_type(conn2, %{state2 | charset_a: hd(c_p)})
+
           accept_charset ->
             accept_charset2 = prioritize_charsets(accept_charset)
             choose_charset(conn2, state2, accept_charset2)
@@ -1252,15 +1323,23 @@ defmodule PlugRest.Resource do
 
   @spec prioritize_charsets([quality_type]) :: [quality_type]
   defp prioritize_charsets(accept_charsets) do
-    accept_charsets2 = :lists.sort(fn {_charset_a, quality_a}, {_charset_b, quality_b} ->
-      quality_a > quality_b end, accept_charsets)
+    accept_charsets2 =
+      :lists.sort(
+        fn {_charset_a, quality_a}, {_charset_b, quality_b} ->
+          quality_a > quality_b
+        end,
+        accept_charsets
+      )
+
     case :lists.keymember("*", 1, accept_charsets2) do
       true ->
         accept_charsets2
+
       false ->
         case :lists.keymember("iso-8859-1", 1, accept_charsets2) do
           true ->
             accept_charsets2
+
           false ->
             [{"iso-8859-1", 1000} | accept_charsets2]
         end
@@ -1290,17 +1369,22 @@ defmodule PlugRest.Resource do
   end
 
   @spec set_content_type(conn, rest_state) :: conn
-  defp set_content_type(conn, %{content_type_a: {{type, sub_type, params}, _fun},
-                                charset_a: charset} = state) do
+  defp set_content_type(
+         conn,
+         %{content_type_a: {{type, sub_type, params}, _fun}, charset_a: charset} = state
+       ) do
     params_bin = set_content_type_build_params(params)
     content_type = print_media_type({type, sub_type, params_bin})
+
     conn2 =
       case charset do
         nil ->
           put_resp_content_type(conn, content_type)
+
         ^charset ->
           put_resp_content_type(conn, content_type, charset)
       end
+
     conn2
     |> encodings_provided(state)
   end
@@ -1311,7 +1395,7 @@ defmodule PlugRest.Resource do
   end
 
   defp set_content_type_build_params(params) when is_map(params) do
-    Enum.map(params, fn ({k, v}) -> "#{k}=#{v}" end) |> Enum.join(";")
+    Enum.map(params, fn {k, v} -> "#{k}=#{v}" end) |> Enum.join(";")
   end
 
   @spec encodings_provided(conn, rest_state) :: conn
@@ -1330,38 +1414,48 @@ defmodule PlugRest.Resource do
       case c_tp do
         [] ->
           []
+
         [_] ->
           []
+
         [_ | _] ->
           ["accept"]
       end
+
     variances2 =
       case l_p do
         [] ->
           var_variances
+
         [_] ->
           var_variances
+
         [_ | _] ->
           ["accept-language" | var_variances]
       end
+
     variances3 =
       case c_p do
         [] ->
           variances2
+
         [_] ->
           variances2
+
         [_ | _] ->
           ["accept-charset" | variances2]
       end
+
     case variances(conn, state, variances3) do
       {variances4, conn2, state2} ->
         case for(v <- variances4, into: [], do: [", ", v]) do
-              [] ->
-                resource_exists(conn2, state2)
-              [[", ", h] | variances5] ->
-                conn3 = put_resp_header(conn2, "vary", List.to_string([h | variances5]))
-                resource_exists(conn3, state2)
-          end
+          [] ->
+            resource_exists(conn2, state2)
+
+          [[", ", h] | variances5] ->
+            conn3 = put_resp_header(conn2, "vary", List.to_string([h | variances5]))
+            resource_exists(conn3, state2)
+        end
     end
   end
 
@@ -1369,6 +1463,7 @@ defmodule PlugRest.Resource do
     case unsafe_call(conn, state, :variances) do
       :no_call ->
         {var_variances, conn, state}
+
       {handler_variances, conn2, handler_state} ->
         {var_variances ++ handler_variances, conn2, %{state | handler_state: handler_state}}
     end
@@ -1382,11 +1477,14 @@ defmodule PlugRest.Resource do
   @spec if_match_exists(conn, rest_state) :: conn
   defp if_match_exists(conn, state) do
     state2 = %{state | exists: true}
+
     case parse_entity_tag_header(conn, "if-match") do
       [] ->
         if_unmodified_since_exists(conn, state2)
+
       :* ->
         if_unmodified_since_exists(conn, state2)
+
       etags_list ->
         if_match(conn, state2, etags_list)
     end
@@ -1397,10 +1495,12 @@ defmodule PlugRest.Resource do
     case generate_etag(conn, state) do
       {{:weak, _}, conn2, state2} ->
         precondition_failed(conn2, state2)
+
       {etag, conn2, state2} ->
         case :lists.member(etag, etags_list) do
           true ->
             if_none_match_exists(conn2, state2)
+
           false ->
             precondition_failed(conn2, state2)
         end
@@ -1412,6 +1512,7 @@ defmodule PlugRest.Resource do
     case get_req_header(conn, "if-match") do
       [] ->
         is_put_to_missing_resource(conn, state)
+
       _ ->
         precondition_failed(conn, state)
     end
@@ -1422,18 +1523,20 @@ defmodule PlugRest.Resource do
     case parse_date_header(conn, "if-unmodified-since") do
       [] ->
         if_none_match_exists(conn, state)
+
       if_unmodified_since ->
         if_unmodified_since(conn, state, if_unmodified_since)
     end
   end
 
-  @spec if_unmodified_since(conn, state, :calendar.time) :: conn
+  @spec if_unmodified_since(conn, state, :calendar.time()) :: conn
   defp if_unmodified_since(conn, state, if_unmodified_since) do
     case last_modified(conn, state) do
       {last_modified, conn2, state2} ->
         case last_modified > if_unmodified_since do
           true ->
             precondition_failed(conn2, state2)
+
           false ->
             if_none_match_exists(conn2, state2)
         end
@@ -1445,8 +1548,10 @@ defmodule PlugRest.Resource do
     case parse_entity_tag_header(conn, "if-none-match") do
       [] ->
         if_modified_since_exists(conn, state)
+
       :* ->
         precondition_is_head_get(conn, state)
+
       etags_list ->
         if_none_match(conn, state, etags_list)
     end
@@ -1459,10 +1564,12 @@ defmodule PlugRest.Resource do
         case etag do
           nil ->
             precondition_failed(conn2, state2)
+
           ^etag ->
             case is_weak_match(etag, etags_list) do
               true ->
                 precondition_is_head_get(conn2, state2)
+
               false ->
                 method(conn2, state2)
             end
@@ -1485,7 +1592,7 @@ defmodule PlugRest.Resource do
 
   @spec precondition_is_head_get(conn, rest_state) :: conn
   defp precondition_is_head_get(conn, %{method: var_method} = state)
-  when var_method === "HEAD" or var_method === "GET" do
+       when var_method === "HEAD" or var_method === "GET" do
     not_modified(conn, state)
   end
 
@@ -1498,21 +1605,24 @@ defmodule PlugRest.Resource do
     case parse_date_header(conn, "if-modified-since") do
       [] ->
         method(conn, state)
+
       if_modified_since ->
         if_modified_since_now(conn, state, if_modified_since)
     end
   end
 
-  @spec if_modified_since_now(conn, state, :calendar.time) :: conn
+  @spec if_modified_since_now(conn, state, :calendar.time()) :: conn
   defp if_modified_since_now(conn, state, if_modified_since) do
     universaltime =
       case Application.get_env(:plug_rest, :current_time_fun) do
-        nil -> :erlang.universaltime
+        nil -> :erlang.universaltime()
         fun -> fun.()
       end
+
     case if_modified_since > universaltime do
       true ->
         method(conn, state)
+
       false ->
         if_modified_since(conn, state, if_modified_since)
     end
@@ -1522,10 +1632,12 @@ defmodule PlugRest.Resource do
     case last_modified(conn, state) do
       {nil, conn2, state2} ->
         method(conn2, state2)
+
       {last_modified, conn2, state2} ->
         case last_modified > if_modified_since do
           true ->
             method(conn2, state2)
+
           false ->
             not_modified(conn2, state2)
         end
@@ -1535,6 +1647,7 @@ defmodule PlugRest.Resource do
   @spec not_modified(conn, rest_state) :: conn
   defp not_modified(conn, state) do
     conn2 = delete_resp_header(conn, "content-type")
+
     case set_resp_etag(conn2, state) do
       {conn3, state2} ->
         case set_resp_expires(conn3, state2) do
@@ -1564,10 +1677,13 @@ defmodule PlugRest.Resource do
       {{true, location}, conn2, handler_state} ->
         conn3 = put_resp_header(conn2, "location", location)
         respond(conn3, %{state | handler_state: handler_state}, 301)
+
       {false, conn2, handler_state} ->
         on_false.(conn2, %{state | handler_state: handler_state})
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       :no_call ->
         on_false.(conn, state)
     end
@@ -1575,9 +1691,14 @@ defmodule PlugRest.Resource do
 
   @spec previously_existed(conn, rest_state) :: conn
   defp previously_existed(conn, state) do
-    expect(conn, state, :previously_existed, false,
+    expect(
+      conn,
+      state,
+      :previously_existed,
+      false,
       fn r, s -> is_post_to_missing_resource(r, s, 404) end,
-      fn r, s -> moved_permanently(r, s, &moved_temporarily/2) end)
+      fn r, s -> moved_permanently(r, s, &moved_temporarily/2) end
+    )
   end
 
   @spec moved_temporarily(conn, rest_state) :: conn
@@ -1586,10 +1707,13 @@ defmodule PlugRest.Resource do
       {{true, location}, conn2, handler_state} ->
         conn3 = put_resp_header(conn2, "location", location)
         respond(conn3, %{state | handler_state: handler_state}, 307)
+
       {false, conn2, handler_state} ->
         is_post_to_missing_resource(conn2, %{state | handler_state: handler_state}, 410)
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       :no_call ->
         is_post_to_missing_resource(conn, state, 410)
     end
@@ -1619,12 +1743,12 @@ defmodule PlugRest.Resource do
   end
 
   defp method(conn, %{method: var_method} = state)
-  when var_method === "POST" or var_method === "PATCH" do
+       when var_method === "POST" or var_method === "PATCH" do
     accept_resource(conn, state)
   end
 
   defp method(conn, %{method: var_method} = state)
-  when var_method === "GET" or var_method === "HEAD" do
+       when var_method === "GET" or var_method === "HEAD" do
     set_resp_body_etag(conn, state)
   end
 
@@ -1652,14 +1776,18 @@ defmodule PlugRest.Resource do
     case call(conn, state, :content_types_accepted) do
       :no_call ->
         respond(conn, state, 415)
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {c_ta, conn2, handler_state} ->
         c_ta2 = for(p <- c_ta, into: [], do: normalize_content_types(p))
         state2 = %{state | handler_state: handler_state}
+
         case parse_media_type_header(conn2, "content-type") do
           :error ->
             respond(conn2, state2, 415)
+
           content_type ->
             choose_content_type(conn2, state2, content_type, c_ta2)
         end
@@ -1672,13 +1800,14 @@ defmodule PlugRest.Resource do
   end
 
   defp choose_content_type(conn, state, content_type, [{accepted, fun} | _tail])
-  when accepted === :* or accepted === content_type do
+       when accepted === :* or accepted === content_type do
     process_content_type(conn, state, fun)
   end
 
-  defp choose_content_type(conn, state, {type, sub_type, param},
-  [{{type, sub_type, accepted_param}, fun} | _tail])
-  when accepted_param === :* or accepted_param === param do
+  defp choose_content_type(conn, state, {type, sub_type, param}, [
+         {{type, sub_type, accepted_param}, fun} | _tail
+       ])
+       when accepted_param === :* or accepted_param === param do
     process_content_type(conn, state, fun)
   end
 
@@ -1691,26 +1820,31 @@ defmodule PlugRest.Resource do
     case call(conn, state, fun) do
       {:stop, conn2, handler_state2} ->
         terminate(conn2, %{state | handler_state: handler_state2})
+
       {true, conn2, handler_state2} when exists ->
         state2 = %{state | handler_state: handler_state2}
         next(conn2, state2, &has_resp_body/2)
+
       {true, conn2, handler_state2} ->
         state2 = %{state | handler_state: handler_state2}
         next(conn2, state2, &maybe_created/2)
+
       {false, conn2, handler_state2} ->
         state2 = %{state | handler_state: handler_state2}
         respond(conn2, state2, 400)
+
       {{true, res_url}, conn2, handler_state2} when var_method === "POST" ->
         state2 = %{state | handler_state: handler_state2}
         conn3 = put_resp_header(conn2, "location", res_url)
+
         if exists do
           respond(conn3, state2, 303)
         else
           respond(conn3, state2, 201)
         end
+
       :no_call ->
-        raise UndefinedFunctionError, module: state.handler, function: fun,
-          arity: 2
+        raise UndefinedFunctionError, module: state.handler, function: fun, arity: 2
     end
   end
 
@@ -1723,6 +1857,7 @@ defmodule PlugRest.Resource do
     case get_resp_header(conn, "location") do
       [] ->
         has_resp_body(conn, state)
+
       _ ->
         respond(conn, state, 201)
     end
@@ -1733,6 +1868,7 @@ defmodule PlugRest.Resource do
     case get_rest_body(conn) do
       nil ->
         respond(conn, state, 204)
+
       _ ->
         multiple_choices(conn, state)
     end
@@ -1753,6 +1889,7 @@ defmodule PlugRest.Resource do
         case last_modified do
           ^last_modified when is_nil(last_modified) ->
             set_resp_body_expires(conn2, state2)
+
           ^last_modified ->
             last_modified_bin = :cowboy_clock.rfc1123(last_modified)
             conn3 = put_resp_header(conn2, "last-modified", last_modified_bin)
@@ -1774,12 +1911,13 @@ defmodule PlugRest.Resource do
     case call(conn, state, callback) do
       {:stop, conn2, handler_state2} ->
         terminate(conn2, %{state | handler_state: handler_state2})
+
       {body, conn2, handler_state2} ->
         state2 = %{state | handler_state: handler_state2, resp_body: body}
         multiple_choices(conn2, state2)
+
       :no_call ->
-        raise UndefinedFunctionError, module: state.handler, function: callback,
-          arity: 2
+        raise UndefinedFunctionError, module: state.handler, function: callback, arity: 2
     end
   end
 
@@ -1791,9 +1929,11 @@ defmodule PlugRest.Resource do
   @spec set_resp_etag(conn, rest_state) :: {conn, rest_state}
   defp set_resp_etag(conn, state) do
     {etag, conn2, state2} = generate_etag(conn, state)
+
     case etag do
       nil ->
         {conn2, state2}
+
       ^etag ->
         conn3 = put_resp_header(conn2, "etag", List.to_string(encode_etag(etag)))
         {conn3, state2}
@@ -1812,12 +1952,15 @@ defmodule PlugRest.Resource do
   @spec set_resp_expires(conn, rest_state) :: {conn, rest_state}
   defp set_resp_expires(conn, state) do
     {var_expires, conn2, state2} = expires(conn, state)
+
     case var_expires do
       ^var_expires when is_nil(var_expires) ->
         {conn2, state2}
+
       ^var_expires when is_binary(var_expires) ->
         conn3 = put_resp_header(conn2, "expires", var_expires)
         {conn3, state2}
+
       ^var_expires ->
         expires_bin = :cowboy_clock.rfc1123(var_expires)
         conn3 = put_resp_header(conn2, "expires", expires_bin)
@@ -1834,15 +1977,18 @@ defmodule PlugRest.Resource do
     case unsafe_call(conn, state, :generate_etag) do
       :no_call ->
         {nil, conn, %{state | etag: :no_call}}
+
       {etag, conn2, handler_state} when is_binary(etag) ->
         case :cowboy_http.entity_tag_match(etag) do
           {:error, :badarg} ->
             raise PlugRest.RuntimeError,
-              message: "Invalid ETag #{inspect etag} (#{inspect state.handler})"
+              message: "Invalid ETag #{inspect(etag)} (#{inspect(state.handler)})"
+
           tag_match ->
             {etag2} = List.to_tuple(tag_match)
             {etag2, conn2, %{state | handler_state: handler_state, etag: etag2}}
         end
+
       {etag, conn2, handler_state} ->
         {etag, conn2, %{state | handler_state: handler_state, etag: etag}}
     end
@@ -1861,6 +2007,7 @@ defmodule PlugRest.Resource do
     case unsafe_call(conn, state, :last_modified) do
       :no_call ->
         {nil, conn, %{state | last_modified: :no_call}}
+
       {last_modified, conn2, handler_state} ->
         {last_modified, conn2,
          %{state | handler_state: handler_state, last_modified: last_modified}}
@@ -1880,6 +2027,7 @@ defmodule PlugRest.Resource do
     case unsafe_call(conn, state, :expires) do
       :no_call ->
         {nil, conn, %{state | expires: :no_call}}
+
       {var_expires, conn2, handler_state} ->
         {var_expires, conn2, %{state | handler_state: handler_state, expires: var_expires}}
     end
@@ -1895,10 +2043,13 @@ defmodule PlugRest.Resource do
     case call(conn, state, callback) do
       :no_call ->
         next(conn, state, on_true)
+
       {:stop, conn2, handler_state} ->
         terminate(conn2, %{state | handler_state: handler_state})
+
       {^expected, conn2, handler_state} ->
         next(conn2, %{state | handler_state: handler_state}, on_true)
+
       {_unexpected, conn2, handler_state} ->
         next(conn2, %{state | handler_state: handler_state}, on_false)
     end
@@ -1908,6 +2059,7 @@ defmodule PlugRest.Resource do
     case function_exported?(handler, callback, 2) do
       true ->
         apply(handler, callback, [conn, handler_state])
+
       false ->
         :no_call
     end
@@ -1917,6 +2069,7 @@ defmodule PlugRest.Resource do
     case function_exported?(handler, callback, 2) do
       true ->
         apply(handler, callback, [conn, handler_state])
+
       false ->
         :no_call
     end

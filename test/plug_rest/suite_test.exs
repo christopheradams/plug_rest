@@ -147,14 +147,19 @@ defmodule PlugRest.SuiteTest do
 
     def get_text_plain(conn, state) do
       media_type = PlugRest.Resource.get_media_type(conn)
-      body = case media_type do
-               nil ->
-                 "'*'"
-               {_, _, %{"level" => level}} ->
-                 "level=#{level}"
-               {_, _, %{}} ->
-                 "%{}"
-             end
+
+      body =
+        case media_type do
+          nil ->
+            "'*'"
+
+          {_, _, %{"level" => level}} ->
+            "level=#{level}"
+
+          {_, _, %{}} ->
+            "%{}"
+        end
+
       {body, conn, state}
     end
 
@@ -190,17 +195,20 @@ defmodule PlugRest.SuiteTest do
       case conn.method do
         "PATCH" ->
           {[{{"text", "plain", %{}}, :patch_text_plain}], conn, state}
+
         _ ->
           {[], conn, state}
       end
     end
 
     def patch_text_plain(conn, state) do
-      case read_body(conn)  do
+      case read_body(conn) do
         {:ok, "stop", conn0} ->
           {:stop, Plug.Conn.put_status(conn0, 400), state}
+
         {:ok, "false", conn0} ->
           {false, conn0, state}
+
         {:ok, _body, conn0} ->
           {true, conn0, state}
       end
@@ -256,17 +264,23 @@ defmodule PlugRest.SuiteTest do
 
     def generate_etag(conn, state) do
       %{"type" => type} = fetch_query_params(conn).query_params
+
       case(type) do
         "tuple-weak" ->
           {{:weak, "etag-header-value"}, conn, state}
+
         "tuple-strong" ->
           {{:strong, "etag-header-value"}, conn, state}
+
         "binary-weak-quoted" ->
           {"W/\"etag-header-value\"", conn, state}
+
         "binary-strong-quoted" ->
           {"\"etag-header-value\"", conn, state}
+
         "binary-strong-unquoted" ->
           {"etag-header-value", conn, state}
+
         "binary-weak-unquoted" ->
           {"W/etag-header-value", conn, state}
       end
@@ -437,6 +451,7 @@ defmodule PlugRest.SuiteTest do
       assert_raise UndefinedFunctionError, ~r/get_text_plain\/2/, fn ->
         build_conn(:get, "/missing_get_callbacks")
       end
+
     assert Plug.Exception.status(exception) == 500
   end
 
@@ -447,6 +462,7 @@ defmodule PlugRest.SuiteTest do
         |> put_req_header("content-type", "application/json")
         |> RestRouter.call([])
       end
+
     assert Plug.Exception.status(exception) == 500
   end
 
@@ -518,12 +534,14 @@ defmodule PlugRest.SuiteTest do
       assert_raise PlugRest.RuntimeError, ~r/Invalid ETag/, fn ->
         build_conn(:get, "/resetags?type=binary-strong-unquoted")
       end
+
     assert Plug.Exception.status(exception) == 500
 
     exception =
       assert_raise PlugRest.RuntimeError, ~r/Invalid ETag/, fn ->
         build_conn(:get, "/resetags?type=binary-weak-unquoted")
       end
+
     assert Plug.Exception.status(exception) == 500
   end
 

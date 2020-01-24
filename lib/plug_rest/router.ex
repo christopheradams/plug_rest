@@ -66,7 +66,7 @@ defmodule PlugRest.Router do
   """
 
   @typedoc "A URL path"
-  @type path :: String.t
+  @type path :: String.t()
 
   @typedoc "A Plug Module"
   @type plug :: atom
@@ -86,17 +86,16 @@ defmodule PlugRest.Router do
     end
   end
 
-
   @doc false
   defmacro __before_compile__(_env) do
     quote do
       import Plug.Router, only: [match: 2]
+
       match _ do
         send_resp(var!(conn), 404, "")
       end
     end
   end
-
 
   ## Resource
 
@@ -130,19 +129,21 @@ defmodule PlugRest.Router do
 
       resource "/pages/:page", PageResource, [], host: "host1.example.com"
   """
-  @spec resource(path, plug, plug_opts, options) :: Macro.t
+  @spec resource(path, plug, plug_opts, options) :: Macro.t()
   defmacro resource(path, plug, plug_opts \\ [], options \\ []) do
     add_resource(path, plug, plug_opts, options)
   end
 
   ## Compiles the resource into a match macro from Plug.Router
-  @spec add_resource(path, plug, plug_opts, options) :: Macro.t
+  @spec add_resource(path, plug, plug_opts, options) :: Macro.t()
   defp add_resource(path, plug, plug_opts, options) do
-    options = options
+    options =
+      options
       |> Keyword.put(:to, plug)
       |> Keyword.put(:init_opts, plug_opts)
+
     quote do
-      match unquote(path), unquote(options)
+      match(unquote(path), unquote(options))
     end
   end
 end

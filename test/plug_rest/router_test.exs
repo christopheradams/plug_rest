@@ -118,79 +118,90 @@ defmodule PlugRest.RouterTest do
   end
 
   test "match can match known route" do
-    conn = build_conn(:get, "/match")
-    |> test_status(200)
+    conn =
+      build_conn(:get, "/match")
+      |> test_status(200)
 
     assert conn.resp_body == "Matches!"
   end
 
   test "match any can catch unknown route" do
-    conn = build_conn(:get, "/unknown")
-    |> test_status(404)
+    conn =
+      build_conn(:get, "/unknown")
+      |> test_status(404)
 
     assert conn.resp_body == ""
   end
 
   test "dynamic path populates connection params" do
-    conn = conn(:get, "/users/1234/comments/987")
-    |> RestRouter.call([])
+    conn =
+      conn(:get, "/users/1234/comments/987")
+      |> RestRouter.call([])
 
     test_status(conn, 200)
     assert conn.resp_body == "1234 : 987"
   end
 
   test "glob resource dispatch" do
-    conn = build_conn(:get, "/glob/value")
-    |> test_status(200)
+    conn =
+      build_conn(:get, "/glob/value")
+      |> test_status(200)
 
-    assert conn.resp_body == "Plug REST";
+    assert conn.resp_body == "Plug REST"
   end
 
   test "glob values resource dispatch" do
-    conn = build_conn(:get, "/glob_params/value")
-    |> test_status(200)
+    conn =
+      build_conn(:get, "/glob_params/value")
+      |> test_status(200)
 
-    assert conn.resp_body == "bar: value";
+    assert conn.resp_body == "bar: value"
 
-    conn = build_conn(:get, "/glob_params/item/extra")
-    |> test_status(200)
+    conn =
+      build_conn(:get, "/glob_params/item/extra")
+      |> test_status(200)
 
-    assert conn.resp_body == "bar: item, extra";
+    assert conn.resp_body == "bar: item, extra"
   end
 
   test "host option" do
-    conn1 = conn(:get, "/host")
-    |> Map.put(:host, "host1.example.com")
-    |> RestRouter.call([])
+    conn1 =
+      conn(:get, "/host")
+      |> Map.put(:host, "host1.example.com")
+      |> RestRouter.call([])
 
     assert conn1.resp_body == "Host 1"
 
-    conn2 = conn(:get, "/host")
-    |> Map.put(:host, "host2.example.com")
-    |> RestRouter.call([])
+    conn2 =
+      conn(:get, "/host")
+      |> Map.put(:host, "host2.example.com")
+      |> RestRouter.call([])
 
     assert conn2.resp_body == "Host 2"
   end
 
   test "private option" do
-    conn = conn(:get, "/private")
-    |> RestRouter.call([])
+    conn =
+      conn(:get, "/private")
+      |> RestRouter.call([])
 
     assert conn.resp_body == "private"
   end
 
   test "assigns option" do
-    conn = conn(:get, "/assigns")
-    |> RestRouter.call([])
+    conn =
+      conn(:get, "/assigns")
+      |> RestRouter.call([])
 
     assert conn.resp_body == "assigns"
   end
 
   test "forward" do
-    conn = build_conn(:get, "/other")
-    |> test_status(200)
+    conn =
+      build_conn(:get, "/other")
+      |> test_status(200)
 
-    assert conn.resp_body == "Other";
+    assert conn.resp_body == "Other"
   end
 
   ## Plugs test
@@ -217,9 +228,11 @@ defmodule PlugRest.RouterTest do
 
   test "plugs in router" do
     request_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    conn = conn(:get, "/request_id")
-    |> put_req_header("x-request-id", request_id)
-    |> PlugsRouter.call([])
+
+    conn =
+      conn(:get, "/request_id")
+      |> put_req_header("x-request-id", request_id)
+      |> PlugsRouter.call([])
 
     assert conn.state == :sent
     assert conn.status == 200
