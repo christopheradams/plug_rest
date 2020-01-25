@@ -12,7 +12,7 @@ defmodule PlugRest.Mixfile do
     [
       app: :plug_rest,
       version: @version,
-      elixir: "~> 1.3",
+      elixir: "~> 1.4",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       dialyzer: [plt_add_apps: [:mix, :eex]],
