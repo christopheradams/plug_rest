@@ -144,16 +144,43 @@ defmodule PlugRest.Conn do
       [{:strong, "xyzzy"}]
 
   """
-  @spec parse_entity_tag_header(conn, header) :: etags_list | :*
+  @spec parse_entity_tag_header(conn, header) :: etags_list | :* | {:error, :badarg}
   def parse_entity_tag_header(conn, header) do
     case get_req_header(conn, header) do
       [] -> []
+      ["*"] -> :*
       [etags] -> entity_tag_match(etags)
     end
   end
 
+  @bad_arg {:error, :badarg}
+
   @doc false
-  defdelegate entity_tag_match(etags), to: :cowboy_http
+  @spec entity_tag_match(String.t()) :: etags_list | {:error, :badarg}
+  def entity_tag_match("") do
+    @bad_arg
+  end
+
+  def entity_tag_match(etags) do
+    etags
+    |> list()
+    |> Enum.map(fn etag ->
+      case Regex.named_captures(~r/(?:(?<strength>W)\/)?"(?<tag>[\x21\x23-\x7e]*)"/, etag) do
+        nil ->
+          @bad_arg
+
+        %{"strength" => "", "tag" => tag} ->
+          {:strong, tag}
+
+        %{"strength" => "W", "tag" => tag} ->
+          {:weak, tag}
+      end
+    end)
+    |> Enum.reduce_while([], fn
+      @bad_arg, _acc -> {:halt, @bad_arg}
+      etag, acc -> {:cont, acc ++ [etag]}
+    end)
+  end
 
   @doc """
   Parses other accept headers into types that can be sorted by quality
