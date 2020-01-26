@@ -1979,7 +1979,7 @@ defmodule PlugRest.Resource do
         {nil, conn, %{state | etag: :no_call}}
 
       {etag, conn2, handler_state} when is_binary(etag) ->
-        case :cowboy_http.entity_tag_match(etag) do
+        case entity_tag_match(etag) do
           {:error, :badarg} ->
             raise PlugRest.RuntimeError,
               message: "Invalid ETag #{inspect(etag)} (#{inspect(state.handler)})"

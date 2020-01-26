@@ -148,9 +148,12 @@ defmodule PlugRest.Conn do
   def parse_entity_tag_header(conn, header) do
     case get_req_header(conn, header) do
       [] -> []
-      [etags] -> :cowboy_http.entity_tag_match(etags)
+      [etags] -> entity_tag_match(etags)
     end
   end
+
+  @doc false
+  defdelegate entity_tag_match(etags), to: :cowboy_http
 
   @doc """
   Parses other accept headers into types that can be sorted by quality
