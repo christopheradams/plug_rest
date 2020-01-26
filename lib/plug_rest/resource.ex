@@ -2114,7 +2114,16 @@ defmodule PlugRest.Resource do
 
   defp terminate(conn, %{resp_body: {:chunked, body}} = _state) do
     conn2 = conn |> send_chunked(conn.status)
-    Enum.into(body, conn2)
+
+    Enum.reduce_while(body, conn2, fn chunk, conn ->
+      case chunk(conn, chunk) do
+        {:ok, conn} ->
+          {:cont, conn}
+
+        {:error, :closed} ->
+          {:halt, conn}
+      end
+    end)
   end
 
   defp terminate(conn, %{resp_body: {:file, filename}} = _state) do
