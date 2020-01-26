@@ -255,4 +255,8 @@ defmodule PlugRest.Conn do
       {tag, quality}
     end)
   end
+
+  def generate_datetime(date_time) do
+    :cowboy_clock.rfc1123(date_time)
+  end
 end

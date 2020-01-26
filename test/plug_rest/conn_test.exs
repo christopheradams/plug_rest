@@ -206,4 +206,8 @@ defmodule PlugRest.ConnTest do
 
     assert parse_date_header(conn, "if-unmodified-since") == []
   end
+
+  test "generate datetime" do
+    assert generate_datetime({{2012, 9, 21}, {22, 36, 14}}) == "Fri, 21 Sep 2012 22:36:14 GMT"
+  end
 end
