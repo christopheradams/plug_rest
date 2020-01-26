@@ -436,4 +436,6 @@ PlugRest copyright &copy; 2016, [Christopher Adams](https://github.com/christoph
 
 cowboy_rest copyright &copy; 2011-2014, Loïc Hoguin <essen@ninenines.eu>
 
+Plug copyright &copy; 2013 Plataformatec.
+
 PlugRest source code is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).

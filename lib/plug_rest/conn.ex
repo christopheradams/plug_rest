@@ -256,7 +256,54 @@ defmodule PlugRest.Conn do
     end)
   end
 
+  @spec generate_datetime(:calendar.datetime()) :: binary()
   def generate_datetime(date_time) do
-    :cowboy_clock.rfc1123(date_time)
+    date_time |> rfc2822() |> IO.iodata_to_binary()
   end
+
+  # Copied from lib/plug/conn/cookies.ex
+  defp pad(number) when number in 0..9, do: <<?0, ?0 + number>>
+  defp pad(number), do: Integer.to_string(number)
+
+  defp rfc2822({{year, month, day} = date, {hour, minute, second}}) do
+    # Sat, 17 Apr 2010 14:00:00 GMT
+    [
+      weekday_name(:calendar.day_of_the_week(date)),
+      ?,,
+      ?\s,
+      pad(day),
+      ?\s,
+      month_name(month),
+      ?\s,
+      Integer.to_string(year),
+      ?\s,
+      pad(hour),
+      ?:,
+      pad(minute),
+      ?:,
+      pad(second),
+      " GMT"
+    ]
+  end
+
+  defp weekday_name(1), do: "Mon"
+  defp weekday_name(2), do: "Tue"
+  defp weekday_name(3), do: "Wed"
+  defp weekday_name(4), do: "Thu"
+  defp weekday_name(5), do: "Fri"
+  defp weekday_name(6), do: "Sat"
+  defp weekday_name(7), do: "Sun"
+
+  defp month_name(1), do: "Jan"
+  defp month_name(2), do: "Feb"
+  defp month_name(3), do: "Mar"
+  defp month_name(4), do: "Apr"
+  defp month_name(5), do: "May"
+  defp month_name(6), do: "Jun"
+  defp month_name(7), do: "Jul"
+  defp month_name(8), do: "Aug"
+  defp month_name(9), do: "Sep"
+  defp month_name(10), do: "Oct"
+  defp month_name(11), do: "Nov"
+  defp month_name(12), do: "Dec"
 end
