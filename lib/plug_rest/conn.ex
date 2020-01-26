@@ -166,8 +166,8 @@ defmodule PlugRest.Conn do
   @spec parse_quality_header(conn, String.t()) :: [quality_type]
   def parse_quality_header(conn, header) when is_binary(header) do
     get_req_header(conn, header)
-    |> parse_header
-    |> reformat_tags
+    |> parse_header()
+    |> reformat_tags()
   end
 
   @spec parse_accept_as_utils_media_type([String.t()]) :: [maybe_media_type]
