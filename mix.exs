@@ -30,7 +30,7 @@ defmodule PlugRest.Mixfile do
 
   defp deps do
     [
-      {:plug, "~> 1.3 or ~> 1.4"},
+      {:plug, "~> 1.7 or ~> 1.8"},
       {:cowboy, "~> 1.0", optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false}

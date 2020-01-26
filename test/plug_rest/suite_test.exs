@@ -448,7 +448,7 @@ defmodule PlugRest.SuiteTest do
 
   test "rest missing get callbacks" do
     exception =
-      assert_raise UndefinedFunctionError, ~r/get_text_plain\/2/, fn ->
+      assert_raise Plug.Conn.WrapperError, ~r/get_text_plain\/2/, fn ->
         build_conn(:get, "/missing_get_callbacks")
       end
 
@@ -457,7 +457,7 @@ defmodule PlugRest.SuiteTest do
 
   test "rest missing put callbacks" do
     exception =
-      assert_raise UndefinedFunctionError, ~r/put_application_json\/2/, fn ->
+      assert_raise Plug.Conn.WrapperError, ~r/put_application_json\/2/, fn ->
         conn(:put, "/missing_put_callbacks")
         |> put_req_header("content-type", "application/json")
         |> RestRouter.call([])
@@ -531,14 +531,14 @@ defmodule PlugRest.SuiteTest do
     |> test_header("etag", "\"etag-header-value\"")
 
     exception =
-      assert_raise PlugRest.RuntimeError, ~r/Invalid ETag/, fn ->
+      assert_raise Plug.Conn.WrapperError, ~r/Invalid ETag/, fn ->
         build_conn(:get, "/resetags?type=binary-strong-unquoted")
       end
 
     assert Plug.Exception.status(exception) == 500
 
     exception =
-      assert_raise PlugRest.RuntimeError, ~r/Invalid ETag/, fn ->
+      assert_raise Plug.Conn.WrapperError, ~r/Invalid ETag/, fn ->
         build_conn(:get, "/resetags?type=binary-weak-unquoted")
       end
 
