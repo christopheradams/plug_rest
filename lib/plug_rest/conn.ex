@@ -42,7 +42,7 @@ defmodule PlugRest.Conn do
         try do
           date =
             date_header
-            |> String.to_char_list()
+            |> String.to_charlist()
             |> :httpd_util.convert_request_date()
 
           case date do
