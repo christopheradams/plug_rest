@@ -12,7 +12,7 @@ defmodule PlugRest.Mixfile do
     [
       app: :plug_rest,
       version: @version,
-      elixir: "~> 1.4",
+      elixir: "~> 1.5",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       dialyzer: [plt_add_apps: [:mix, :eex]],
@@ -25,7 +25,7 @@ defmodule PlugRest.Mixfile do
   end
 
   def application do
-    [applications: [:plug, :cowboy, :logger, :inets, :public_key]]
+    [extra_applications: [:logger, :inets, :public_key]]
   end
 
   defp deps do
