@@ -163,6 +163,14 @@ defmodule PlugRest.ConnTest do
     assert actual_headers == expected_headers
   end
 
+  test "match invalid etags" do
+    bad_etags = ["", ~s("), "W", "W/"]
+
+    Enum.each(bad_etags, fn etag ->
+      assert entity_tag_match(etag) == {:error, :badarg}
+    end)
+  end
+
   test "parse if-modified-since header" do
     if_modified_since = "Sun, 17 Jul 2016 19:54:31 GMT"
 
