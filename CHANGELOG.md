@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.14.0
+
+* Enhancements
+  * Require Plug 1.8+ and drop Cowboy dependency
+
+## v0.13.1
+
+* Bug fixes
+  * [Mix] Fix gen.resource task for Elixir 1.9
+
 ## v0.13.1
 
 * Bug fixes

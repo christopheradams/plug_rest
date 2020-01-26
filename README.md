@@ -118,21 +118,14 @@ $ cd my_app
 
 Add PlugRest to your project in two steps:
 
-1. Add `:cowboy`, `:plug`, and `:plug_rest` to your list of dependencies in `mix.exs`:
+1. Add `:plug_cowboy` and `:plug_rest` to your list of dependencies in `mix.exs`:
 
     ```elixir
-    def deps do
-      [{:cowboy, "~> 1.0.0"},
-       {:plug, "~> 1.8"},
-       {:plug_rest, "~> 0.13"}]
-    end
-    ```
-
-2. Add these dependencies to your applications list:
-
-    ```elixir
-    def application do
-      [applications: [:cowboy, :plug, :plug_rest]]
+    defp deps do
+      [
+        {:plug_cowboy, "~> 2.0"},
+        {:plug_rest, "~> 0.14"}
+      ]
     end
     ```
 
@@ -218,12 +211,11 @@ end
 ### Application
 
 Finally, add the Router to your supervision tree by editing
-`lib/my_app.ex`:
+`lib/my_app/application.ex`:
 
 ```elixir
-# Define workers and child supervisors to be supervised
 children = [
-  Plug.Adapters.Cowboy.child_spec(:http, MyApp.Router, [], [port: 4001])
+  {Plug.Cowboy, scheme: :http, plug: MyApp.Router, options: [port: 4001]}
 ]
 ```
 
